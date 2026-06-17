@@ -13,35 +13,56 @@ class SettingsPage extends StatelessWidget {
       ),
       body: ListView(
         children: [
-          /*
-          _buildListTile(FontAwesomeIcons.circleQuestion, 'Support'),
-          _buildListTile(FontAwesomeIcons.key, 'License'),
+          _buildListTile(FontAwesomeIcons.circleQuestion, 'Support', onTap: () {
+            context.go('/settings/support');
+          }),
+          _buildListTile(FontAwesomeIcons.key, 'License', onTap: () {
+            context.go('/settings/license');
+          }),
           const Divider(),
-          _buildListTile(FontAwesomeIcons.moneyBillWave, 'Line'),
-          _buildListTile(FontAwesomeIcons.cloudArrowDown, 'Import Line'),
-          _buildListTile(FontAwesomeIcons.cloudArrowUp, 'Export Line'),
+          _buildListTile(FontAwesomeIcons.moneyBillWave, 'Line', onTap: () {
+            context.go('/settings/line');
+          }),
+          _buildListTile(FontAwesomeIcons.cloudArrowDown, 'Import Line', onTap: () {
+            context.go('/settings/import-line');
+          }),
+          _buildListTile(FontAwesomeIcons.cloudArrowUp, 'Export Line', onTap: () {
+            context.go('/settings/export-line');
+          }),
           const Divider(),
-          _buildListTile(FontAwesomeIcons.locationCrosshairs, 'Area'),
+          _buildListTile(FontAwesomeIcons.locationCrosshairs, 'Area', onTap: () {
+            context.go('/settings/area');
+          }),
           const Divider(),
-          _buildListTile(FontAwesomeIcons.solidCreditCard, 'Expense Type'),
-          _buildListTile(FontAwesomeIcons.briefcase, 'Investment Type'),
+          _buildListTile(FontAwesomeIcons.solidCreditCard, 'Expense Type', onTap: () {
+            context.go('/settings/expense-type');
+          }),
+          _buildListTile(FontAwesomeIcons.briefcase, 'Investment Type', onTap: () {
+            context.go('/settings/investment-type');
+          }),
           const Divider(),
-          _buildListTile(FontAwesomeIcons.borderAll, 'Site'),
+          _buildListTile(FontAwesomeIcons.borderAll, 'Site', onTap: () {
+            context.go('/settings/site');
+          }),
           const Divider(),
-          */
           _buildListTile(FontAwesomeIcons.gear, 'My Settings', onTap: () {
             context.go('/settings/my-settings');
           }),
           _buildListTile(FontAwesomeIcons.language, 'Language Settings', onTap: () {
             context.go('/settings/language');
           }),
-          /*
-          _buildListTile(FontAwesomeIcons.commentSms, 'SMS Template'),
-          _buildListTile(FontAwesomeIcons.fingerprint, 'Enable Fingerprint'),
-          _buildListTile(FontAwesomeIcons.shieldHalved, 'Enable Security Alert'),
-          _buildListTile(FontAwesomeIcons.lock, 'Change Password'),
-          const Divider(),
-          */
+          _buildListTile(FontAwesomeIcons.commentSms, 'SMS Template', onTap: () {
+            context.go('/settings/sms-template');
+          }),
+          _buildListTile(FontAwesomeIcons.fingerprint, 'Enable Fingerprint', onTap: () {
+            context.go('/settings/enable-fingerprint');
+          }),
+          _buildListTile(FontAwesomeIcons.shieldHalved, 'Enable Security Alert', onTap: () {
+            context.go('/settings/enable-security-alert');
+          }),
+          _buildListTile(FontAwesomeIcons.lock, 'Change Password', onTap: () {
+            context.go('/settings/change-password');
+          }),
           const Divider(),
           ListTile(
             leading: const FaIcon(FontAwesomeIcons.powerOff, color: Colors.grey, size: 20),

@@ -2,8 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 
-class LoginPage extends StatelessWidget {
+import 'package:shared_preferences/shared_preferences.dart';
+
+class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
+
+  @override
+  State<LoginPage> createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  final TextEditingController _usernameController = TextEditingController();
+
+  @override
+  void dispose() {
+    _usernameController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,8 +46,9 @@ class LoginPage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 64),
-              const TextField(
-                decoration: InputDecoration(
+              TextField(
+                controller: _usernameController,
+                decoration: const InputDecoration(
                   labelText: 'USER NAME',
                   hintText: 'Enter Your User Name',
                 ),
@@ -59,9 +75,15 @@ class LoginPage extends StatelessWidget {
               ),
               const SizedBox(height: 32),
               ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
+                  final prefs = await SharedPreferences.getInstance();
+                  final username = _usernameController.text.trim();
+                  await prefs.setString('username', username.isNotEmpty ? username : 'Demo user');
+                  
                   // Navigate to home after login
-                  context.go('/collections');
+                  if (context.mounted) {
+                    context.go('/collections');
+                  }
                 },
                 child: const Text('LOGIN'),
               ),

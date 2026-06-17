@@ -10,6 +10,7 @@ class AddLineModal extends StatefulWidget {
 
 class _AddLineModalState extends State<AddLineModal> {
   String? _selectedLineType;
+  bool _isLineTypeOpen = false;
   bool _closeLoanManually = false;
   bool _enablePenalty = false;
   bool _keepPaidCustomer = false;
@@ -30,8 +31,11 @@ class _AddLineModalState extends State<AddLineModal> {
     'Gold Loan',
   ];
 
-  void _showLineTypeDialog() {
-    showDialog(
+  void _showLineTypeDialog() async {
+    setState(() {
+      _isLineTypeOpen = true;
+    });
+    await showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
@@ -67,6 +71,11 @@ class _AddLineModalState extends State<AddLineModal> {
         );
       },
     );
+    if (mounted) {
+      setState(() {
+        _isLineTypeOpen = false;
+      });
+    }
   }
 
   @override
@@ -89,15 +98,31 @@ class _AddLineModalState extends State<AddLineModal> {
               child: ListView(
                 children: [
                   _buildTextField('Line Name'),
-                  ListTile(
-                    title: Text(
-                      _selectedLineType ?? 'Line Type',
-                      style: TextStyle(color: _selectedLineType == null ? Colors.red[300] : null),
-                    ),
-                    trailing: const Icon(Icons.arrow_drop_down, color: Colors.red),
+                  GestureDetector(
                     onTap: _showLineTypeDialog,
+                    behavior: HitTestBehavior.opaque,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+                      decoration: BoxDecoration(
+                        border: Border(
+                          bottom: BorderSide(color: _isLineTypeOpen ? Colors.blue : Colors.grey.shade300, width: _isLineTypeOpen ? 1.5 : 1.0),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            _selectedLineType ?? 'Line Type',
+                            style: TextStyle(fontSize: 16, color: _isLineTypeOpen ? Colors.redAccent : Colors.black87),
+                          ),
+                          Icon(
+                            _isLineTypeOpen ? Icons.arrow_drop_up : Icons.arrow_drop_down,
+                            color: _isLineTypeOpen ? Colors.redAccent : Colors.grey,
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
-                  const Divider(height: 1),
                   _buildTextField('Interest Per Hundred'),
                   _buildTextField('Bill Amount Per Hundred'),
                   _buildTextField('No Of Install'),

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
-  static final ValueNotifier<String> themeNotifier = ValueNotifier<String>('Dark-Blue');
+  static final ValueNotifier<String> themeNotifier = ValueNotifier<String>('Blue');
 
   static ThemeData getTheme(String themeName) {
     bool isDark = themeName.startsWith('Dark-');
@@ -18,7 +18,7 @@ class AppTheme {
         break;
       case 'Blue':
       default:
-        seedColor = Colors.lightBlue;
+        seedColor = Colors.blue;
     }
 
     if (isDark) {

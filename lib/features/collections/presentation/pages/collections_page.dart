@@ -56,7 +56,9 @@ class _CollectionsPageState extends State<CollectionsPage> {
           ),
           IconButton(
             icon: const FaIcon(FontAwesomeIcons.bell, size: 20),
-            onPressed: () {},
+            onPressed: () {
+              context.go('/collections/reminders');
+            },
           ),
         ],
       ),
@@ -102,7 +104,7 @@ class _CollectionsPageState extends State<CollectionsPage> {
                   ),
                 ],
               ),
-              hint: const Text('Line', style: TextStyle(color: Colors.redAccent)),
+              hint: const Text('Line'),
               items: ['Main Bazar Line', 'South Street Line', 'Market Line'].map((String value) {
                 return DropdownMenuItem<String>(
                   value: value,

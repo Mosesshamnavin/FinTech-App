@@ -197,7 +197,7 @@ class _MySettingsPageState extends State<MySettingsPage> {
   Color _getThemeColor(String themeName) {
     if (themeName.contains('Orange')) return Colors.orange;
     if (themeName.contains('Green')) return Colors.green;
-    return Colors.lightBlue;
+    return Colors.blue;
   }
 
   Widget _buildThemeSection() {
