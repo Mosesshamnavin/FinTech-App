@@ -11,6 +11,26 @@ import 'features/collections/presentation/pages/reminders_notes_page.dart';
 import 'features/customers/presentation/pages/customers_page.dart';
 import 'features/expenses/presentation/pages/expenses_page.dart';
 import 'features/home/presentation/pages/home_shell_page.dart';
+import 'features/reports/presentation/pages/plan_report_page.dart';
+import 'features/reports/presentation/pages/daily_summary_page.dart';
+import 'features/reports/presentation/pages/line_summary_page.dart';
+import 'features/reports/presentation/pages/online_collection_summary_page.dart';
+import 'features/reports/presentation/pages/site_dashboard_summary_page.dart';
+import 'features/reports/presentation/pages/expense_summary_page.dart';
+import 'features/reports/presentation/pages/investment_summary_page.dart';
+import 'features/reports/presentation/pages/investment_expense_summary_page.dart';
+import 'features/reports/presentation/pages/book_excess_loss_summary_page.dart';
+import 'features/reports/presentation/pages/loan_summary_page.dart';
+import 'features/reports/presentation/pages/about_to_close_loan_summary_page.dart';
+import 'features/reports/presentation/pages/missing_customer_summary_page.dart';
+import 'features/reports/presentation/pages/monthly_interest_pending_summary_page.dart';
+import 'features/reports/presentation/pages/completed_loan_summary_page.dart';
+import 'features/reports/presentation/pages/non_performance_loan_summary_page.dart';
+import 'features/reports/presentation/pages/new_customer_summary_page.dart';
+import 'features/reports/presentation/pages/bad_loan_summary_page.dart';
+import 'features/reports/presentation/pages/new_bad_loan_by_date_summary_page.dart';
+import 'features/reports/presentation/pages/loan_analysis_page.dart';
+import 'features/reports/presentation/pages/ledger_report_page.dart';
 import 'features/reports/presentation/pages/report_detail_page.dart';
 import 'features/reports/presentation/pages/reports_page.dart';
 import 'features/settings/presentation/pages/language_settings_page.dart';
@@ -110,6 +130,86 @@ final GoRouter _router = GoRouter(
               path: '/reports',
               builder: (context, state) => const ReportsPage(),
               routes: [
+                GoRoute(
+                  path: 'plan',
+                  builder: (context, state) => const PlanReportPage(),
+                ),
+                GoRoute(
+                  path: 'daily-summary',
+                  builder: (context, state) => const DailySummaryPage(),
+                ),
+                GoRoute(
+                  path: 'line-summary',
+                  builder: (context, state) => const LineSummaryPage(),
+                ),
+                GoRoute(
+                  path: 'online-collection-summary',
+                  builder: (context, state) => const OnlineCollectionSummaryPage(),
+                ),
+                GoRoute(
+                  path: 'site-dashboard-summary',
+                  builder: (context, state) => const SiteDashboardSummaryPage(),
+                ),
+                GoRoute(
+                  path: 'expense-summary',
+                  builder: (context, state) => const ExpenseSummaryPage(),
+                ),
+                GoRoute(
+                  path: 'investment-summary',
+                  builder: (context, state) => const InvestmentSummaryPage(),
+                ),
+                GoRoute(
+                  path: 'investment-expense-summary',
+                  builder: (context, state) => const InvestmentExpenseSummaryPage(),
+                ),
+                GoRoute(
+                  path: 'book-excess-loss-summary',
+                  builder: (context, state) => const BookExcessLossSummaryPage(),
+                ),
+                GoRoute(
+                  path: 'loan-summary',
+                  builder: (context, state) => const LoanSummaryPage(),
+                ),
+                GoRoute(
+                  path: 'about-to-close-loan-summary',
+                  builder: (context, state) => const AboutToCloseLoanSummaryPage(),
+                ),
+                GoRoute(
+                  path: 'missing-customer-summary',
+                  builder: (context, state) => const MissingCustomerSummaryPage(),
+                ),
+                GoRoute(
+                  path: 'monthly-interest-pending-summary',
+                  builder: (context, state) => const MonthlyInterestPendingSummaryPage(),
+                ),
+                GoRoute(
+                  path: 'completed-loan-summary',
+                  builder: (context, state) => const CompletedLoanSummaryPage(),
+                ),
+                GoRoute(
+                  path: 'non-performance-loan-summary',
+                  builder: (context, state) => const NonPerformanceLoanSummaryPage(),
+                ),
+                GoRoute(
+                  path: 'new-customer-summary',
+                  builder: (context, state) => const NewCustomerSummaryPage(),
+                ),
+                GoRoute(
+                  path: 'bad-loan-summary',
+                  builder: (context, state) => const BadLoanSummaryPage(),
+                ),
+                GoRoute(
+                  path: 'new-bad-loan-by-date-summary',
+                  builder: (context, state) => const NewBadLoanByDateSummaryPage(),
+                ),
+                GoRoute(
+                  path: 'loan-analysis',
+                  builder: (context, state) => const LoanAnalysisPage(),
+                ),
+                GoRoute(
+                  path: 'ledger-report',
+                  builder: (context, state) => const LedgerReportPage(),
+                ),
                 GoRoute(
                   path: ':reportId',
                   builder: (context, state) {
