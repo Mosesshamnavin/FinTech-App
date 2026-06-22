@@ -1,5 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+
+import 'core/di/injection_container.dart' as di;
+import 'core/di/injection_container.dart';
+import 'features/auth/presentation/bloc/auth_bloc.dart';
+import 'features/auth/presentation/bloc/auth_event.dart';
+import 'features/auth/presentation/bloc/auth_state.dart';
 
 import 'core/theme/app_theme.dart';
 import 'features/auth/presentation/pages/forgot_password_page.dart';
@@ -54,7 +61,9 @@ import 'features/settings/presentation/pages/export_line_page.dart';
 import 'features/settings/presentation/pages/sms_template_page.dart';
 import 'features/settings/presentation/pages/support_page.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await di.initDependencies();
   runApp(const MyApp());
 }
 
@@ -68,6 +77,11 @@ final _sectionENavigatorKey = GlobalKey<NavigatorState>();
 final GoRouter _router = GoRouter(
   navigatorKey: _rootNavigatorKey,
   initialLocation: '/login',
+  redirect: (context, state) {
+    // Auth redirect is handled by BlocListener in LoginPage.
+    // Router stays simple — no global redirect needed with BLoC.
+    return null;
+  },
   routes: <RouteBase>[
     GoRoute(
       path: '/login',
@@ -318,16 +332,32 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<String>(
-      valueListenable: AppTheme.themeNotifier,
-      builder: (context, themeName, _) {
-        return MaterialApp.router(
-          title: 'Vasool Drive',
-          theme: AppTheme.getTheme(themeName),
-          routerConfig: _router,
-          debugShowCheckedModeBanner: false,
-        );
-      },
+    return MultiBlocProvider(
+      providers: [
+        // AuthBloc is provided globally so any page can listen to auth state
+        BlocProvider<AuthBloc>(
+          create: (_) => sl<AuthBloc>()..add(const AuthCheckRequested()),
+        ),
+      ],
+      child: ValueListenableBuilder<String>(
+        valueListenable: AppTheme.themeNotifier,
+        builder: (context, themeName, _) {
+          return BlocListener<AuthBloc, AuthState>(
+            listener: (context, state) {
+              // Handle session expiry or logout from anywhere in the app
+              if (state is AuthUnauthenticated) {
+                _router.go('/login');
+              }
+            },
+            child: MaterialApp.router(
+              title: 'Vasool Drive',
+              theme: AppTheme.getTheme(themeName),
+              routerConfig: _router,
+              debugShowCheckedModeBanner: false,
+            ),
+          );
+        },
+      ),
     );
   }
 }
