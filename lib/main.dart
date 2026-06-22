@@ -15,6 +15,7 @@ import 'features/auth/presentation/pages/register_page.dart';
 import 'features/collections/presentation/pages/cashout_page.dart';
 import 'features/collections/presentation/pages/collections_page.dart';
 import 'features/collections/presentation/pages/reminders_notes_page.dart';
+import 'features/customers/presentation/pages/add_customer_page.dart';
 import 'features/customers/presentation/pages/customers_page.dart';
 import 'features/expenses/presentation/pages/expenses_page.dart';
 import 'features/home/presentation/pages/home_shell_page.dart';
@@ -134,6 +135,12 @@ final GoRouter _router = GoRouter(
             GoRoute(
               path: '/customers',
               builder: (context, state) => const CustomersPage(),
+              routes: [
+                GoRoute(
+                  path: 'add',
+                  builder: (context, state) => const AddCustomerPage(),
+                ),
+              ],
             ),
           ],
         ),

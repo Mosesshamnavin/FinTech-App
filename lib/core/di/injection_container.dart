@@ -11,6 +11,12 @@ import '../../features/auth/domain/usecases/login_usecase.dart';
 import '../../features/auth/domain/usecases/logout_usecase.dart';
 import '../../features/auth/domain/usecases/register_usecase.dart';
 import '../../features/auth/presentation/bloc/auth_bloc.dart';
+import '../../features/customers/data/datasources/customer_remote_datasource.dart';
+import '../../features/customers/data/repositories/customer_repository_impl.dart';
+import '../../features/customers/domain/repositories/customer_repository.dart';
+import '../../features/customers/domain/usecases/add_customer_usecase.dart';
+import '../../features/customers/domain/usecases/get_customers_usecase.dart';
+import '../../features/customers/presentation/bloc/customers_bloc.dart';
 
 final sl = GetIt.instance;
 
@@ -55,6 +61,27 @@ Future<void> initDependencies() async {
       registerUseCase: sl(),
       logoutUseCase: sl(),
       getCachedUserUseCase: sl(),
+    ),
+  );
+  // ─── Customers: Data Sources ──────────────────────────────────────────────
+  sl.registerLazySingleton<CustomerRemoteDataSource>(
+    () => MockCustomerRemoteDataSourceImpl(),
+  );
+
+  // ─── Customers: Repository ────────────────────────────────────────────────
+  sl.registerLazySingleton<CustomerRepository>(
+    () => CustomerRepositoryImpl(remoteDataSource: sl()),
+  );
+
+  // ─── Customers: Use Cases ─────────────────────────────────────────────────
+  sl.registerLazySingleton(() => GetCustomersUseCase(sl()));
+  sl.registerLazySingleton(() => AddCustomerUseCase(sl()));
+
+  // ─── Customers: BLoC ──────────────────────────────────────────────────────
+  sl.registerFactory(
+    () => CustomersBloc(
+      getCustomersUseCase: sl(),
+      addCustomerUseCase: sl(),
     ),
   );
 }
