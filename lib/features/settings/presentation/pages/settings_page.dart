@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
+
+import '../../../../core/theme/app_theme.dart';
+import '../../../auth/presentation/bloc/auth_bloc.dart';
+import '../../../auth/presentation/bloc/auth_event.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
@@ -64,11 +69,15 @@ class SettingsPage extends StatelessWidget {
             context.go('/settings/change-password');
           }),
           const Divider(),
+          _buildListTile(FontAwesomeIcons.palette, 'Theme Settings', onTap: () {
+            _showThemeDialog(context);
+          }),
+          const Divider(),
           ListTile(
             leading: const FaIcon(FontAwesomeIcons.powerOff, color: Colors.grey, size: 20),
             title: const Text('Sign out', style: TextStyle(color: Colors.red)),
             onTap: () {
-              context.go('/login');
+              context.read<AuthBloc>().add(const AuthLogoutRequested());
             },
           ),
         ],
@@ -82,5 +91,41 @@ class SettingsPage extends StatelessWidget {
       title: Text(title),
       onTap: onTap ?? () {},
     );
+  }
+
+  void _showThemeDialog(BuildContext context) {
+    final themes = ['Blue', 'Green', 'Orange', 'Dark-Blue', 'Dark-Green', 'Dark-Orange'];
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Select Theme'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: themes.map((theme) {
+                return ListTile(
+                  title: Text(theme.replaceAll('-', ' ')),
+                  leading: Icon(
+                    theme.contains('Dark') ? Icons.dark_mode : Icons.light_mode,
+                    color: _getThemeColor(theme),
+                  ),
+                  onTap: () {
+                    AppTheme.themeNotifier.value = theme;
+                    Navigator.pop(context);
+                  },
+                );
+              }).toList(),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Color _getThemeColor(String theme) {
+    if (theme.contains('Orange')) return Colors.orange;
+    if (theme.contains('Green')) return Colors.green;
+    return Colors.blue;
   }
 }

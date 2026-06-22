@@ -23,6 +23,13 @@ import '../../features/customers/domain/repositories/customer_repository.dart';
 import '../../features/customers/domain/usecases/add_customer_usecase.dart';
 import '../../features/customers/domain/usecases/get_customers_usecase.dart';
 import '../../features/customers/presentation/bloc/customers_bloc.dart';
+import '../../features/reports/data/datasources/report_remote_datasource.dart';
+import '../../features/reports/data/repositories/report_repository_impl.dart';
+import '../../features/reports/domain/repositories/report_repository.dart';
+import '../../features/reports/domain/usecases/get_daily_summary_usecase.dart';
+import '../../features/reports/domain/usecases/get_line_summary_usecase.dart';
+import '../../features/reports/domain/usecases/get_new_customer_summary_usecase.dart';
+import '../../features/reports/presentation/bloc/report_bloc.dart';
 
 final sl = GetIt.instance;
 
@@ -113,6 +120,30 @@ Future<void> initDependencies() async {
     () => CollectionsBloc(
       getDailyCollectionsUseCase: sl(),
       addCollectionUseCase: sl(),
+    ),
+  );
+
+  // ─── Reports: Data Sources ────────────────────────────────────────────────
+  sl.registerLazySingleton<ReportRemoteDataSource>(
+    () => MockReportRemoteDataSourceImpl(),
+  );
+
+  // ─── Reports: Repository ──────────────────────────────────────────────────
+  sl.registerLazySingleton<ReportRepository>(
+    () => ReportRepositoryImpl(remoteDataSource: sl()),
+  );
+
+  // ─── Reports: Use Cases ───────────────────────────────────────────────────
+  sl.registerLazySingleton(() => GetDailySummaryUseCase(sl()));
+  sl.registerLazySingleton(() => GetLineSummaryUseCase(sl()));
+  sl.registerLazySingleton(() => GetNewCustomerSummaryUseCase(sl()));
+
+  // ─── Reports: BLoC ────────────────────────────────────────────────────────
+  sl.registerFactory(
+    () => ReportBloc(
+      getDailySummaryUseCase: sl(),
+      getLineSummaryUseCase: sl(),
+      getNewCustomerSummaryUseCase: sl(),
     ),
   );
 }
