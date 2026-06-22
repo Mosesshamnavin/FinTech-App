@@ -11,6 +11,12 @@ import '../../features/auth/domain/usecases/login_usecase.dart';
 import '../../features/auth/domain/usecases/logout_usecase.dart';
 import '../../features/auth/domain/usecases/register_usecase.dart';
 import '../../features/auth/presentation/bloc/auth_bloc.dart';
+import '../../features/collections/data/datasources/collection_remote_datasource.dart';
+import '../../features/collections/data/repositories/collection_repository_impl.dart';
+import '../../features/collections/domain/repositories/collection_repository.dart';
+import '../../features/collections/domain/usecases/add_collection_usecase.dart';
+import '../../features/collections/domain/usecases/get_daily_collections_usecase.dart';
+import '../../features/collections/presentation/bloc/collections_bloc.dart';
 import '../../features/customers/data/datasources/customer_remote_datasource.dart';
 import '../../features/customers/data/repositories/customer_repository_impl.dart';
 import '../../features/customers/domain/repositories/customer_repository.dart';
@@ -82,6 +88,31 @@ Future<void> initDependencies() async {
     () => CustomersBloc(
       getCustomersUseCase: sl(),
       addCustomerUseCase: sl(),
+    ),
+  );
+
+  // ─── Collections: Data Sources ────────────────────────────────────────────
+  sl.registerLazySingleton<CollectionRemoteDataSource>(
+    () => MockCollectionRemoteDataSourceImpl(),
+  );
+
+  // ─── Collections: Repository ──────────────────────────────────────────────
+  sl.registerLazySingleton<CollectionRepository>(
+    () => CollectionRepositoryImpl(
+      collectionRemoteDataSource: sl(),
+      customerRemoteDataSource: sl(),
+    ),
+  );
+
+  // ─── Collections: Use Cases ───────────────────────────────────────────────
+  sl.registerLazySingleton(() => GetDailyCollectionsUseCase(sl()));
+  sl.registerLazySingleton(() => AddCollectionUseCase(sl()));
+
+  // ─── Collections: BLoC ────────────────────────────────────────────────────
+  sl.registerFactory(
+    () => CollectionsBloc(
+      getDailyCollectionsUseCase: sl(),
+      addCollectionUseCase: sl(),
     ),
   );
 }
