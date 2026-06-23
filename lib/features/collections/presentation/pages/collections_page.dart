@@ -110,7 +110,7 @@ class _CollectionsViewState extends State<_CollectionsView> {
         actions: [
           IconButton(
             icon: const FaIcon(FontAwesomeIcons.wallet, size: 20),
-            onPressed: () => context.go('/collections/cashout'),
+            onPressed: () => context.push('/collections/cashout'),
           ),
           IconButton(
             icon: const FaIcon(FontAwesomeIcons.calculator, size: 20),
@@ -118,7 +118,7 @@ class _CollectionsViewState extends State<_CollectionsView> {
           ),
           IconButton(
             icon: const FaIcon(FontAwesomeIcons.bell, size: 20),
-            onPressed: () => context.go('/collections/reminders'),
+            onPressed: () => context.push('/collections/reminders'),
           ),
         ],
       ),
