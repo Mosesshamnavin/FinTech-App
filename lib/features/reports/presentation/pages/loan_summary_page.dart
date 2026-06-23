@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/widgets/custom_dropdown.dart';
+import '../../../loans/presentation/bloc/loans_bloc.dart';
+import '../../../loans/presentation/bloc/loans_event.dart';
+import '../../../loans/presentation/bloc/loans_state.dart';
 
 class LoanSummaryPage extends StatefulWidget {
   const LoanSummaryPage({super.key});
@@ -85,7 +89,7 @@ class _LoanSummaryPageState extends State<LoanSummaryPage> {
     return Center(
       child: ElevatedButton(
         onPressed: () {
-          // Action for viewing report
+          context.read<LoansBloc>().add(LoadAllLoansRequested());
         },
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.lightBlue[300],
@@ -193,6 +197,63 @@ class _LoanSummaryPageState extends State<LoanSummaryPage> {
             ),
             const SizedBox(height: 32),
             _buildSubmitButton(),
+            const SizedBox(height: 32),
+            BlocBuilder<LoansBloc, LoansState>(
+              builder: (context, state) {
+                if (state is LoansLoading) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (state is LoansError) {
+                  return Center(child: Text(state.message, style: const TextStyle(color: Colors.red)));
+                } else if (state is LoansLoaded) {
+                  if (state.loans.isEmpty) {
+                    return const Center(child: Text('No loans found.'));
+                  }
+                  return ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: state.loans.length,
+                    itemBuilder: (context, index) {
+                      final loan = state.loans[index];
+                      return Card(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        child: Padding(
+                          padding: const EdgeInsets.all(12),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text('Loan ID: ${loan.id}', style: const TextStyle(fontWeight: FontWeight.bold)),
+                                  Chip(
+                                    label: Text(loan.status, style: const TextStyle(fontSize: 12, color: Colors.white)),
+                                    backgroundColor: loan.status == 'Active' ? Colors.green : Colors.blueGrey,
+                                    padding: EdgeInsets.zero,
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              Text('Customer ID: ${loan.customerId}'),
+                              const SizedBox(height: 4),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text('Principal: ₹${loan.principalAmount}'),
+                                  Text('Outstanding: ₹${loan.outstandingBalance}', style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.red)),
+                                ],
+                              ),
+                              const SizedBox(height: 4),
+                              Text('Total Amount: ₹${loan.totalAmount}'),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                }
+                return const SizedBox.shrink();
+              },
+            ),
           ],
         ),
       ),

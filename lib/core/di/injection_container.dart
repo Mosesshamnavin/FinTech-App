@@ -31,6 +31,15 @@ import '../../features/reports/domain/usecases/get_line_summary_usecase.dart';
 import '../../features/reports/domain/usecases/get_new_customer_summary_usecase.dart';
 import '../../features/reports/presentation/bloc/report_bloc.dart';
 
+// Loans
+import '../../features/loans/data/datasources/loan_remote_datasource.dart';
+import '../../features/loans/data/repositories/loan_repository_impl.dart';
+import '../../features/loans/domain/repositories/loan_repository.dart';
+import '../../features/loans/domain/usecases/add_loan_usecase.dart';
+import '../../features/loans/domain/usecases/get_all_loans_usecase.dart';
+import '../../features/loans/domain/usecases/get_customer_loans_usecase.dart';
+import '../../features/loans/presentation/bloc/loans_bloc.dart';
+
 final sl = GetIt.instance;
 
 Future<void> initDependencies() async {
@@ -124,26 +133,39 @@ Future<void> initDependencies() async {
   );
 
   // ─── Reports: Data Sources ────────────────────────────────────────────────
+  // ---------------------------------------------------------------------------
+  // REPORTS FEATURE
+  // ---------------------------------------------------------------------------
   sl.registerLazySingleton<ReportRemoteDataSource>(
     () => MockReportRemoteDataSourceImpl(),
   );
-
-  // ─── Reports: Repository ──────────────────────────────────────────────────
   sl.registerLazySingleton<ReportRepository>(
     () => ReportRepositoryImpl(remoteDataSource: sl()),
   );
-
-  // ─── Reports: Use Cases ───────────────────────────────────────────────────
   sl.registerLazySingleton(() => GetDailySummaryUseCase(sl()));
   sl.registerLazySingleton(() => GetLineSummaryUseCase(sl()));
   sl.registerLazySingleton(() => GetNewCustomerSummaryUseCase(sl()));
 
-  // ─── Reports: BLoC ────────────────────────────────────────────────────────
-  sl.registerFactory(
-    () => ReportBloc(
-      getDailySummaryUseCase: sl(),
-      getLineSummaryUseCase: sl(),
-      getNewCustomerSummaryUseCase: sl(),
-    ),
+  sl.registerFactory(() => ReportBloc(
+        getDailySummaryUseCase: sl(),
+        getLineSummaryUseCase: sl(),
+        getNewCustomerSummaryUseCase: sl(),
+      ));
+
+  // ---------------------------------------------------------------------------
+  // LOANS FEATURE
+  // ---------------------------------------------------------------------------
+  sl.registerLazySingleton(() => LoanRemoteDataSource());
+  sl.registerLazySingleton<LoanRepository>(
+    () => LoanRepositoryImpl(remoteDataSource: sl()),
   );
+  sl.registerLazySingleton(() => AddLoanUseCase(sl()));
+  sl.registerLazySingleton(() => GetAllLoansUseCase(sl()));
+  sl.registerLazySingleton(() => GetCustomerLoansUseCase(sl()));
+
+  sl.registerFactory(() => LoansBloc(
+        getAllLoans: sl(),
+        getCustomerLoans: sl(),
+        addLoan: sl(),
+      ));
 }

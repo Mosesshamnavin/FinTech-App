@@ -7,6 +7,7 @@ import 'core/di/injection_container.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/auth/presentation/bloc/auth_event.dart';
 import 'features/auth/presentation/bloc/auth_state.dart';
+import 'features/loans/presentation/bloc/loans_bloc.dart';
 
 import 'core/theme/app_theme.dart';
 import 'features/auth/presentation/pages/forgot_password_page.dart';
@@ -189,7 +190,10 @@ final GoRouter _router = GoRouter(
                 ),
                 GoRoute(
                   path: 'loan-summary',
-                  builder: (context, state) => const LoanSummaryPage(),
+                  builder: (context, state) => BlocProvider<LoansBloc>(
+                    create: (_) => sl<LoansBloc>(),
+                    child: const LoanSummaryPage(),
+                  ),
                 ),
                 GoRoute(
                   path: 'about-to-close-loan-summary',
