@@ -40,6 +40,14 @@ import '../../features/loans/domain/usecases/get_all_loans_usecase.dart';
 import '../../features/loans/domain/usecases/get_customer_loans_usecase.dart';
 import '../../features/loans/presentation/bloc/loans_bloc.dart';
 
+// Expenses
+import '../../features/expenses/data/datasources/expense_remote_datasource.dart';
+import '../../features/expenses/data/repositories/expense_repository_impl.dart';
+import '../../features/expenses/domain/repositories/expense_repository.dart';
+import '../../features/expenses/domain/usecases/add_expense_usecase.dart';
+import '../../features/expenses/domain/usecases/get_expenses_usecase.dart';
+import '../../features/expenses/presentation/bloc/expenses_bloc.dart';
+
 final sl = GetIt.instance;
 
 Future<void> initDependencies() async {
@@ -167,5 +175,20 @@ Future<void> initDependencies() async {
         getAllLoans: sl(),
         getCustomerLoans: sl(),
         addLoan: sl(),
+      ));
+
+  // ---------------------------------------------------------------------------
+  // EXPENSES FEATURE
+  // ---------------------------------------------------------------------------
+  sl.registerLazySingleton(() => ExpenseRemoteDataSource());
+  sl.registerLazySingleton<ExpenseRepository>(
+    () => ExpenseRepositoryImpl(remoteDataSource: sl()),
+  );
+  sl.registerLazySingleton(() => AddExpenseUseCase(sl()));
+  sl.registerLazySingleton(() => GetExpensesUseCase(sl()));
+
+  sl.registerFactory(() => ExpensesBloc(
+        getExpenses: sl(),
+        addExpense: sl(),
       ));
 }

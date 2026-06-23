@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:intl/intl.dart';
+import '../bloc/expenses_bloc.dart';
+import '../bloc/expenses_event.dart';
+import '../bloc/expenses_state.dart';
+import '../widgets/add_expense_modal.dart';
 
 class ExpensesPage extends StatefulWidget {
   const ExpensesPage({super.key});
@@ -8,14 +14,53 @@ class ExpensesPage extends StatefulWidget {
   State<ExpensesPage> createState() => _ExpensesPageState();
 }
 
-class _ExpensesPageState extends State<ExpensesPage> {
+class _ExpensesPageState extends State<ExpensesPage> with SingleTickerProviderStateMixin {
   final TextEditingController _fromDateController = TextEditingController(text: '01/06/2026');
   final TextEditingController _toDateController = TextEditingController(text: '16/06/2026');
   String _selectedLine = 'All';
   bool _isOnlineChecked = false;
+  late TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+    _tabController.addListener(() {
+      if (!_tabController.indexIsChanging) {
+        _loadData();
+      }
+    });
+
+    final now = DateTime.now();
+    final firstDayOfMonth = DateTime(now.year, now.month, 1);
+    _fromDateController.text = DateFormat('dd/MM/yyyy').format(firstDayOfMonth);
+    _toDateController.text = DateFormat('dd/MM/yyyy').format(now);
+    
+    // Initial load for Expense tab
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadData();
+    });
+  }
+
+  void _loadData() {
+    final fromFormat = DateFormat('dd/MM/yyyy').parse(_fromDateController.text);
+    final toFormat = DateFormat('dd/MM/yyyy').parse(_toDateController.text);
+    
+    // Tab 0 = Expense (isInvestment = false)
+    // Tab 1 = Investment (isInvestment = true)
+    final isInvestment = _tabController.index == 1;
+
+    context.read<ExpensesBloc>().add(LoadExpensesRequested(
+      from: fromFormat,
+      to: toFormat,
+      isInvestment: isInvestment,
+      lineId: _selectedLine,
+    ));
+  }
 
   @override
   void dispose() {
+    _tabController.dispose();
     _fromDateController.dispose();
     _toDateController.dispose();
     super.dispose();
@@ -30,46 +75,60 @@ class _ExpensesPageState extends State<ExpensesPage> {
     );
     if (picked != null) {
       setState(() {
-        controller.text = "${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year}";
+        controller.text = DateFormat('dd/MM/yyyy').format(picked);
       });
+      _loadData(); // Reload data when date changes
     }
+  }
+
+  void _showAddModal(BuildContext context) {
+    final isInvestment = _tabController.index == 1;
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (_) => AddExpenseModal(isInvestment: isInvestment),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 2,
-      child: Scaffold(
-        appBar: AppBar(
-          titleSpacing: 0,
-          title: const TabBar(
-            labelColor: Colors.lightBlue,
-            unselectedLabelColor: Colors.grey,
-            indicatorColor: Colors.lightBlue,
-            indicatorSize: TabBarIndicatorSize.tab,
-            tabs: [
-              Tab(text: 'EXPENSE'),
-              Tab(text: 'INVESTMENT'),
-            ],
-          ),
-          actions: [
-            IconButton(
+    return Scaffold(
+      appBar: AppBar(
+        titleSpacing: 0,
+        title: TabBar(
+          controller: _tabController,
+          labelColor: Colors.lightBlue,
+          unselectedLabelColor: Colors.grey,
+          indicatorColor: Colors.lightBlue,
+          indicatorSize: TabBarIndicatorSize.tab,
+          tabs: const [
+            Tab(text: 'EXPENSE'),
+            Tab(text: 'INVESTMENT'),
+          ],
+        ),
+        actions: [
+          Builder(
+            builder: (ctx) => IconButton(
               icon: const FaIcon(FontAwesomeIcons.plus, size: 20),
-              onPressed: () {},
+              onPressed: () => _showAddModal(ctx),
             ),
-          ],
-        ),
-        body: TabBarView(
-          children: [
-            _buildExpenseView(),
-            _buildExpenseView(), // Investment view is identical to Expense view
-          ],
-        ),
+          ),
+        ],
+      ),
+      body: TabBarView(
+        controller: _tabController,
+        children: [
+          _buildExpenseView(false),
+          _buildExpenseView(true),
+        ],
       ),
     );
   }
 
-  Widget _buildExpenseView() {
+  Widget _buildExpenseView(bool isInvestment) {
     return SingleChildScrollView(
       child: Column(
         children: [
@@ -172,6 +231,7 @@ class _ExpensesPageState extends State<ExpensesPage> {
                             setState(() {
                               _selectedLine = val;
                             });
+                            _loadData(); // Reload data when line changes
                           }
                         },
                       ),
@@ -193,29 +253,74 @@ class _ExpensesPageState extends State<ExpensesPage> {
             },
             controlAffinity: ListTileControlAffinity.leading,
           ),
-          Card(
-            margin: const EdgeInsets.all(16.0),
-            elevation: 2,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text('Date : ${_fromDateController.text} - ${_toDateController.text}', style: const TextStyle(fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 8),
-                  const Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text('Online: 0'),
-                      Text('Cash: 0'),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  const Text('Total: 0', style: TextStyle(fontWeight: FontWeight.bold)),
-                ],
-              ),
-            ),
+          BlocBuilder<ExpensesBloc, ExpensesState>(
+            builder: (context, state) {
+              if (state is ExpensesLoading) {
+                return const Padding(
+                  padding: EdgeInsets.all(32.0),
+                  child: Center(child: CircularProgressIndicator()),
+                );
+              } else if (state is ExpensesError) {
+                return Center(child: Text(state.message, style: const TextStyle(color: Colors.red)));
+              } else if (state is ExpensesLoaded) {
+                // Filter by online/cash switch
+                final filtered = state.expenses.where((e) => _isOnlineChecked ? e.isOnline : true).toList();
+                
+                final totalCash = filtered.where((e) => !e.isOnline).fold(0.0, (sum, e) => sum + e.amount);
+                final totalOnline = filtered.where((e) => e.isOnline).fold(0.0, (sum, e) => sum + e.amount);
+                final total = totalCash + totalOnline;
+
+                return Column(
+                  children: [
+                    Card(
+                      margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                      elevation: 2,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Text('Date : ${_fromDateController.text} - ${_toDateController.text}', style: const TextStyle(fontWeight: FontWeight.bold)),
+                            const SizedBox(height: 8),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text('Online: ₹$totalOnline'),
+                                Text('Cash: ₹$totalCash'),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            Text('Total: ₹$total', style: const TextStyle(fontWeight: FontWeight.bold)),
+                          ],
+                        ),
+                      ),
+                    ),
+                    ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: filtered.length,
+                      itemBuilder: (context, index) {
+                        final expense = filtered[index];
+                        return ListTile(
+                          leading: CircleAvatar(
+                            backgroundColor: expense.isOnline ? Colors.blue.withOpacity(0.2) : Colors.green.withOpacity(0.2),
+                            child: Icon(
+                              expense.isOnline ? Icons.account_balance : Icons.money,
+                              color: expense.isOnline ? Colors.blue : Colors.green,
+                            ),
+                          ),
+                          title: Text(expense.category, style: const TextStyle(fontWeight: FontWeight.bold)),
+                          subtitle: Text('${DateFormat('dd MMM yyyy').format(expense.date)} - ${expense.description}'),
+                          trailing: Text('₹${expense.amount}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.red)),
+                        );
+                      },
+                    ),
+                  ],
+                );
+              }
+              return const SizedBox.shrink();
+            },
           ),
         ],
       ),

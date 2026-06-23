@@ -8,6 +8,7 @@ import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/auth/presentation/bloc/auth_event.dart';
 import 'features/auth/presentation/bloc/auth_state.dart';
 import 'features/loans/presentation/bloc/loans_bloc.dart';
+import 'features/expenses/presentation/bloc/expenses_bloc.dart';
 
 import 'core/theme/app_theme.dart';
 import 'features/auth/presentation/pages/forgot_password_page.dart';
@@ -126,7 +127,10 @@ final GoRouter _router = GoRouter(
           routes: [
             GoRoute(
               path: '/expenses',
-              builder: (context, state) => const ExpensesPage(),
+              builder: (context, state) => BlocProvider<ExpensesBloc>(
+                create: (_) => sl<ExpensesBloc>(),
+                child: const ExpensesPage(),
+              ),
             ),
           ],
         ),
