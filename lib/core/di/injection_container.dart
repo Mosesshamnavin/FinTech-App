@@ -35,6 +35,12 @@ import '../../features/reports/presentation/bloc/report_bloc.dart';
 import '../../features/loans/data/datasources/loan_remote_datasource.dart';
 import '../../features/loans/data/repositories/loan_repository_impl.dart';
 import '../../features/loans/domain/repositories/loan_repository.dart';
+import '../../features/collections/data/datasources/cashout_remote_datasource.dart';
+import '../../features/collections/data/repositories/cashout_repository_impl.dart';
+import '../../features/collections/domain/repositories/cashout_repository.dart';
+import '../../features/collections/domain/usecases/cashout_usecases.dart';
+import '../../features/collections/presentation/bloc/cashout_bloc.dart';
+
 import '../../features/loans/domain/usecases/add_loan_usecase.dart';
 import '../../features/loans/domain/usecases/get_all_loans_usecase.dart';
 import '../../features/loans/domain/usecases/get_customer_loans_usecase.dart';
@@ -125,6 +131,27 @@ Future<void> initDependencies() async {
   sl.registerLazySingleton<CollectionRemoteDataSource>(
     () => MockCollectionRemoteDataSourceImpl(),
   );
+
+  sl.registerLazySingleton(() => CashOutRemoteDataSource());
+
+
+  sl.registerLazySingleton<CashOutRepository>(
+    () => CashOutRepositoryImpl(remoteDataSource: sl()),
+  );
+
+  // ─── Collections: Use Cases ───────────────────────────────────────────────
+  sl.registerLazySingleton(() => AddCashOutUseCase(sl()));
+  sl.registerLazySingleton(() => GetActiveCashOutsUseCase(sl()));
+  sl.registerLazySingleton(() => GetCashOutHistoryUseCase(sl()));
+  sl.registerLazySingleton(() => SettleCashOutUseCase(sl()));
+
+  // ─── Collections: BLoC ────────────────────────────────────────────────────
+  sl.registerFactory(() => CashOutBloc(
+        getActiveCashOuts: sl(),
+        getCashOutHistory: sl(),
+        addCashOut: sl(),
+        settleCashOut: sl(),
+      ));
 
   // Settings
   sl.registerFactory(() => SettingsBloc(

@@ -1,5 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:intl/intl.dart';
+
+import '../../domain/entities/cashout_entity.dart';
+import '../bloc/cashout_bloc.dart';
+import '../bloc/cashout_event.dart';
+import '../../../settings/presentation/bloc/settings_bloc.dart';
+import '../../../settings/presentation/bloc/settings_state.dart';
 
 class AddCashOutModal extends StatefulWidget {
   const AddCashOutModal({super.key});
@@ -9,12 +17,18 @@ class AddCashOutModal extends StatefulWidget {
 }
 
 class _AddCashOutModalState extends State<AddCashOutModal> {
-  String? _selectedLine;
-  final TextEditingController _dateController = TextEditingController(text: '16/06/2026');
+  String? _selectedLineId;
+  DateTime _selectedDate = DateTime.now();
+
+  final TextEditingController _amountController = TextEditingController();
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _commentsController = TextEditingController();
 
   @override
   void dispose() {
-    _dateController.dispose();
+    _amountController.dispose();
+    _nameController.dispose();
+    _commentsController.dispose();
     super.dispose();
   }
 
@@ -25,9 +39,9 @@ class _AddCashOutModalState extends State<AddCashOutModal> {
       firstDate: DateTime(2000),
       lastDate: DateTime(2100),
     );
-    if (picked != null) {
+      if (picked != null) {
       setState(() {
-        _dateController.text = "${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year}";
+        _selectedDate = picked;
       });
     }
   }
@@ -52,56 +66,67 @@ class _AddCashOutModalState extends State<AddCashOutModal> {
               child: ListView(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 children: [
-                  DropdownButtonFormField<String>(
-                    decoration: const InputDecoration(
-                      contentPadding: EdgeInsets.symmetric(vertical: 8.0),
-                    ),
-                    isExpanded: true,
-                    value: _selectedLine,
-                    hint: const Text('Line', style: TextStyle(fontSize: 16)),
-                    items: ['Main Bazar Line', 'South Street Line'].map((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value),
-                      );
-                    }).toList(),
-                    onChanged: (val) {
-                      setState(() {
-                        _selectedLine = val;
-                      });
+                  BlocBuilder<SettingsBloc, SettingsState>(
+                    builder: (context, state) {
+                      if (state is SettingsLoaded) {
+                        return DropdownButtonFormField<String>(
+                          decoration: const InputDecoration(
+                            contentPadding: EdgeInsets.symmetric(vertical: 8.0),
+                          ),
+                          isExpanded: true,
+                          value: _selectedLineId,
+                          hint: const Text('Line', style: TextStyle(fontSize: 16)),
+                          items: state.lines.map((line) {
+                            return DropdownMenuItem<String>(
+                              value: line.id,
+                              child: Text(line.name),
+                            );
+                          }).toList(),
+                          onChanged: (val) {
+                            setState(() {
+                              _selectedLineId = val;
+                            });
+                          },
+                        );
+                      }
+                      return const SizedBox.shrink();
                     },
                   ),
                   const SizedBox(height: 8),
-                  const TextField(
-                    decoration: InputDecoration(
+                  TextField(
+                    controller: _amountController,
+                    decoration: const InputDecoration(
                       labelText: 'Amount',
                     ),
                     keyboardType: TextInputType.number,
                   ),
                   const SizedBox(height: 8),
-                  TextField(
-                    controller: _dateController,
-                    readOnly: true,
+                  InkWell(
                     onTap: () => _selectDate(context),
-                    decoration: const InputDecoration(
-                      labelText: 'Date',
-                      floatingLabelBehavior: FloatingLabelBehavior.always,
-                      suffixIcon: Padding(
-                        padding: EdgeInsets.only(top: 14.0, bottom: 14.0),
-                        child: FaIcon(FontAwesomeIcons.calendarDay, color: Colors.lightBlue, size: 20),
+                    child: InputDecorator(
+                      decoration: const InputDecoration(
+                        labelText: 'Date',
+                        floatingLabelBehavior: FloatingLabelBehavior.always,
+                        suffixIcon: Padding(
+                          padding: EdgeInsets.only(top: 14.0, bottom: 14.0),
+                          child: FaIcon(FontAwesomeIcons.calendarDay, color: Colors.lightBlue, size: 20),
+                        ),
+                        suffixIconConstraints: BoxConstraints(minWidth: 40, minHeight: 0),
                       ),
-                      suffixIconConstraints: BoxConstraints(minWidth: 40, minHeight: 0),
+                      child: Text(DateFormat('dd/MM/yyyy').format(_selectedDate)),
                     ),
                   ),
                   const SizedBox(height: 8),
-                  const TextField(
-                    decoration: InputDecoration(
+                  TextField(
+                    controller: _nameController,
+                    decoration: const InputDecoration(
                       labelText: 'Name',
                     ),
                   ),
                   const SizedBox(height: 8),
-                  const TextField(
-                    decoration: InputDecoration(
+                  TextField(
+                    controller: _commentsController,
+                    decoration: const InputDecoration(
                       labelText: 'Comments',
                     ),
                   ),
@@ -111,7 +136,22 @@ class _AddCashOutModalState extends State<AddCashOutModal> {
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: ElevatedButton(
-                onPressed: () {},
+                onPressed: () {
+                  if (_selectedLineId == null || _amountController.text.isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please select Line and enter amount')));
+                    return;
+                  }
+                  final newCashOut = CashOutEntity(
+                    id: DateTime.now().millisecondsSinceEpoch.toString(),
+                    lineId: _selectedLineId!,
+                    amount: double.tryParse(_amountController.text) ?? 0.0,
+                    date: _selectedDate,
+                    name: _nameController.text,
+                    comments: _commentsController.text,
+                  );
+                  context.read<CashOutBloc>().add(AddCashOutSubmitted(newCashOut));
+                  Navigator.of(context).pop();
+                },
                 child: const Text('SUBMIT'),
               ),
             ),

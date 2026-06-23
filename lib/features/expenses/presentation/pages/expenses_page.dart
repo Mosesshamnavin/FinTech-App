@@ -83,13 +83,17 @@ class _ExpensesPageState extends State<ExpensesPage> with SingleTickerProviderSt
 
   void _showAddModal(BuildContext context) {
     final isInvestment = _tabController.index == 1;
+    final expensesBloc = context.read<ExpensesBloc>();
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
-      builder: (_) => AddExpenseModal(isInvestment: isInvestment),
+      builder: (_) => BlocProvider.value(
+        value: expensesBloc,
+        child: AddExpenseModal(isInvestment: isInvestment),
+      ),
     );
   }
 

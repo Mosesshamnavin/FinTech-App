@@ -12,6 +12,7 @@ import 'features/loans/presentation/bloc/loans_event.dart';
 import 'features/expenses/presentation/bloc/expenses_bloc.dart';
 import 'features/settings/presentation/bloc/settings_bloc.dart';
 import 'features/settings/presentation/bloc/settings_event.dart';
+import 'features/collections/presentation/bloc/cashout_bloc.dart';
 import 'features/auth/presentation/pages/forgot_password_page.dart';
 import 'features/auth/presentation/pages/login_page.dart';
 import 'features/auth/presentation/pages/register_page.dart';
@@ -358,6 +359,9 @@ class MyApp extends StatelessWidget {
         ),
         BlocProvider(
           create: (_) => di.sl<SettingsBloc>()..add(LoadSettingsRequested()),
+        ),
+        BlocProvider(
+          create: (_) => di.sl<CashOutBloc>(),
         ),
       ],
       child: ValueListenableBuilder<String>(

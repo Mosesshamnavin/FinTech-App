@@ -4,6 +4,8 @@ import 'package:intl/intl.dart';
 import '../../domain/entities/expense_entity.dart';
 import '../bloc/expenses_bloc.dart';
 import '../bloc/expenses_event.dart';
+import '../../../settings/presentation/bloc/settings_bloc.dart';
+import '../../../settings/presentation/bloc/settings_state.dart';
 
 class AddExpenseModal extends StatefulWidget {
   final bool isInvestment;
@@ -23,16 +25,6 @@ class _AddExpenseModalState extends State<AddExpenseModal> {
   DateTime _selectedDate = DateTime.now();
   String _selectedCategory = 'Food';
   bool _isOnline = false;
-
-  final List<String> _categories = [
-    'Food',
-    'Petrol',
-    'Salary',
-    'Maintenance',
-    'Fixed Deposit',
-    'Stocks',
-    'Other'
-  ];
 
   @override
   void dispose() {
@@ -106,15 +98,36 @@ class _AddExpenseModalState extends State<AddExpenseModal> {
             ),
           ),
           const SizedBox(height: 16),
-          DropdownButtonFormField<String>(
-            value: _selectedCategory,
-            decoration: const InputDecoration(
-              labelText: 'Category',
-              border: OutlineInputBorder(),
-            ),
-            items: _categories.map((c) => DropdownMenuItem(value: c, child: Text(c))).toList(),
-            onChanged: (val) {
-              if (val != null) setState(() => _selectedCategory = val);
+          BlocBuilder<SettingsBloc, SettingsState>(
+            builder: (context, state) {
+              List<String> categories = ['Other'];
+              if (state is SettingsLoaded) {
+                if (widget.isInvestment) {
+                  if (state.investmentTypes.isNotEmpty) {
+                    categories = state.investmentTypes.map((e) => e.name).toList();
+                  }
+                } else {
+                  if (state.expenseTypes.isNotEmpty) {
+                    categories = state.expenseTypes.map((e) => e.name).toList();
+                  }
+                }
+              }
+              // Make sure _selectedCategory is valid
+              if (!categories.contains(_selectedCategory)) {
+                _selectedCategory = categories.first;
+              }
+
+              return DropdownButtonFormField<String>(
+                value: _selectedCategory,
+                decoration: const InputDecoration(
+                  labelText: 'Category',
+                  border: OutlineInputBorder(),
+                ),
+                items: categories.map((c) => DropdownMenuItem(value: c, child: Text(c))).toList(),
+                onChanged: (val) {
+                  if (val != null) setState(() => _selectedCategory = val);
+                },
+              );
             },
           ),
           const SizedBox(height: 16),
