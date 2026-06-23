@@ -48,6 +48,12 @@ import '../../features/expenses/domain/usecases/add_expense_usecase.dart';
 import '../../features/expenses/domain/usecases/get_expenses_usecase.dart';
 import '../../features/expenses/presentation/bloc/expenses_bloc.dart';
 
+import '../../features/settings/data/datasources/settings_remote_datasource.dart';
+import '../../features/settings/data/repositories/settings_repository_impl.dart';
+import '../../features/settings/domain/repositories/settings_repository.dart';
+import '../../features/settings/domain/usecases/settings_usecases.dart';
+import '../../features/settings/presentation/bloc/settings_bloc.dart';
+
 final sl = GetIt.instance;
 
 Future<void> initDependencies() async {
@@ -119,6 +125,33 @@ Future<void> initDependencies() async {
   sl.registerLazySingleton<CollectionRemoteDataSource>(
     () => MockCollectionRemoteDataSourceImpl(),
   );
+
+  // Settings
+  sl.registerFactory(() => SettingsBloc(
+        getExpenseTypes: sl(),
+        addExpenseType: sl(),
+        getInvestmentTypes: sl(),
+        addInvestmentType: sl(),
+        getAreas: sl(),
+        addArea: sl(),
+        getLines: sl(),
+        addLine: sl(),
+      ));
+
+  sl.registerLazySingleton(() => GetExpenseTypesUseCase(sl()));
+  sl.registerLazySingleton(() => AddExpenseTypeUseCase(sl()));
+  sl.registerLazySingleton(() => GetInvestmentTypesUseCase(sl()));
+  sl.registerLazySingleton(() => AddInvestmentTypeUseCase(sl()));
+  sl.registerLazySingleton(() => GetAreasUseCase(sl()));
+  sl.registerLazySingleton(() => AddAreaUseCase(sl()));
+  sl.registerLazySingleton(() => GetLinesUseCase(sl()));
+  sl.registerLazySingleton(() => AddLineUseCase(sl()));
+
+  sl.registerLazySingleton<SettingsRepository>(
+    () => SettingsRepositoryImpl(remoteDataSource: sl()),
+  );
+
+  sl.registerLazySingleton(() => SettingsRemoteDataSource());
 
   // ─── Collections: Repository ──────────────────────────────────────────────
   sl.registerLazySingleton<CollectionRepository>(

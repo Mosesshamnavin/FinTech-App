@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../domain/entities/settings_entities.dart';
+import '../bloc/settings_bloc.dart';
+import '../bloc/settings_event.dart';
 
 class AddInvestmentTypePage extends StatefulWidget {
   const AddInvestmentTypePage({super.key});
@@ -8,7 +12,14 @@ class AddInvestmentTypePage extends StatefulWidget {
 }
 
 class _AddInvestmentTypePageState extends State<AddInvestmentTypePage> {
+  final TextEditingController _nameController = TextEditingController();
   String _status = 'Active';
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    super.dispose();
+  }
   bool _trackInvestment = false;
 
   void _showStatusDialog() {
@@ -88,8 +99,9 @@ class _AddInvestmentTypePageState extends State<AddInvestmentTypePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const TextField(
-              decoration: InputDecoration(
+            TextField(
+              controller: _nameController,
+              decoration: const InputDecoration(
                 labelText: 'Investment Type Name',
                 border: UnderlineInputBorder(),
                 enabledBorder: UnderlineInputBorder(
@@ -150,7 +162,17 @@ class _AddInvestmentTypePageState extends State<AddInvestmentTypePage> {
             Center(
               child: ElevatedButton(
                 onPressed: () {
-                  // Save logic
+                  if (_nameController.text.trim().isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please enter a name')));
+                    return;
+                  }
+                  final newInvestmentType = InvestmentTypeEntity(
+                    id: DateTime.now().millisecondsSinceEpoch.toString(),
+                    name: _nameController.text.trim(),
+                    isActive: _status == 'Active',
+                  );
+                  context.read<SettingsBloc>().add(AddInvestmentTypeSubmitted(newInvestmentType));
+                  Navigator.of(context).pop();
                 },
                 child: const Text('SAVE'),
               ),

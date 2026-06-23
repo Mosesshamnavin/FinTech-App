@@ -1,16 +1,17 @@
+import 'core/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-
 import 'core/di/injection_container.dart' as di;
 import 'core/di/injection_container.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/auth/presentation/bloc/auth_event.dart';
 import 'features/auth/presentation/bloc/auth_state.dart';
 import 'features/loans/presentation/bloc/loans_bloc.dart';
+import 'features/loans/presentation/bloc/loans_event.dart';
 import 'features/expenses/presentation/bloc/expenses_bloc.dart';
-
-import 'core/theme/app_theme.dart';
+import 'features/settings/presentation/bloc/settings_bloc.dart';
+import 'features/settings/presentation/bloc/settings_event.dart';
 import 'features/auth/presentation/pages/forgot_password_page.dart';
 import 'features/auth/presentation/pages/login_page.dart';
 import 'features/auth/presentation/pages/register_page.dart';
@@ -349,9 +350,14 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        // AuthBloc is provided globally so any page can listen to auth state
-        BlocProvider<AuthBloc>(
-          create: (_) => sl<AuthBloc>()..add(const AuthCheckRequested()),
+        BlocProvider(
+          create: (_) => di.sl<AuthBloc>()..add(const AuthCheckRequested()),
+        ),
+        BlocProvider(
+          create: (_) => di.sl<LoansBloc>()..add(LoadAllLoansRequested()),
+        ),
+        BlocProvider(
+          create: (_) => di.sl<SettingsBloc>()..add(LoadSettingsRequested()),
         ),
       ],
       child: ValueListenableBuilder<String>(

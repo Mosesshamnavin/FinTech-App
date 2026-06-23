@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import '../../../settings/domain/entities/settings_entities.dart';
+import '../../../settings/presentation/bloc/settings_bloc.dart';
+import '../../../settings/presentation/bloc/settings_event.dart';
 
 class AddLineModal extends StatefulWidget {
   const AddLineModal({super.key});
@@ -14,6 +18,22 @@ class _AddLineModalState extends State<AddLineModal> {
   bool _closeLoanManually = false;
   bool _enablePenalty = false;
   bool _keepPaidCustomer = false;
+
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _interestController = TextEditingController();
+  final TextEditingController _billAmountController = TextEditingController();
+  final TextEditingController _installController = TextEditingController();
+  final TextEditingController _badLoanDaysController = TextEditingController();
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _interestController.dispose();
+    _billAmountController.dispose();
+    _installController.dispose();
+    _badLoanDaysController.dispose();
+    super.dispose();
+  }
 
   final List<ExpansionTileController> _upiControllers = [
     ExpansionTileController(),
@@ -97,7 +117,7 @@ class _AddLineModalState extends State<AddLineModal> {
             Expanded(
               child: ListView(
                 children: [
-                  _buildTextField('Line Name'),
+                  _buildTextField('Line Name', _nameController),
                   GestureDetector(
                     onTap: _showLineTypeDialog,
                     behavior: HitTestBehavior.opaque,
@@ -123,10 +143,10 @@ class _AddLineModalState extends State<AddLineModal> {
                       ),
                     ),
                   ),
-                  _buildTextField('Interest Per Hundred'),
-                  _buildTextField('Bill Amount Per Hundred'),
-                  _buildTextField('No Of Install'),
-                  _buildTextField('Bad Loan Days'),
+                  _buildTextField('Interest Per Hundred', _interestController, isNumber: true),
+                  _buildTextField('Bill Amount Per Hundred', _billAmountController, isNumber: true),
+                  _buildTextField('No Of Install', _installController, isNumber: true),
+                  _buildTextField('Bad Loan Days', _badLoanDaysController, isNumber: true),
                   _buildSwitch('Close Loan Manually', _closeLoanManually, (val) => setState(() => _closeLoanManually = val)),
                   _buildSwitch('Enable Penalty', _enablePenalty, (val) => setState(() => _enablePenalty = val)),
                   _buildSwitch('Keep Paid Customer in Completed Tab?', _keepPaidCustomer, (val) => setState(() => _keepPaidCustomer = val)),
@@ -139,7 +159,26 @@ class _AddLineModalState extends State<AddLineModal> {
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: ElevatedButton(
-                onPressed: () {},
+                onPressed: () {
+                  if (_nameController.text.trim().isEmpty || _selectedLineType == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please fill Line Name and Type')));
+                    return;
+                  }
+                  final newLine = LineEntity(
+                    id: DateTime.now().millisecondsSinceEpoch.toString(),
+                    name: _nameController.text.trim(),
+                    type: _selectedLineType!,
+                    interestPerHundred: double.tryParse(_interestController.text) ?? 0.0,
+                    billAmountPerHundred: double.tryParse(_billAmountController.text) ?? 0.0,
+                    noOfInstall: int.tryParse(_installController.text) ?? 0,
+                    badLoanDays: int.tryParse(_badLoanDaysController.text) ?? 0,
+                    closeLoanManually: _closeLoanManually,
+                    enablePenalty: _enablePenalty,
+                    keepPaidCustomer: _keepPaidCustomer,
+                  );
+                  context.read<SettingsBloc>().add(AddLineSubmitted(newLine));
+                  Navigator.of(context).pop();
+                },
                 child: const Text('SAVE'),
               ),
             ),
@@ -149,10 +188,12 @@ class _AddLineModalState extends State<AddLineModal> {
     );
   }
 
-  Widget _buildTextField(String hint) {
+  Widget _buildTextField(String hint, TextEditingController controller, {bool isNumber = false}) {
     return Column(
       children: [
         TextField(
+          controller: controller,
+          keyboardType: isNumber ? TextInputType.number : TextInputType.text,
           decoration: InputDecoration(
             hintText: hint,
             border: InputBorder.none,

@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../domain/entities/settings_entities.dart';
+import '../bloc/settings_bloc.dart';
+import '../bloc/settings_event.dart';
 
 class AddExpenseTypePage extends StatefulWidget {
   const AddExpenseTypePage({super.key});
@@ -8,7 +12,14 @@ class AddExpenseTypePage extends StatefulWidget {
 }
 
 class _AddExpenseTypePageState extends State<AddExpenseTypePage> {
+  final TextEditingController _nameController = TextEditingController();
   String _status = 'Active';
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    super.dispose();
+  }
 
   void _showStatusDialog() {
     showDialog(
@@ -87,8 +98,9 @@ class _AddExpenseTypePageState extends State<AddExpenseTypePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const TextField(
-              decoration: InputDecoration(
+            TextField(
+              controller: _nameController,
+              decoration: const InputDecoration(
                 labelText: 'Expense Type Name',
                 border: UnderlineInputBorder(),
                 enabledBorder: UnderlineInputBorder(
@@ -126,7 +138,17 @@ class _AddExpenseTypePageState extends State<AddExpenseTypePage> {
             Center(
               child: ElevatedButton(
                 onPressed: () {
-                  // Save logic
+                  if (_nameController.text.trim().isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please enter a name')));
+                    return;
+                  }
+                  final newExpenseType = ExpenseTypeEntity(
+                    id: DateTime.now().millisecondsSinceEpoch.toString(),
+                    name: _nameController.text.trim(),
+                    isActive: _status == 'Active',
+                  );
+                  context.read<SettingsBloc>().add(AddExpenseTypeSubmitted(newExpenseType));
+                  Navigator.of(context).pop();
                 },
                 child: const Text('SAVE'),
               ),
