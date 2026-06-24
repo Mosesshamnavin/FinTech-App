@@ -58,36 +58,43 @@ class _AddLineModalState extends State<AddLineModal> {
     await showDialog(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          title: const Text('Line Type'),
-          contentPadding: const EdgeInsets.only(top: 16.0),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: _lineTypes.map((type) {
-                return RadioListTile<String>(
-                  title: Text(type),
-                  value: type,
-                  groupValue: _selectedLineType,
-                  onChanged: (value) {
-                    setState(() {
-                      _selectedLineType = value;
-                    });
-                  },
-                );
-              }).toList(),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('CANCEL', style: TextStyle(color: Colors.lightBlue)),
-            ),
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('OK', style: TextStyle(color: Colors.lightBlue)),
-            ),
-          ],
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: const Text('Line Type'),
+              contentPadding: const EdgeInsets.only(top: 16.0),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: _lineTypes.map((type) {
+                    return RadioListTile<String>(
+                      title: Text(type),
+                      value: type,
+                      groupValue: _selectedLineType,
+                      onChanged: (value) {
+                        setDialogState(() {
+                          _selectedLineType = value;
+                        });
+                        setState(() {
+                          _selectedLineType = value;
+                        });
+                      },
+                    );
+                  }).toList(),
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('CANCEL', style: TextStyle(color: Colors.lightBlue)),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('OK', style: TextStyle(color: Colors.lightBlue)),
+                ),
+              ],
+            );
+          },
         );
       },
     );

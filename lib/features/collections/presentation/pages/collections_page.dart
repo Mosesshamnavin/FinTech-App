@@ -10,6 +10,8 @@ import '../widgets/add_collection_modal.dart';
 import '../bloc/collections_bloc.dart';
 import '../bloc/collections_event.dart';
 import '../bloc/collections_state.dart';
+import '../../../settings/presentation/bloc/settings_bloc.dart';
+import '../../../settings/presentation/bloc/settings_state.dart';
 
 class CollectionsPage extends StatelessWidget {
   const CollectionsPage({super.key});
@@ -35,8 +37,7 @@ class _CollectionsViewState extends State<_CollectionsView> {
   String? _selectedArea;
   final TextEditingController _dateController = TextEditingController();
 
-  final List<String> _mockLines = ['Line 1', 'Line 2', 'Line 3'];
-  final List<String> _mockAreas = ['Area A', 'Area B', 'Area C'];
+  // Removed mock lists
 
   @override
   void initState() {
@@ -142,48 +143,62 @@ class _CollectionsViewState extends State<_CollectionsView> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                DropdownButtonFormField<String>(
-                  value: _selectedLine,
-                  decoration: const InputDecoration(hintText: 'Line'),
-                  items: _mockLines.map((String value) {
-                    return DropdownMenuItem<String>(value: value, child: Text(value));
-                  }).toList(),
-                  onChanged: (val) => setState(() => _selectedLine = val),
-                  icon: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.arrow_drop_down, color: Colors.grey),
-                      IconButton(
-                        icon: const FaIcon(FontAwesomeIcons.plus, size: 20),
-                        onPressed: () => showDialog(
-                          context: context,
-                          builder: (context) => const AddLineModal(),
+                BlocBuilder<SettingsBloc, SettingsState>(
+                  builder: (context, state) {
+                    List<String> lines = [];
+                    List<String> areas = [];
+                    if (state is SettingsLoaded) {
+                      lines = state.lines.map((e) => e.name).toList();
+                      areas = state.areas.map((e) => e.name).toList();
+                    }
+                    return Column(
+                      children: [
+                        DropdownButtonFormField<String>(
+                          value: _selectedLine,
+                          decoration: const InputDecoration(hintText: 'Line'),
+                          items: lines.map((String value) {
+                            return DropdownMenuItem<String>(value: value, child: Text(value));
+                          }).toList(),
+                          onChanged: (val) => setState(() => _selectedLine = val),
+                          icon: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.arrow_drop_down, color: Colors.grey),
+                              IconButton(
+                                icon: const FaIcon(FontAwesomeIcons.plus, size: 20),
+                                onPressed: () => showDialog(
+                                  context: context,
+                                  builder: (context) => const AddLineModal(),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 16),
-                DropdownButtonFormField<String>(
-                  value: _selectedArea,
-                  decoration: const InputDecoration(hintText: 'Area'),
-                  items: _mockAreas.map((String value) {
-                    return DropdownMenuItem<String>(value: value, child: Text(value));
-                  }).toList(),
-                  onChanged: (val) => setState(() => _selectedArea = val),
-                  icon: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.arrow_drop_down, color: Colors.grey),
-                      IconButton(
-                        icon: const FaIcon(FontAwesomeIcons.magnifyingGlass, color: Colors.lightBlue, size: 20),
-                        onPressed: () => showDialog(
-                          context: context,
-                          builder: (context) => const AreaSearchModal(),
+                        const SizedBox(height: 16),
+                        DropdownButtonFormField<String>(
+                          value: _selectedArea,
+                          decoration: const InputDecoration(hintText: 'Area'),
+                          items: areas.map((String value) {
+                            return DropdownMenuItem<String>(value: value, child: Text(value));
+                          }).toList(),
+                          onChanged: (val) => setState(() => _selectedArea = val),
+                          icon: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.arrow_drop_down, color: Colors.grey),
+                              IconButton(
+                                icon: const FaIcon(FontAwesomeIcons.magnifyingGlass, color: Colors.lightBlue, size: 20),
+                                onPressed: () => showDialog(
+                                  context: context,
+                                  builder: (context) => const AreaSearchModal(),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
+                      ],
+                    );
+                  },
                 ),
                 const SizedBox(height: 16),
                 SizedBox(

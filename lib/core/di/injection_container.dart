@@ -1,4 +1,6 @@
+import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../services/storage_service.dart';
@@ -59,10 +61,15 @@ import '../../features/settings/data/repositories/settings_repository_impl.dart'
 import '../../features/settings/domain/repositories/settings_repository.dart';
 import '../../features/settings/domain/usecases/settings_usecases.dart';
 import '../../features/settings/presentation/bloc/settings_bloc.dart';
+import '../network/graphql_service.dart';
 
 final sl = GetIt.instance;
 
 Future<void> initDependencies() async {
+  // ─── Core Services ────────────────────────────────────────────────────────
+  sl.registerLazySingleton(() => GraphQLService());
+  sl.registerLazySingleton<GraphQLClient>(() => sl<GraphQLService>().client);
+
   // ─── External ────────────────────────────────────────────────────────────
   final sharedPreferences = await SharedPreferences.getInstance();
   sl.registerLazySingleton(() => sharedPreferences);
@@ -178,7 +185,7 @@ Future<void> initDependencies() async {
     () => SettingsRepositoryImpl(remoteDataSource: sl()),
   );
 
-  sl.registerLazySingleton(() => SettingsRemoteDataSource());
+  sl.registerLazySingleton(() => SettingsRemoteDataSource(client: sl()));
 
   // ─── Collections: Repository ──────────────────────────────────────────────
   sl.registerLazySingleton<CollectionRepository>(

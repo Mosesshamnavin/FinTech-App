@@ -5,6 +5,8 @@ import 'package:intl/intl.dart';
 import '../bloc/expenses_bloc.dart';
 import '../bloc/expenses_event.dart';
 import '../bloc/expenses_state.dart';
+import '../../../settings/presentation/bloc/settings_bloc.dart';
+import '../../../settings/presentation/bloc/settings_state.dart';
 import '../widgets/add_expense_modal.dart';
 
 class ExpensesPage extends StatefulWidget {
@@ -213,30 +215,38 @@ class _ExpensesPageState extends State<ExpensesPage> with SingleTickerProviderSt
                           contentPadding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                         ),
                       ),
-                      DropdownButtonFormField<String>(
-                        decoration: const InputDecoration(
-                          labelText: 'Line',
-                          floatingLabelBehavior: FloatingLabelBehavior.always,
-                          border: InputBorder.none,
-                          enabledBorder: InputBorder.none,
-                          focusedBorder: InputBorder.none,
-                          contentPadding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                        ),
-                        isExpanded: true,
-                        value: _selectedLine,
-                        items: ['All', 'Main Bazar Line', 'South Street Line'].map((String value) {
-                          return DropdownMenuItem<String>(
-                            value: value,
-                            child: Text(value),
-                          );
-                        }).toList(),
-                        onChanged: (val) {
-                          if (val != null) {
-                            setState(() {
-                              _selectedLine = val;
-                            });
-                            _loadData(); // Reload data when line changes
+                      BlocBuilder<SettingsBloc, SettingsState>(
+                        builder: (context, state) {
+                          List<String> lines = ['All'];
+                          if (state is SettingsLoaded) {
+                            lines.addAll(state.lines.map((e) => e.name));
                           }
+                          return DropdownButtonFormField<String>(
+                            decoration: const InputDecoration(
+                              labelText: 'Line',
+                              floatingLabelBehavior: FloatingLabelBehavior.always,
+                              border: InputBorder.none,
+                              enabledBorder: InputBorder.none,
+                              focusedBorder: InputBorder.none,
+                              contentPadding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                            ),
+                            isExpanded: true,
+                            value: _selectedLine,
+                            items: lines.map((String value) {
+                              return DropdownMenuItem<String>(
+                                value: value,
+                                child: Text(value),
+                              );
+                            }).toList(),
+                            onChanged: (val) {
+                              if (val != null) {
+                                setState(() {
+                                  _selectedLine = val;
+                                });
+                                _loadData(); // Reload data when line changes
+                              }
+                            },
+                          );
                         },
                       ),
                     ],

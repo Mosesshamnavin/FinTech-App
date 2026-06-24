@@ -5,6 +5,8 @@ import '../../../../core/di/injection_container.dart';
 import '../bloc/customers_bloc.dart';
 import '../bloc/customers_event.dart';
 import '../bloc/customers_state.dart';
+import '../../../settings/presentation/bloc/settings_bloc.dart';
+import '../../../settings/presentation/bloc/settings_state.dart';
 
 class AddCustomerPage extends StatelessWidget {
   const AddCustomerPage({super.key});
@@ -33,8 +35,7 @@ class _AddCustomerViewState extends State<_AddCustomerView> {
   String? _selectedLine;
   String? _selectedArea;
 
-  final List<String> _mockLines = ['Line 1', 'Line 2', 'Line 3'];
-  final List<String> _mockAreas = ['Area A', 'Area B', 'Area C'];
+  // Removed mock lists
 
   @override
   void dispose() {
@@ -112,22 +113,36 @@ class _AddCustomerViewState extends State<_AddCustomerView> {
                 textInputAction: TextInputAction.next,
               ),
               const SizedBox(height: 16),
-              DropdownButtonFormField<String>(
-                decoration: const InputDecoration(labelText: 'Line'),
-                value: _selectedLine,
-                items: _mockLines.map((line) {
-                  return DropdownMenuItem(value: line, child: Text(line));
-                }).toList(),
-                onChanged: (val) => setState(() => _selectedLine = val),
-              ),
-              const SizedBox(height: 16),
-              DropdownButtonFormField<String>(
-                decoration: const InputDecoration(labelText: 'Area'),
-                value: _selectedArea,
-                items: _mockAreas.map((area) {
-                  return DropdownMenuItem(value: area, child: Text(area));
-                }).toList(),
-                onChanged: (val) => setState(() => _selectedArea = val),
+              BlocBuilder<SettingsBloc, SettingsState>(
+                builder: (context, state) {
+                  List<String> lines = [];
+                  List<String> areas = [];
+                  if (state is SettingsLoaded) {
+                    lines = state.lines.map((e) => e.name).toList();
+                    areas = state.areas.map((e) => e.name).toList();
+                  }
+                  return Column(
+                    children: [
+                      DropdownButtonFormField<String>(
+                        decoration: const InputDecoration(labelText: 'Line'),
+                        value: _selectedLine,
+                        items: lines.map((line) {
+                          return DropdownMenuItem(value: line, child: Text(line));
+                        }).toList(),
+                        onChanged: (val) => setState(() => _selectedLine = val),
+                      ),
+                      const SizedBox(height: 16),
+                      DropdownButtonFormField<String>(
+                        decoration: const InputDecoration(labelText: 'Area'),
+                        value: _selectedArea,
+                        items: areas.map((area) {
+                          return DropdownMenuItem(value: area, child: Text(area));
+                        }).toList(),
+                        onChanged: (val) => setState(() => _selectedArea = val),
+                      ),
+                    ],
+                  );
+                },
               ),
               const SizedBox(height: 32),
               BlocBuilder<CustomersBloc, CustomersState>(
