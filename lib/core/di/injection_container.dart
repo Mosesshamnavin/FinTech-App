@@ -85,7 +85,7 @@ Future<void> initDependencies() async {
   // 🔄 SWAP THIS when Hasura server is ready:
   //   Replace MockAuthRemoteDataSourceImpl with HasuraAuthRemoteDataSourceImpl(sl())
   sl.registerLazySingleton<AuthRemoteDataSource>(
-    () => MockAuthRemoteDataSourceImpl(),
+    () => HasuraAuthRemoteDataSourceImpl(client: sl<GraphQLClient>()),
   );
 
   // ─── Auth: Repository ─────────────────────────────────────────────────────

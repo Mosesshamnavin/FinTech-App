@@ -37,8 +37,6 @@ class _CollectionsViewState extends State<_CollectionsView> {
   String? _selectedArea;
   final TextEditingController _dateController = TextEditingController();
 
-  // Removed mock lists
-
   @override
   void initState() {
     super.initState();

@@ -1,3 +1,4 @@
+import 'package:graphql_flutter/graphql_flutter.dart' hide ServerException;
 import '../../../../core/error/exceptions.dart';
 import '../models/user_model.dart';
 
@@ -27,50 +28,54 @@ abstract class AuthRemoteDataSource {
 /// Demo accounts:
 ///   admin / admin123  → role: admin
 ///   agent / agent123  → role: agent
-class MockAuthRemoteDataSourceImpl implements AuthRemoteDataSource {
-  static const _mockDelay = Duration(milliseconds: 800); // simulate network
+class HasuraAuthRemoteDataSourceImpl implements AuthRemoteDataSource {
+  final GraphQLClient client;
 
-  static const _mockUsers = [
-    {
-      'id': 'mock-user-001',
-      'username': 'admin',
-      'password': 'admin',
-      'email': 'admin@vasool.app',
-      'role': 'admin',
-      'token': 'mock-jwt-admin-token',
-    },
-    {
-      'id': 'mock-user-002',
-      'username': 'agent',
-      'password': 'agent',
-      'email': 'agent@vasool.app',
-      'role': 'agent',
-      'token': 'mock-jwt-agent-token',
-    },
-  ];
+  HasuraAuthRemoteDataSourceImpl({required this.client});
 
   @override
   Future<UserModel> login({
     required String username,
     required String password,
   }) async {
-    await Future.delayed(_mockDelay);
+    const String query = r'''
+      query Login($username: String!, $password: String!) {
+        users(where: {username: {_eq: $username}, password: {_eq: $password}}) {
+          id
+          username
+          email
+          role
+        }
+      }
+    ''';
 
-    final user = _mockUsers.where(
-      (u) => u['username'] == username && u['password'] == password,
+    final result = await client.query(
+      QueryOptions(
+        document: gql(query),
+        variables: {
+          'username': username,
+          'password': password,
+        },
+        fetchPolicy: FetchPolicy.networkOnly,
+      ),
     );
 
-    if (user.isEmpty) {
+    if (result.hasException) {
+      throw ServerException(result.exception.toString());
+    }
+
+    final List usersData = result.data?['users'] ?? [];
+    if (usersData.isEmpty) {
       throw const AuthException('Invalid username or password.');
     }
 
-    final u = user.first;
+    final user = usersData.first;
     return UserModel(
-      id: u['id']!,
-      username: u['username']!,
-      email: u['email']!,
-      role: u['role']!,
-      token: u['token']!,
+      id: user['id'].toString(),
+      username: user['username'].toString(),
+      email: user['email'].toString(),
+      role: user['role'].toString(),
+      token: 'mock-jwt-token', // You can replace this with a real JWT if you setup an Auth server later
     );
   }
 
@@ -82,28 +87,85 @@ class MockAuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     required String email,
     required String mobile,
   }) async {
-    await Future.delayed(_mockDelay);
+    // First, check if user exists
+    const String checkQuery = r'''
+      query CheckUsername($username: String!) {
+        users(where: {username: {_eq: $username}}) {
+          id
+        }
+      }
+    ''';
 
-    // Check if username already exists
-    final exists = _mockUsers.any((u) => u['username'] == username);
-    if (exists) {
+    final checkResult = await client.query(
+      QueryOptions(
+        document: gql(checkQuery),
+        variables: {'username': username},
+        fetchPolicy: FetchPolicy.networkOnly,
+      ),
+    );
+
+    if (checkResult.hasException) {
+      throw ServerException(checkResult.exception.toString());
+    }
+
+    final List existingUsers = checkResult.data?['users'] ?? [];
+    if (existingUsers.isNotEmpty) {
       throw const ServerException('Username already taken. Please choose another.');
     }
 
-    // Return newly created mock user
+    // If username is unique, insert user
+    const String mutation = r'''
+      mutation InsertUser($name: String!, $username: String!, $password: String!, $email: String!, $mobile: String!) {
+        insert_users_one(object: {
+          name: $name,
+          username: $username,
+          password: $password,
+          email: $email,
+          mobile: $mobile,
+          role: "agent"
+        }) {
+          id
+          role
+        }
+      }
+    ''';
+
+    final result = await client.mutate(
+      MutationOptions(
+        document: gql(mutation),
+        variables: {
+          'name': name,
+          'username': username,
+          'password': password,
+          'email': email,
+          'mobile': mobile,
+        },
+        fetchPolicy: FetchPolicy.networkOnly,
+      ),
+    );
+
+    if (result.hasException) {
+      throw ServerException(result.exception.toString());
+    }
+
+    final insertData = result.data?['insert_users_one'];
+    if (insertData == null) {
+      throw const ServerException('Failed to create user. Please try again.');
+    }
+
     return UserModel(
-      id: 'mock-new-user-${DateTime.now().millisecondsSinceEpoch}',
+      id: insertData['id'].toString(),
       username: username,
       email: email,
-      role: 'agent',
-      token: 'mock-jwt-new-token',
+      role: insertData['role'].toString(),
+      token: 'mock-jwt-token',
     );
   }
 
   @override
   Future<void> sendOtp({required String username}) async {
-    await Future.delayed(_mockDelay);
-    // Mock: always succeeds for any username
+    // Simulated OTP send
+    await Future.delayed(const Duration(milliseconds: 500));
   }
 
   @override
@@ -111,10 +173,10 @@ class MockAuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     required String otp,
     required String newPassword,
   }) async {
-    await Future.delayed(_mockDelay);
+    // Simulated password reset
+    await Future.delayed(const Duration(milliseconds: 500));
     if (otp != '123456') {
       throw const AuthException('Invalid OTP. Please try again.');
     }
-    // Mock: OTP 123456 always works
   }
 }

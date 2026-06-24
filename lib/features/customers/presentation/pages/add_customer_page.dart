@@ -35,8 +35,6 @@ class _AddCustomerViewState extends State<_AddCustomerView> {
   String? _selectedLine;
   String? _selectedArea;
 
-  // Removed mock lists
-
   @override
   void dispose() {
     _nameController.dispose();

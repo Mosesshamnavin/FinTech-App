@@ -27,6 +27,7 @@ class _LoginView extends StatefulWidget {
 }
 
 class _LoginViewState extends State<_LoginView> {
+  final _formKey = GlobalKey<FormState>();
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
@@ -39,12 +40,14 @@ class _LoginViewState extends State<_LoginView> {
   }
 
   void _onLoginPressed(BuildContext context) {
-    context.read<AuthBloc>().add(
-          AuthLoginSubmitted(
-            username: _usernameController.text,
-            password: _passwordController.text,
-          ),
-        );
+    if (_formKey.currentState!.validate()) {
+      context.read<AuthBloc>().add(
+            AuthLoginSubmitted(
+              username: _usernameController.text,
+              password: _passwordController.text,
+            ),
+          );
+    }
   }
 
   @override
@@ -67,111 +70,128 @@ class _LoginViewState extends State<_LoginView> {
         body: SafeArea(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(24.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const SizedBox(height: 48),
-                const Center(
-                  child: Icon(Icons.receipt_long, size: 80, color: Colors.orange),
-                ),
-                const SizedBox(height: 16),
-                const Center(
-                  child: Text(
-                    'VASOOL DRIVE',
-                    style: TextStyle(
-                      fontSize: 24,
-                      color: Colors.lightBlue,
-                      fontWeight: FontWeight.bold,
-                    ),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const SizedBox(height: 48),
+                  const Center(
+                    child: Icon(Icons.receipt_long, size: 80, color: Colors.orange),
                   ),
-                ),
-                const SizedBox(height: 64),
-                TextField(
-                  controller: _usernameController,
-                  textInputAction: TextInputAction.next,
-                  decoration: const InputDecoration(
-                    labelText: 'USER NAME',
-                    hintText: 'Enter Your User Name',
-                  ),
-                ),
-                const SizedBox(height: 24),
-                TextField(
-                  controller: _passwordController,
-                  obscureText: _obscurePassword,
-                  textInputAction: TextInputAction.done,
-                  onSubmitted: (_) => _onLoginPressed(context),
-                  decoration: InputDecoration(
-                    labelText: 'PASSWORD',
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _obscurePassword ? Icons.visibility_off : Icons.visibility,
-                        size: 20,
-                        color: Colors.grey,
+                  const SizedBox(height: 16),
+                  const Center(
+                    child: Text(
+                      'VASOOL DRIVE',
+                      style: TextStyle(
+                        fontSize: 24,
+                        color: Colors.lightBlue,
+                        fontWeight: FontWeight.bold,
                       ),
-                      onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
                     ),
                   ),
-                ),
-                const SizedBox(height: 16),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: TextButton(
-                    onPressed: () => context.push('/forgot-password'),
+                  const SizedBox(height: 64),
+                  TextFormField(
+                    controller: _usernameController,
+                    textInputAction: TextInputAction.next,
+                    decoration: InputDecoration(
+                      labelText: 'USER NAME',
+                      hintText: 'Enter Your User Name',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      filled: true,
+                      fillColor: Colors.grey.shade50,
+                      prefixIcon: const Icon(Icons.person_outline, color: Colors.grey),
+                    ),
+                    validator: (value) => value == null || value.trim().isEmpty ? 'Please enter your username' : null,
+                  ),
+                  const SizedBox(height: 24),
+                  TextFormField(
+                    controller: _passwordController,
+                    obscureText: _obscurePassword,
+                    textInputAction: TextInputAction.done,
+                    onFieldSubmitted: (_) => _onLoginPressed(context),
+                    decoration: InputDecoration(
+                      labelText: 'PASSWORD',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      filled: true,
+                      fillColor: Colors.grey.shade50,
+                      prefixIcon: const Icon(Icons.lock_outline, color: Colors.grey),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                          size: 20,
+                          color: Colors.grey,
+                        ),
+                        onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                      ),
+                    ),
+                    validator: (value) => value == null || value.isEmpty ? 'Please enter your password' : null,
+                  ),
+                  const SizedBox(height: 16),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: TextButton(
+                      onPressed: () => context.push('/forgot-password'),
+                      child: const Text(
+                        'Forgot Password?',
+                        style: TextStyle(color: Colors.lightBlue, fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+                  BlocBuilder<AuthBloc, AuthState>(
+                    builder: (context, state) {
+                      final isLoading = state is AuthActionLoading;
+                      return ElevatedButton(
+                        onPressed: isLoading ? null : () => _onLoginPressed(context),
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                        child: isLoading
+                            ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : const Text('LOGIN', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  OutlinedButton(
+                    onPressed: () => context.push('/register'),
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(color: Colors.lightBlue, width: 2),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                    ),
                     child: const Text(
-                      'Forgot Password?',
-                      style: TextStyle(color: Colors.lightBlue, fontSize: 16),
+                      'OPEN AN ACCOUNT',
+                      style: TextStyle(color: Colors.lightBlue, fontSize: 16, fontWeight: FontWeight.bold),
                     ),
                   ),
-                ),
-                const SizedBox(height: 32),
-                BlocBuilder<AuthBloc, AuthState>(
-                  builder: (context, state) {
-                    final isLoading = state is AuthActionLoading;
-                    return ElevatedButton(
-                      onPressed: isLoading ? null : () => _onLoginPressed(context),
-                      child: isLoading
-                          ? const SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: Colors.white,
-                              ),
-                            )
-                          : const Text('LOGIN'),
-                    );
-                  },
-                ),
-                const SizedBox(height: 16),
-                OutlinedButton(
-                  onPressed: () => context.push('/register'),
-                  style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: Colors.lightBlue),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                  ),
-                  child: const Text(
-                    'OPEN AN ACCOUNT',
-                    style: TextStyle(color: Colors.lightBlue),
-                  ),
-                ),
-                const SizedBox(height: 64),
-                Center(
-                  child: TextButton(
-                    onPressed: () => context.go('/settings/support'),
-                    child: const Text(
-                      'Support',
-                      style: TextStyle(color: Colors.lightBlue, fontSize: 16),
+                  const SizedBox(height: 64),
+                  Center(
+                    child: TextButton(
+                      onPressed: () => context.go('/settings/support'),
+                      child: const Text(
+                        'Support',
+                        style: TextStyle(color: Colors.lightBlue, fontSize: 16),
+                      ),
                     ),
                   ),
-                ),
-                const Align(
-                  alignment: Alignment.bottomRight,
-                  child: Text('26.6.2', style: TextStyle(color: Colors.grey, fontSize: 12)),
-                ),
-              ],
+                  const Align(
+                    alignment: Alignment.bottomRight,
+                    child: Text('26.6.2', style: TextStyle(color: Colors.grey, fontSize: 12)),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

@@ -7,6 +7,8 @@ import '../../../../core/di/injection_container.dart';
 import '../bloc/customers_bloc.dart';
 import '../bloc/customers_event.dart';
 import '../bloc/customers_state.dart';
+import '../../../settings/presentation/bloc/settings_bloc.dart';
+import '../../../settings/presentation/bloc/settings_state.dart';
 
 class CustomersPage extends StatelessWidget {
   const CustomersPage({super.key});
@@ -30,9 +32,6 @@ class _CustomersView extends StatefulWidget {
 class _CustomersViewState extends State<_CustomersView> {
   String? _selectedLine;
   String? _selectedArea;
-
-  final List<String> _mockLines = ['Line 1', 'Line 2', 'Line 3'];
-  final List<String> _mockAreas = ['Area A', 'Area B', 'Area C'];
 
   void _onFilterSubmitted() {
     context.read<CustomersBloc>().add(
@@ -65,22 +64,43 @@ class _CustomersViewState extends State<_CustomersView> {
             padding: const EdgeInsets.all(16.0),
             child: Column(
               children: [
-                DropdownButtonFormField<String>(
-                  decoration: const InputDecoration(hintText: 'Select Line'),
-                  value: _selectedLine,
-                  items: _mockLines.map((line) {
-                    return DropdownMenuItem(value: line, child: Text(line));
-                  }).toList(),
-                  onChanged: (val) => setState(() => _selectedLine = val),
-                ),
-                const SizedBox(height: 16),
-                DropdownButtonFormField<String>(
-                  decoration: const InputDecoration(hintText: 'Select Area'),
-                  value: _selectedArea,
-                  items: _mockAreas.map((area) {
-                    return DropdownMenuItem(value: area, child: Text(area));
-                  }).toList(),
-                  onChanged: (val) => setState(() => _selectedArea = val),
+                BlocBuilder<SettingsBloc, SettingsState>(
+                  builder: (context, state) {
+                    List<String> lines = [];
+                    List<String> areas = [];
+                    if (state is SettingsLoaded) {
+                      lines = state.lines.map((e) => e.name).toList();
+                      areas = state.areas.map((e) => e.name).toList();
+                    }
+                    if (_selectedLine != null && !lines.contains(_selectedLine)) {
+                      _selectedLine = null;
+                    }
+                    if (_selectedArea != null && !areas.contains(_selectedArea)) {
+                      _selectedArea = null;
+                    }
+
+                    return Column(
+                      children: [
+                        DropdownButtonFormField<String>(
+                          decoration: const InputDecoration(hintText: 'Select Line'),
+                          value: _selectedLine,
+                          items: lines.map((line) {
+                            return DropdownMenuItem(value: line, child: Text(line));
+                          }).toList(),
+                          onChanged: (val) => setState(() => _selectedLine = val),
+                        ),
+                        const SizedBox(height: 16),
+                        DropdownButtonFormField<String>(
+                          decoration: const InputDecoration(hintText: 'Select Area'),
+                          value: _selectedArea,
+                          items: areas.map((area) {
+                            return DropdownMenuItem(value: area, child: Text(area));
+                          }).toList(),
+                          onChanged: (val) => setState(() => _selectedArea = val),
+                        ),
+                      ],
+                    );
+                  },
                 ),
                 const SizedBox(height: 16),
                 SizedBox(
