@@ -29,6 +29,12 @@ class StorageService {
 
   String? getUsername() => _prefs.getString(AppConfig.kUsername);
 
+  Future<void> saveName(String name) async {
+    await _prefs.setString('name', name);
+  }
+
+  String? getName() => _prefs.getString('name');
+
   Future<void> saveUserId(String userId) async {
     await _prefs.setString(AppConfig.kUserId, userId);
   }
@@ -61,6 +67,7 @@ class StorageService {
     await _prefs.remove(AppConfig.kAuthToken);
     await _prefs.remove(AppConfig.kRefreshToken);
     await _prefs.remove(AppConfig.kUsername);
+    await _prefs.remove('name');
     await _prefs.remove(AppConfig.kUserId);
     await _prefs.remove(AppConfig.kUserRole);
     await _prefs.setBool(AppConfig.kIsLoggedIn, false);

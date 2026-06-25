@@ -6,6 +6,7 @@ class UserModel extends UserEntity {
   const UserModel({
     required super.id,
     required super.username,
+    required super.name,
     required super.email,
     required super.role,
     super.siteName,
@@ -16,6 +17,7 @@ class UserModel extends UserEntity {
     return UserModel(
       id: json['id']?.toString() ?? '',
       username: json['username']?.toString() ?? '',
+      name: json['name']?.toString() ?? '',
       email: json['email']?.toString() ?? '',
       role: json['role']?.toString() ?? 'agent',
       siteName: json['site']?['name']?.toString(),
@@ -27,6 +29,7 @@ class UserModel extends UserEntity {
     return {
       'id': id,
       'username': username,
+      'name': name,
       'email': email,
       'role': role,
       'siteName': siteName,
@@ -38,6 +41,7 @@ class UserModel extends UserEntity {
     return UserModel(
       id: entity.id,
       username: entity.username,
+      name: entity.name,
       email: entity.email,
       role: entity.role,
       siteName: entity.siteName,

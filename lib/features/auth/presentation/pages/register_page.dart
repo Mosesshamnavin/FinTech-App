@@ -13,10 +13,7 @@ class RegisterPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => sl<AuthBloc>(),
-      child: const _RegisterView(),
-    );
+    return const _RegisterView();
   }
 }
 

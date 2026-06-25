@@ -43,6 +43,7 @@ class HasuraAuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         users(where: {username: {_eq: $username}, password: {_eq: $password}}) {
           id
           username
+          name
           email
           role
         }
@@ -73,6 +74,7 @@ class HasuraAuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     return UserModel(
       id: user['id'].toString(),
       username: user['username'].toString(),
+      name: user['name']?.toString() ?? user['username'].toString(),
       email: user['email'].toString(),
       role: user['role'].toString(),
       token: 'mock-jwt-token', // You can replace this with a real JWT if you setup an Auth server later
@@ -156,6 +158,7 @@ class HasuraAuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     return UserModel(
       id: insertData['id'].toString(),
       username: username,
+      name: name,
       email: email,
       role: insertData['role'].toString(),
       token: 'mock-jwt-token',

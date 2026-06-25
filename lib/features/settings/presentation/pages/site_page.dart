@@ -22,7 +22,7 @@ class SitePage extends StatelessWidget {
         builder: (context, state) {
           String loggedInUser = 'Unknown User';
           if (state is AuthAuthenticated) {
-            loggedInUser = state.user.username;
+            loggedInUser = state.user.name;
           }
           return ListView(
             children: [
