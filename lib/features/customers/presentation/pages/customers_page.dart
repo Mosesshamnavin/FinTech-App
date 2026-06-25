@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../core/widgets/custom_dropdown.dart';
 
 import '../../../../core/di/injection_container.dart';
 import '../bloc/customers_bloc.dart';
@@ -64,43 +65,22 @@ class _CustomersViewState extends State<_CustomersView> {
             padding: const EdgeInsets.all(16.0),
             child: Column(
               children: [
-                BlocBuilder<SettingsBloc, SettingsState>(
-                  builder: (context, state) {
-                    List<String> lines = [];
-                    List<String> areas = [];
-                    if (state is SettingsLoaded) {
-                      lines = state.lines.map((e) => e.name).toList();
-                      areas = state.areas.map((e) => e.name).toList();
-                    }
-                    if (_selectedLine != null && !lines.contains(_selectedLine)) {
-                      _selectedLine = null;
-                    }
-                    if (_selectedArea != null && !areas.contains(_selectedArea)) {
-                      _selectedArea = null;
-                    }
-
-                    return Column(
-                      children: [
-                        DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(hintText: 'Select Line'),
-                          value: _selectedLine,
-                          items: lines.map((line) {
-                            return DropdownMenuItem(value: line, child: Text(line));
-                          }).toList(),
-                          onChanged: (val) => setState(() => _selectedLine = val),
-                        ),
-                        const SizedBox(height: 16),
-                        DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(hintText: 'Select Area'),
-                          value: _selectedArea,
-                          items: areas.map((area) {
-                            return DropdownMenuItem(value: area, child: Text(area));
-                          }).toList(),
-                          onChanged: (val) => setState(() => _selectedArea = val),
-                        ),
-                      ],
-                    );
-                  },
+                Column(
+                  children: [
+                    CustomDropdownFormField<String>(
+                      label: 'Select Line',
+                      value: _selectedLine,
+                      items: const [],
+                      onChanged: (val) => setState(() => _selectedLine = val),
+                    ),
+                    const SizedBox(height: 16),
+                    CustomDropdownFormField<String>(
+                      label: 'Select Area',
+                      value: _selectedArea,
+                      items: const [],
+                      onChanged: (val) => setState(() => _selectedArea = val),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 16),
                 SizedBox(
@@ -139,6 +119,17 @@ class _CustomersViewState extends State<_CustomersView> {
                     separatorBuilder: (_, __) => const SizedBox(height: 8),
                     itemBuilder: (context, index) {
                       final customer = state.customers[index];
+                      String lineName = customer.lineId;
+                      String areaName = customer.areaId;
+                      final settingsState = context.read<SettingsBloc>().state;
+                      if (settingsState is SettingsLoaded) {
+                        final line = settingsState.lines.where((l) => l.id == customer.lineId).firstOrNull;
+                        if (line != null) lineName = line.name;
+                        
+                        final area = settingsState.areas.where((a) => a.id == customer.areaId).firstOrNull;
+                        if (area != null) areaName = area.name;
+                      }
+
                       return Card(
                         elevation: 0,
                         shape: RoundedRectangleBorder(
@@ -159,7 +150,7 @@ class _CustomersViewState extends State<_CustomersView> {
                             children: [
                               Text(customer.phone),
                               Text(
-                                '${customer.lineId} - ${customer.areaId}',
+                                '$lineName - $areaName',
                                 style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
                               ),
                             ],

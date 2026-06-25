@@ -20,6 +20,7 @@ import '../../features/collections/domain/usecases/add_collection_usecase.dart';
 import '../../features/collections/domain/usecases/get_daily_collections_usecase.dart';
 import '../../features/collections/presentation/bloc/collections_bloc.dart';
 import '../../features/customers/data/datasources/customer_remote_datasource.dart';
+import '../../features/customers/data/datasources/hasura_customer_remote_datasource.dart';
 import '../../features/customers/data/repositories/customer_repository_impl.dart';
 import '../../features/customers/domain/repositories/customer_repository.dart';
 import '../../features/customers/domain/usecases/add_customer_usecase.dart';
@@ -35,6 +36,7 @@ import '../../features/reports/presentation/bloc/report_bloc.dart';
 
 // Loans
 import '../../features/loans/data/datasources/loan_remote_datasource.dart';
+import '../../features/loans/data/datasources/hasura_loan_remote_datasource.dart';
 import '../../features/loans/data/repositories/loan_repository_impl.dart';
 import '../../features/loans/domain/repositories/loan_repository.dart';
 import '../../features/collections/data/datasources/cashout_remote_datasource.dart';
@@ -114,7 +116,7 @@ Future<void> initDependencies() async {
   );
   // ─── Customers: Data Sources ──────────────────────────────────────────────
   sl.registerLazySingleton<CustomerRemoteDataSource>(
-    () => MockCustomerRemoteDataSourceImpl(),
+    () => HasuraCustomerRemoteDataSourceImpl(client: sl<GraphQLClient>()),
   );
 
   // ─── Customers: Repository ────────────────────────────────────────────────
@@ -230,7 +232,9 @@ Future<void> initDependencies() async {
   // ---------------------------------------------------------------------------
   // LOANS FEATURE
   // ---------------------------------------------------------------------------
-  sl.registerLazySingleton(() => LoanRemoteDataSource());
+  sl.registerLazySingleton<LoanRemoteDataSource>(
+    () => HasuraLoanRemoteDataSourceImpl(client: sl<GraphQLClient>()),
+  );
   sl.registerLazySingleton<LoanRepository>(
     () => LoanRepositoryImpl(remoteDataSource: sl()),
   );

@@ -119,7 +119,7 @@ class _RegisterViewState extends State<_RegisterView> {
                 const SizedBox(height: 16),
                 const Center(
                   child: Text(
-                    'VASOOL DRIVE',
+                    'SRI VINAYAGA FINANCE',
                     style: TextStyle(
                       fontSize: 20,
                       color: Colors.lightBlue,

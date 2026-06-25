@@ -54,15 +54,16 @@ class _CustomDropdownFormFieldState<T> extends State<CustomDropdownFormField<T>>
 
         if (state is SettingsLoaded) {
           if (widget.label == 'Line' || widget.label == 'Select Line') {
-            final lines = state.lines.map((e) => e.name).toList();
-            displayItems = lines.map((line) => DropdownMenuItem(value: line as T, child: Text(line))).toList();
-            if (displayValue != null && !lines.contains(displayValue as String)) {
+            final lines = state.lines;
+            displayItems = lines.map((line) => DropdownMenuItem(value: line.id as T, child: Text(line.name))).toList();
+            // We need to check if displayValue is one of the valid IDs.
+            if (displayValue != null && !lines.any((l) => l.id == displayValue)) {
               displayValue = null;
             }
           } else if (widget.label == 'Area' || widget.label == 'Select Area') {
-            final areas = state.areas.map((e) => e.name).toList();
-            displayItems = areas.map((area) => DropdownMenuItem(value: area as T, child: Text(area))).toList();
-            if (displayValue != null && !areas.contains(displayValue as String)) {
+            final areas = state.areas;
+            displayItems = areas.map((area) => DropdownMenuItem(value: area.id as T, child: Text(area.name))).toList();
+            if (displayValue != null && !areas.any((a) => a.id == displayValue)) {
               displayValue = null;
             }
           }
@@ -87,7 +88,12 @@ class _CustomDropdownFormFieldState<T> extends State<CustomDropdownFormField<T>>
           isExpanded: widget.isExpanded,
           value: displayValue,
           items: displayItems,
-          onChanged: widget.onChanged,
+          onChanged: (val) {
+            _focusNode.unfocus();
+            if (widget.onChanged != null) {
+              widget.onChanged!(val);
+            }
+          },
         );
       },
     );

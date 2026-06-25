@@ -16,6 +16,7 @@ import 'features/collections/presentation/bloc/cashout_bloc.dart';
 import 'features/auth/presentation/pages/forgot_password_page.dart';
 import 'features/auth/presentation/pages/login_page.dart';
 import 'features/auth/presentation/pages/register_page.dart';
+import 'features/splash/presentation/pages/splash_page.dart';
 import 'features/collections/presentation/pages/cashout_page.dart';
 import 'features/collections/presentation/pages/collections_page.dart';
 import 'features/collections/presentation/pages/reminders_notes_page.dart';
@@ -81,13 +82,17 @@ final _sectionENavigatorKey = GlobalKey<NavigatorState>();
 
 final GoRouter _router = GoRouter(
   navigatorKey: _rootNavigatorKey,
-  initialLocation: '/login',
+  initialLocation: '/',
   redirect: (context, state) {
     // Auth redirect is handled by BlocListener in LoginPage.
     // Router stays simple — no global redirect needed with BLoC.
     return null;
   },
   routes: <RouteBase>[
+    GoRoute(
+      path: '/',
+      builder: (context, state) => const SplashPage(),
+    ),
     GoRoute(
       path: '/login',
       builder: (context, state) => const LoginPage(),
@@ -375,7 +380,7 @@ class MyApp extends StatelessWidget {
               }
             },
             child: MaterialApp.router(
-              title: 'Vasool Drive',
+              title: 'Sri Vinayaga Finance',
               theme: AppTheme.getTheme(themeName),
               routerConfig: _router,
               debugShowCheckedModeBanner: false,

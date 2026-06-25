@@ -14,7 +14,7 @@ class AppConfig {
       'wss://api.vasool.app/v1/graphql'; // Update when server is ready
 
   // ─── App ──────────────────────────────────────────────────────────────────
-  static const String appName = 'Vasool Drive';
+  static const String appName = 'Sri Vinayaga Finance';
   static const String appVersion = '1.0.0';
 
   // ─── Storage Keys ─────────────────────────────────────────────────────────

@@ -76,13 +76,21 @@ class _LoginViewState extends State<_LoginView> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   const SizedBox(height: 48),
-                  const Center(
-                    child: Icon(Icons.receipt_long, size: 80, color: Colors.orange),
+                  Center(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(60),
+                      child: const Image(
+                        image: AssetImage('assets/images/logo.jpeg'),
+                        height: 120,
+                        width: 120,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 16),
                   const Center(
                     child: Text(
-                      'VASOOL DRIVE',
+                      'SRI VINAYAGA FINANCE',
                       style: TextStyle(
                         fontSize: 24,
                         color: Colors.lightBlue,
