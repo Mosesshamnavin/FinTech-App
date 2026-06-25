@@ -103,7 +103,7 @@ class _CustomerDetailView extends StatelessWidget {
                   children: [
                     const FaIcon(FontAwesomeIcons.locationDot, size: 14, color: Colors.grey),
                     const SizedBox(width: 8),
-                    Text('\$lineName - \$areaName', style: const TextStyle(color: Colors.grey)),
+                    Text('$lineName - $areaName', style: const TextStyle(color: Colors.grey)),
                   ],
                 ),
               ],
@@ -149,7 +149,7 @@ class _CustomerDetailView extends StatelessWidget {
                         children: [
                           Expanded(
                             child: Text(
-                              'Total: \${formatter.format(loan.totalAmount)}',
+                              'Total: ${formatter.format(loan.totalAmount)}',
                               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -199,7 +199,7 @@ class _CustomerDetailView extends StatelessWidget {
                         ],
                       ),
                       const SizedBox(height: 16),
-                      Text('Progress (\${(progress * 100).toInt()}%)', style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                      Text('Progress (${(progress * 100).toInt()}%)', style: const TextStyle(fontSize: 12, color: Colors.grey)),
                       const SizedBox(height: 4),
                       LinearProgressIndicator(
                         value: progress,
@@ -209,10 +209,10 @@ class _CustomerDetailView extends StatelessWidget {
                       ),
                       const SizedBox(height: 8),
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('Paid: \${formatter.format(loan.totalAmount - loan.outstandingBalance)}', style: const TextStyle(fontSize: 12, color: Colors.green)),
-                          Text('Balance: \${formatter.format(loan.outstandingBalance)}', style: const TextStyle(fontSize: 12, color: Colors.orange)),
+                          Expanded(child: Text('Paid: ${formatter.format(loan.totalAmount - loan.outstandingBalance)}', style: const TextStyle(fontSize: 12, color: Colors.green))),
+                          const SizedBox(width: 8),
+                          Expanded(child: Text('Balance: ${formatter.format(loan.outstandingBalance)}', style: const TextStyle(fontSize: 12, color: Colors.orange), textAlign: TextAlign.right)),
                         ],
                       ),
                     ],
