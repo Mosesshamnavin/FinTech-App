@@ -143,20 +143,22 @@ class _CollectionsViewState extends State<_CollectionsView> {
                 const SizedBox(height: 16),
                 BlocBuilder<SettingsBloc, SettingsState>(
                   builder: (context, state) {
-                    List<String> lines = [];
-                    List<String> areas = [];
+                    List<DropdownMenuItem<String>> lineItems = [];
+                    List<DropdownMenuItem<String>> areaItems = [];
                     if (state is SettingsLoaded) {
-                      lines = state.lines.map((e) => e.name).toList();
-                      areas = state.areas.map((e) => e.name).toList();
+                      lineItems = state.lines.map((e) {
+                        return DropdownMenuItem<String>(value: e.id, child: Text(e.name));
+                      }).toList();
+                      areaItems = state.areas.map((e) {
+                        return DropdownMenuItem<String>(value: e.id, child: Text(e.name));
+                      }).toList();
                     }
                     return Column(
                       children: [
                         DropdownButtonFormField<String>(
                           value: _selectedLine,
                           decoration: const InputDecoration(hintText: 'Line'),
-                          items: lines.map((String value) {
-                            return DropdownMenuItem<String>(value: value, child: Text(value));
-                          }).toList(),
+                          items: lineItems,
                           onChanged: (val) => setState(() => _selectedLine = val),
                           icon: Row(
                             mainAxisSize: MainAxisSize.min,
@@ -176,9 +178,7 @@ class _CollectionsViewState extends State<_CollectionsView> {
                         DropdownButtonFormField<String>(
                           value: _selectedArea,
                           decoration: const InputDecoration(hintText: 'Area'),
-                          items: areas.map((String value) {
-                            return DropdownMenuItem<String>(value: value, child: Text(value));
-                          }).toList(),
+                          items: areaItems,
                           onChanged: (val) => setState(() => _selectedArea = val),
                           icon: Row(
                             mainAxisSize: MainAxisSize.min,
@@ -199,12 +199,34 @@ class _CollectionsViewState extends State<_CollectionsView> {
                   },
                 ),
                 const SizedBox(height: 16),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: _onSubmit,
-                    child: const Text('SUBMIT'),
-                  ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () {
+                          setState(() {
+                            _selectedLine = null;
+                            _selectedArea = null;
+                          });
+                          // Optionally also trigger a reload immediately, 
+                          // but usually clear just clears the form
+                          _onSubmit();
+                        },
+                        style: OutlinedButton.styleFrom(
+                          side: const BorderSide(color: Colors.red),
+                          foregroundColor: Colors.red,
+                        ),
+                        child: const Text('CLEAR'),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: _onSubmit,
+                        child: const Text('SUBMIT'),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -243,6 +265,19 @@ class _CollectionsViewState extends State<_CollectionsView> {
                       final customer = item.customer;
                       final collection = item.collection;
 
+                      // Find names from settings state if available
+                      String lineName = customer.lineId;
+                      String areaName = customer.areaId;
+                      
+                      final settingsState = context.read<SettingsBloc>().state;
+                      if (settingsState is SettingsLoaded) {
+                        final line = settingsState.lines.where((l) => l.id == customer.lineId).firstOrNull;
+                        if (line != null) lineName = line.name;
+                        
+                        final area = settingsState.areas.where((a) => a.id == customer.areaId).firstOrNull;
+                        if (area != null) areaName = area.name;
+                      }
+
                       return Card(
                         elevation: 0,
                         shape: RoundedRectangleBorder(
@@ -265,7 +300,7 @@ class _CollectionsViewState extends State<_CollectionsView> {
                             customer.name,
                             style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
-                          subtitle: Text('${customer.lineId} - ${customer.areaId}'),
+                          subtitle: Text('$lineName - $areaName'),
                           trailing: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             crossAxisAlignment: CrossAxisAlignment.end,

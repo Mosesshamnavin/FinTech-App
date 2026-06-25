@@ -58,6 +58,14 @@ class AppTheme {
             padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
           ),
         ),
+        outlinedButtonTheme: OutlinedButtonThemeData(
+          style: OutlinedButton.styleFrom(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(4),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+          ),
+        ),
         inputDecorationTheme: InputDecorationTheme(
           border: const UnderlineInputBorder(),
           enabledBorder: const UnderlineInputBorder(
@@ -100,6 +108,14 @@ class AppTheme {
         style: ElevatedButton.styleFrom(
           backgroundColor: seedColor,
           foregroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(4),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(4),
           ),

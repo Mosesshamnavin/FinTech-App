@@ -14,6 +14,7 @@ import '../../features/auth/domain/usecases/logout_usecase.dart';
 import '../../features/auth/domain/usecases/register_usecase.dart';
 import '../../features/auth/presentation/bloc/auth_bloc.dart';
 import '../../features/collections/data/datasources/collection_remote_datasource.dart';
+import '../../features/collections/data/datasources/hasura_collection_remote_datasource.dart';
 import '../../features/collections/data/repositories/collection_repository_impl.dart';
 import '../../features/collections/domain/repositories/collection_repository.dart';
 import '../../features/collections/domain/usecases/add_collection_usecase.dart';
@@ -138,7 +139,7 @@ Future<void> initDependencies() async {
 
   // ─── Collections: Data Sources ────────────────────────────────────────────
   sl.registerLazySingleton<CollectionRemoteDataSource>(
-    () => MockCollectionRemoteDataSourceImpl(),
+    () => HasuraCollectionRemoteDataSourceImpl(client: sl<GraphQLClient>()),
   );
 
   sl.registerLazySingleton(() => CashOutRemoteDataSource());

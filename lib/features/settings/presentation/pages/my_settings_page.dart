@@ -54,7 +54,6 @@ class _MySettingsPageState extends State<MySettingsPage> {
           _buildSettingsSection(),
           _buildOtherSettingsSection(),
           _buildProfileSettingsSection(),
-          _buildThemeSection(),
           _buildLocalSettingSection(),
         ],
       ),
@@ -200,44 +199,7 @@ class _MySettingsPageState extends State<MySettingsPage> {
     return Colors.blue;
   }
 
-  Widget _buildThemeSection() {
-    return ExpansionTile(
-      title: const Text('Theme', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-      children: [
-        Container(
-          child: Column(
-            children: [
-              for (String theme in ['Orange', 'Green', 'Blue', 'Dark-Blue', 'Dark-Green', 'Dark-Orange'])
-                RadioListTile<String>(
-                  title: Text(theme),
-                  value: theme,
-                  groupValue: selectedTheme,
-                  onChanged: (v) {
-                    setState(() => selectedTheme = v!);
-                    AppTheme.themeNotifier.value = v!;
-                  },
-                  activeColor: _getThemeColor(theme),
-                ),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('${selectedTheme.replaceAll("-", " ")} theme saved!'), 
-                      behavior: SnackBarBehavior.floating,
-                      duration: const Duration(seconds: 2),
-                    ),
-                  );
-                }, 
-                child: const Text('SUBMIT')
-              ),
-              const SizedBox(height: 24),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
+
 
   Widget _buildLocalSettingSection() {
     return ExpansionTile(

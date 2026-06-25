@@ -24,10 +24,8 @@ class HasuraCustomerRemoteDataSourceImpl implements CustomerRemoteDataSource {
           id
           name
           phone
-          address
           line_id
           area_id
-          is_active
         }
       }
     ''';
@@ -53,13 +51,14 @@ class HasuraCustomerRemoteDataSourceImpl implements CustomerRemoteDataSource {
         id: json['id'] as String,
         name: json['name'] as String,
         phone: json['phone'] as String,
-        address: json['address'] as String? ?? '',
+        address: '', // Default since it doesn't exist in DB
         lineId: json['line_id'] as String,
         areaId: json['area_id'] as String,
-        isActive: json['is_active'] as bool? ?? true,
+        isActive: true, // Default
       )).toList();
       
     } catch (e) {
+      if (e is ServerException) rethrow;
       throw ServerException(e.toString());
     }
   }
@@ -68,7 +67,7 @@ class HasuraCustomerRemoteDataSourceImpl implements CustomerRemoteDataSource {
   Future<CustomerModel> addCustomer({
     required String name,
     required String phone,
-    required String address,
+    required String address, // Keeping parameter so UI doesn't break, but ignoring it
     required String lineId,
     required String areaId,
   }) async {
@@ -78,10 +77,8 @@ class HasuraCustomerRemoteDataSourceImpl implements CustomerRemoteDataSource {
           id
           name
           phone
-          address
           line_id
           area_id
-          is_active
         }
       }
     ''';
@@ -92,10 +89,8 @@ class HasuraCustomerRemoteDataSourceImpl implements CustomerRemoteDataSource {
         'object': {
           'name': name,
           'phone': phone,
-          'address': address,
           'line_id': lineId,
           'area_id': areaId,
-          'is_active': true,
         }
       },
     );
@@ -117,10 +112,10 @@ class HasuraCustomerRemoteDataSourceImpl implements CustomerRemoteDataSource {
         id: data['id'] as String,
         name: data['name'] as String,
         phone: data['phone'] as String,
-        address: data['address'] as String? ?? '',
+        address: '', // default
         lineId: data['line_id'] as String,
         areaId: data['area_id'] as String,
-        isActive: data['is_active'] as bool? ?? true,
+        isActive: true, // default
       );
     } catch (e) {
       if (e is ServerException) rethrow;

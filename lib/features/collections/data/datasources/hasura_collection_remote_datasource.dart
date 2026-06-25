@@ -1,0 +1,142 @@
+import 'package:graphql_flutter/graphql_flutter.dart' hide ServerException;
+import '../../../../core/error/exceptions.dart';
+import '../models/collection_model.dart';
+import 'collection_remote_datasource.dart';
+
+class HasuraCollectionRemoteDataSourceImpl implements CollectionRemoteDataSource {
+  final GraphQLClient client;
+
+  HasuraCollectionRemoteDataSourceImpl({required this.client});
+
+  String _formatDateForHasura(String dateStr) {
+    // Expects "dd/MM/yyyy"
+    try {
+      final parts = dateStr.split('/');
+      if (parts.length == 3) {
+        final year = parts[2];
+        final month = parts[1];
+        final day = parts[0];
+        // Ensure padded
+        return year + "-" + month + "-" + day + "T00:00:00.000Z";
+      }
+    } catch (_) {}
+    return dateStr;
+  }
+
+  String _formatDateFromHasura(String timestampStr) {
+    try {
+      final dt = DateTime.parse(timestampStr);
+      return dt.day.toString().padLeft(2, '0') + '/' + dt.month.toString().padLeft(2, '0') + '/' + dt.year.toString();
+    } catch (_) {}
+    return timestampStr;
+  }
+
+  @override
+  Future<List<CollectionModel>> getCollectionsByDate(String date) async {
+    const String query = """
+      query getCollectionsByDate(\$date: timestamp!) {
+        collections(where: {date: {_eq: \$date}}) {
+          id
+          customer_id
+          amount
+          date
+          notes
+          status
+        }
+      }
+    """;
+
+    final hasuraDate = _formatDateForHasura(date);
+
+    final QueryOptions options = QueryOptions(
+      document: gql(query),
+      variables: {'date': hasuraDate},
+      fetchPolicy: FetchPolicy.networkOnly,
+    );
+
+    final QueryResult result = await client.query(options);
+
+    if (result.hasException) {
+      throw ServerException(result.exception.toString());
+    }
+
+    final List data = result.data?['collections'] ?? [];
+    return data.map((json) {
+      return CollectionModel(
+        id: json['id'],
+        customerId: json['customer_id'],
+        amount: (json['amount'] as num).toDouble(),
+        date: _formatDateFromHasura(json['date']),
+        notes: json['notes'],
+        status: json['status'],
+      );
+    }).toList();
+  }
+
+  @override
+  Future<CollectionModel> addCollection({
+    required String customerId,
+    required double amount,
+    required String date,
+    String? notes,
+    required String status,
+  }) async {
+    const String mutation = """
+      mutation addCollection(
+        \$customer_id: uuid!,
+        \$amount: numeric!,
+        \$date: timestamp!,
+        \$notes: String,
+        \$status: String!
+      ) {
+        insert_collections_one(object: {
+          customer_id: \$customer_id,
+          amount: \$amount,
+          date: \$date,
+          notes: \$notes,
+          status: \$status
+        }) {
+          id
+          customer_id
+          amount
+          date
+          notes
+          status
+        }
+      }
+    """;
+
+    final hasuraDate = _formatDateForHasura(date);
+
+    final MutationOptions options = MutationOptions(
+      document: gql(mutation),
+      variables: {
+        'customer_id': customerId,
+        'amount': amount,
+        'date': hasuraDate,
+        'notes': notes,
+        'status': status,
+      },
+    );
+
+    final QueryResult result = await client.mutate(options);
+
+    if (result.hasException) {
+      throw ServerException(result.exception.toString());
+    }
+
+    final data = result.data?['insert_collections_one'];
+    if (data == null) {
+      throw ServerException("Failed to insert collection record.");
+    }
+
+    return CollectionModel(
+      id: data['id'],
+      customerId: data['customer_id'],
+      amount: (data['amount'] as num).toDouble(),
+      date: _formatDateFromHasura(data['date']),
+      notes: data['notes'],
+      status: data['status'],
+    );
+  }
+}

@@ -83,12 +83,38 @@ class _CustomersViewState extends State<_CustomersView> {
                   ],
                 ),
                 const SizedBox(height: 16),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: _onFilterSubmitted,
-                    child: const Text('SUBMIT'),
-                  ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () {
+                          setState(() {
+                            _selectedLine = null;
+                            _selectedArea = null;
+                          });
+                          // Fetch all customers when cleared
+                          context.read<CustomersBloc>().add(const LoadCustomersRequested());
+                        },
+                        style: OutlinedButton.styleFrom(
+                          side: const BorderSide(color: Colors.red),
+                          foregroundColor: Colors.red,
+                        ),
+                        child: const Text('CLEAR'),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          context.read<CustomersBloc>().add(LoadCustomersRequested(
+                                lineId: _selectedLine,
+                                areaId: _selectedArea,
+                              ));
+                        },
+                        child: const Text('SUBMIT'),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -157,6 +183,9 @@ class _CustomersViewState extends State<_CustomersView> {
                           ),
                           isThreeLine: true,
                           trailing: const Icon(Icons.chevron_right),
+                          onTap: () {
+                            context.push('/customers/\${customer.id}', extra: customer);
+                          },
                         ),
                       );
                     },

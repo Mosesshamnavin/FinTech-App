@@ -20,6 +20,9 @@ import 'features/splash/presentation/pages/splash_page.dart';
 import 'features/collections/presentation/pages/cashout_page.dart';
 import 'features/collections/presentation/pages/collections_page.dart';
 import 'features/collections/presentation/pages/reminders_notes_page.dart';
+import 'features/customers/presentation/pages/customer_detail_page.dart';
+import 'features/customers/domain/entities/customer_entity.dart';
+import 'features/loans/presentation/pages/add_loan_page.dart';
 import 'features/customers/presentation/pages/add_customer_page.dart';
 import 'features/customers/presentation/pages/customers_page.dart';
 import 'features/expenses/presentation/pages/expenses_page.dart';
@@ -101,6 +104,7 @@ final GoRouter _router = GoRouter(
       path: '/register',
       builder: (context, state) => const RegisterPage(),
     ),
+
     GoRoute(
       path: '/forgot-password',
       builder: (context, state) => const ForgotPasswordPage(),
@@ -151,6 +155,20 @@ final GoRouter _router = GoRouter(
                 GoRoute(
                   path: 'add',
                   builder: (context, state) => const AddCustomerPage(),
+                ),
+                GoRoute(
+                  path: ':id',
+                  builder: (context, state) {
+                    final customer = state.extra as CustomerEntity;
+                    return CustomerDetailPage(customer: customer);
+                  },
+                ),
+                GoRoute(
+                  path: ':id/add-loan',
+                  builder: (context, state) {
+                    final customer = state.extra as CustomerEntity;
+                    return AddLoanPage(customer: customer);
+                  },
                 ),
               ],
             ),
@@ -376,7 +394,10 @@ class MyApp extends StatelessWidget {
             listener: (context, state) {
               // Handle session expiry or logout from anywhere in the app
               if (state is AuthUnauthenticated) {
-                _router.go('/login');
+                // Do not interrupt SplashPage
+                if (_router.routerDelegate.currentConfiguration.uri.toString() != '/') {
+                  _router.go('/login');
+                }
               }
             },
             child: MaterialApp.router(
