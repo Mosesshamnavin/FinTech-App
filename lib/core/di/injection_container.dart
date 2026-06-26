@@ -53,6 +53,7 @@ import '../../features/loans/presentation/bloc/loans_bloc.dart';
 
 // Expenses
 import '../../features/expenses/data/datasources/expense_remote_datasource.dart';
+import '../../features/expenses/data/datasources/hasura_expense_remote_datasource.dart';
 import '../../features/expenses/data/repositories/expense_repository_impl.dart';
 import '../../features/expenses/domain/repositories/expense_repository.dart';
 import '../../features/expenses/domain/usecases/add_expense_usecase.dart';
@@ -167,8 +168,12 @@ Future<void> initDependencies() async {
   sl.registerFactory(() => SettingsBloc(
         getExpenseTypes: sl(),
         addExpenseType: sl(),
+        updateExpenseType: sl(),
+        deleteExpenseType: sl(),
         getInvestmentTypes: sl(),
         addInvestmentType: sl(),
+        updateInvestmentType: sl(),
+        deleteInvestmentType: sl(),
         getAreas: sl(),
         addArea: sl(),
         getLines: sl(),
@@ -177,8 +182,13 @@ Future<void> initDependencies() async {
 
   sl.registerLazySingleton(() => GetExpenseTypesUseCase(sl()));
   sl.registerLazySingleton(() => AddExpenseTypeUseCase(sl()));
+  sl.registerLazySingleton(() => UpdateExpenseTypeUseCase(sl()));
+  sl.registerLazySingleton(() => DeleteExpenseTypeUseCase(sl()));
+  
   sl.registerLazySingleton(() => GetInvestmentTypesUseCase(sl()));
   sl.registerLazySingleton(() => AddInvestmentTypeUseCase(sl()));
+  sl.registerLazySingleton(() => UpdateInvestmentTypeUseCase(sl()));
+  sl.registerLazySingleton(() => DeleteInvestmentTypeUseCase(sl()));
   sl.registerLazySingleton(() => GetAreasUseCase(sl()));
   sl.registerLazySingleton(() => AddAreaUseCase(sl()));
   sl.registerLazySingleton(() => GetLinesUseCase(sl()));
@@ -252,7 +262,9 @@ Future<void> initDependencies() async {
   // ---------------------------------------------------------------------------
   // EXPENSES FEATURE
   // ---------------------------------------------------------------------------
-  sl.registerLazySingleton(() => ExpenseRemoteDataSource());
+  sl.registerLazySingleton<ExpenseRemoteDataSource>(
+    () => HasuraExpenseRemoteDataSourceImpl(client: sl<GraphQLClient>()) as ExpenseRemoteDataSource,
+  );
   sl.registerLazySingleton<ExpenseRepository>(
     () => ExpenseRepositoryImpl(remoteDataSource: sl()),
   );

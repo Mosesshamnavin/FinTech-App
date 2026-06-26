@@ -23,6 +23,30 @@ class SettingsRepositoryImpl implements SettingsRepository {
   }
 
   @override
+  Future<Either<Failure, void>> updateExpenseType(ExpenseTypeEntity expenseType) async {
+    try {
+      await remoteDataSource.updateExpenseType(expenseType);
+      return const Right(null);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } catch (_) {
+      return Left(const ServerFailure());
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> deleteExpenseType(String id) async {
+    try {
+      await remoteDataSource.deleteExpenseType(id);
+      return const Right(null);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } catch (_) {
+      return Left(const ServerFailure());
+    }
+  }
+
+  @override
   Future<Either<Failure, List<ExpenseTypeEntity>>> getExpenseTypes() async {
     try {
       final result = await remoteDataSource.getExpenseTypes();
@@ -39,6 +63,30 @@ class SettingsRepositoryImpl implements SettingsRepository {
     try {
       final result = await remoteDataSource.addInvestmentType(investmentType);
       return Right(result);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } catch (_) {
+      return Left(const ServerFailure());
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> updateInvestmentType(InvestmentTypeEntity investmentType) async {
+    try {
+      await remoteDataSource.updateInvestmentType(investmentType);
+      return const Right(null);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } catch (_) {
+      return Left(const ServerFailure());
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> deleteInvestmentType(String id) async {
+    try {
+      await remoteDataSource.deleteInvestmentType(id);
+      return const Right(null);
     } on ServerException catch (e) {
       return Left(ServerFailure(e.message));
     } catch (_) {

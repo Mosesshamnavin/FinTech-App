@@ -46,7 +46,8 @@ class _ExpensesPageState extends State<ExpensesPage> with SingleTickerProviderSt
 
   void _loadData() {
     final fromFormat = DateFormat('dd/MM/yyyy').parse(_fromDateController.text);
-    final toFormat = DateFormat('dd/MM/yyyy').parse(_toDateController.text);
+    // Add 23h 59m 59s to the 'to' date to include all times on that day
+    final toFormat = DateFormat('dd/MM/yyyy').parse(_toDateController.text).add(const Duration(hours: 23, minutes: 59, seconds: 59));
     
     // Tab 0 = Expense (isInvestment = false)
     // Tab 1 = Investment (isInvestment = true)
@@ -324,7 +325,21 @@ class _ExpensesPageState extends State<ExpensesPage> with SingleTickerProviderSt
                               color: expense.isOnline ? Colors.blue : Colors.green,
                             ),
                           ),
-                          title: Text(expense.category, style: const TextStyle(fontWeight: FontWeight.bold)),
+                          title: BlocBuilder<SettingsBloc, SettingsState>(
+                            builder: (context, settingsState) {
+                              String categoryName = expense.category; // Fallback to UUID/String
+                              if (settingsState is SettingsLoaded) {
+                                if (expense.isInvestment) {
+                                  final match = settingsState.investmentTypes.where((e) => e.id == expense.category).toList();
+                                  if (match.isNotEmpty) categoryName = match.first.name;
+                                } else {
+                                  final match = settingsState.expenseTypes.where((e) => e.id == expense.category).toList();
+                                  if (match.isNotEmpty) categoryName = match.first.name;
+                                }
+                              }
+                              return Text(categoryName, style: const TextStyle(fontWeight: FontWeight.bold));
+                            },
+                          ),
                           subtitle: Text('${DateFormat('dd MMM yyyy').format(expense.date)} - ${expense.description}'),
                           trailing: Text('₹${expense.amount}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.red)),
                         );

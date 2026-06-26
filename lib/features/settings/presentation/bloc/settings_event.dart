@@ -9,9 +9,29 @@ class AddExpenseTypeSubmitted extends SettingsEvent {
   AddExpenseTypeSubmitted(this.expenseType);
 }
 
+class UpdateExpenseTypeSubmitted extends SettingsEvent {
+  final ExpenseTypeEntity expenseType;
+  UpdateExpenseTypeSubmitted(this.expenseType);
+}
+
+class DeleteExpenseTypeSubmitted extends SettingsEvent {
+  final String id;
+  DeleteExpenseTypeSubmitted(this.id);
+}
+
 class AddInvestmentTypeSubmitted extends SettingsEvent {
   final InvestmentTypeEntity investmentType;
   AddInvestmentTypeSubmitted(this.investmentType);
+}
+
+class UpdateInvestmentTypeSubmitted extends SettingsEvent {
+  final InvestmentTypeEntity investmentType;
+  UpdateInvestmentTypeSubmitted(this.investmentType);
+}
+
+class DeleteInvestmentTypeSubmitted extends SettingsEvent {
+  final String id;
+  DeleteInvestmentTypeSubmitted(this.id);
 }
 
 class AddAreaSubmitted extends SettingsEvent {

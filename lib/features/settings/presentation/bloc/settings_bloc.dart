@@ -7,9 +7,13 @@ import 'settings_state.dart';
 class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
   final GetExpenseTypesUseCase getExpenseTypes;
   final AddExpenseTypeUseCase addExpenseType;
+  final UpdateExpenseTypeUseCase updateExpenseType;
+  final DeleteExpenseTypeUseCase deleteExpenseType;
   
   final GetInvestmentTypesUseCase getInvestmentTypes;
   final AddInvestmentTypeUseCase addInvestmentType;
+  final UpdateInvestmentTypeUseCase updateInvestmentType;
+  final DeleteInvestmentTypeUseCase deleteInvestmentType;
   
   final GetAreasUseCase getAreas;
   final AddAreaUseCase addArea;
@@ -20,8 +24,12 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
   SettingsBloc({
     required this.getExpenseTypes,
     required this.addExpenseType,
+    required this.updateExpenseType,
+    required this.deleteExpenseType,
     required this.getInvestmentTypes,
     required this.addInvestmentType,
+    required this.updateInvestmentType,
+    required this.deleteInvestmentType,
     required this.getAreas,
     required this.addArea,
     required this.getLines,
@@ -29,7 +37,11 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
   }) : super(SettingsInitial()) {
     on<LoadSettingsRequested>(_onLoadSettings);
     on<AddExpenseTypeSubmitted>(_onAddExpenseType);
+    on<UpdateExpenseTypeSubmitted>(_onUpdateExpenseType);
+    on<DeleteExpenseTypeSubmitted>(_onDeleteExpenseType);
     on<AddInvestmentTypeSubmitted>(_onAddInvestmentType);
+    on<UpdateInvestmentTypeSubmitted>(_onUpdateInvestmentType);
+    on<DeleteInvestmentTypeSubmitted>(_onDeleteInvestmentType);
     on<AddAreaSubmitted>(_onAddArea);
     on<AddLineSubmitted>(_onAddLine);
   }
@@ -62,9 +74,33 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     add(LoadSettingsRequested());
   }
 
+  Future<void> _onUpdateExpenseType(UpdateExpenseTypeSubmitted event, Emitter<SettingsState> emit) async {
+    emit(SettingsLoading());
+    await updateExpenseType(event.expenseType);
+    add(LoadSettingsRequested());
+  }
+
+  Future<void> _onDeleteExpenseType(DeleteExpenseTypeSubmitted event, Emitter<SettingsState> emit) async {
+    emit(SettingsLoading());
+    await deleteExpenseType(event.id);
+    add(LoadSettingsRequested());
+  }
+
   Future<void> _onAddInvestmentType(AddInvestmentTypeSubmitted event, Emitter<SettingsState> emit) async {
     emit(SettingsLoading());
     await addInvestmentType(event.investmentType);
+    add(LoadSettingsRequested());
+  }
+
+  Future<void> _onUpdateInvestmentType(UpdateInvestmentTypeSubmitted event, Emitter<SettingsState> emit) async {
+    emit(SettingsLoading());
+    await updateInvestmentType(event.investmentType);
+    add(LoadSettingsRequested());
+  }
+
+  Future<void> _onDeleteInvestmentType(DeleteInvestmentTypeSubmitted event, Emitter<SettingsState> emit) async {
+    emit(SettingsLoading());
+    await deleteInvestmentType(event.id);
     add(LoadSettingsRequested());
   }
 

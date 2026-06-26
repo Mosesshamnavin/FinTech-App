@@ -12,6 +12,20 @@ class AddExpenseTypeUseCase extends UseCase<ExpenseTypeEntity, ExpenseTypeEntity
   Future<Either<Failure, ExpenseTypeEntity>> call(ExpenseTypeEntity params) async => repository.addExpenseType(params);
 }
 
+class UpdateExpenseTypeUseCase extends UseCase<void, ExpenseTypeEntity> {
+  final SettingsRepository repository;
+  UpdateExpenseTypeUseCase(this.repository);
+  @override
+  Future<Either<Failure, void>> call(ExpenseTypeEntity params) async => repository.updateExpenseType(params);
+}
+
+class DeleteExpenseTypeUseCase extends UseCase<void, String> {
+  final SettingsRepository repository;
+  DeleteExpenseTypeUseCase(this.repository);
+  @override
+  Future<Either<Failure, void>> call(String params) async => repository.deleteExpenseType(params);
+}
+
 class GetExpenseTypesUseCase extends UseCase<List<ExpenseTypeEntity>, NoParams> {
   final SettingsRepository repository;
   GetExpenseTypesUseCase(this.repository);
@@ -25,6 +39,20 @@ class AddInvestmentTypeUseCase extends UseCase<InvestmentTypeEntity, InvestmentT
   AddInvestmentTypeUseCase(this.repository);
   @override
   Future<Either<Failure, InvestmentTypeEntity>> call(InvestmentTypeEntity params) async => repository.addInvestmentType(params);
+}
+
+class UpdateInvestmentTypeUseCase extends UseCase<void, InvestmentTypeEntity> {
+  final SettingsRepository repository;
+  UpdateInvestmentTypeUseCase(this.repository);
+  @override
+  Future<Either<Failure, void>> call(InvestmentTypeEntity params) async => repository.updateInvestmentType(params);
+}
+
+class DeleteInvestmentTypeUseCase extends UseCase<void, String> {
+  final SettingsRepository repository;
+  DeleteInvestmentTypeUseCase(this.repository);
+  @override
+  Future<Either<Failure, void>> call(String params) async => repository.deleteInvestmentType(params);
 }
 
 class GetInvestmentTypesUseCase extends UseCase<List<InvestmentTypeEntity>, NoParams> {

@@ -186,6 +186,41 @@ class SettingsRemoteDataSource {
     )).toList();
   }
 
+  Future<void> updateExpenseType(ExpenseTypeEntity expenseType) async {
+    const String mutation = r'''
+      mutation UpdateExpenseType($id: uuid!, $name: String!, $isActive: Boolean!) {
+        update_expense_types_by_pk(pk_columns: {id: $id}, _set: {name: $name, is_active: $isActive}) {
+          id
+        }
+      }
+    ''';
+
+    final result = await client.mutate(
+      MutationOptions(
+        document: gql(mutation),
+        variables: {'id': expenseType.id, 'name': expenseType.name, 'isActive': expenseType.isActive},
+      ),
+    );
+
+    if (result.hasException) throw ServerException(result.exception.toString());
+  }
+
+  Future<void> deleteExpenseType(String id) async {
+    const String mutation = r'''
+      mutation DeleteExpenseType($id: uuid!) {
+        delete_expense_types_by_pk(id: $id) {
+          id
+        }
+      }
+    ''';
+
+    final result = await client.mutate(
+      MutationOptions(document: gql(mutation), variables: {'id': id}),
+    );
+
+    if (result.hasException) throw ServerException(result.exception.toString());
+  }
+
   Future<InvestmentTypeEntity> addInvestmentType(InvestmentTypeEntity investmentType) async {
     const String mutation = r'''
       mutation InsertInvestmentType($name: String!) {
@@ -225,5 +260,40 @@ class SettingsRemoteDataSource {
       name: e['name']?.toString() ?? '',
       isActive: e['is_active'] == true,
     )).toList();
+  }
+
+  Future<void> updateInvestmentType(InvestmentTypeEntity investmentType) async {
+    const String mutation = r'''
+      mutation UpdateInvestmentType($id: uuid!, $name: String!, $isActive: Boolean!) {
+        update_investment_types_by_pk(pk_columns: {id: $id}, _set: {name: $name, is_active: $isActive}) {
+          id
+        }
+      }
+    ''';
+
+    final result = await client.mutate(
+      MutationOptions(
+        document: gql(mutation),
+        variables: {'id': investmentType.id, 'name': investmentType.name, 'isActive': investmentType.isActive},
+      ),
+    );
+
+    if (result.hasException) throw ServerException(result.exception.toString());
+  }
+
+  Future<void> deleteInvestmentType(String id) async {
+    const String mutation = r'''
+      mutation DeleteInvestmentType($id: uuid!) {
+        delete_investment_types_by_pk(id: $id) {
+          id
+        }
+      }
+    ''';
+
+    final result = await client.mutate(
+      MutationOptions(document: gql(mutation), variables: {'id': id}),
+    );
+
+    if (result.hasException) throw ServerException(result.exception.toString());
   }
 }

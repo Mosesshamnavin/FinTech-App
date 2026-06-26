@@ -54,10 +54,23 @@ class _AddExpenseModalState extends State<AddExpenseModal> {
       return;
     }
 
+    // Look up the actual UUID of the category from SettingsBloc
+    String typeId = _selectedCategory; // Fallback to name just in case
+    final settingsState = context.read<SettingsBloc>().state;
+    if (settingsState is SettingsLoaded) {
+      if (widget.isInvestment) {
+        final match = settingsState.investmentTypes.where((e) => e.name == _selectedCategory).toList();
+        if (match.isNotEmpty) typeId = match.first.id;
+      } else {
+        final match = settingsState.expenseTypes.where((e) => e.name == _selectedCategory).toList();
+        if (match.isNotEmpty) typeId = match.first.id;
+      }
+    }
+
     final newExpense = ExpenseEntity(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      id: DateTime.now().millisecondsSinceEpoch.toString(), // Temporary ID until backend assigns one
       amount: amount,
-      category: _selectedCategory,
+      category: typeId, // Passing the UUID to the DataSource
       description: _descController.text,
       date: _selectedDate,
       isInvestment: widget.isInvestment,
