@@ -1,5 +1,9 @@
+import 'package:vasooldrive/features/settings/presentation/bloc/settings_state.dart';
+import 'package:vasooldrive/features/settings/presentation/bloc/settings_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
+
 import '../../../../core/di/injection_container.dart';
 import '../../../../core/widgets/custom_dropdown.dart';
 import '../bloc/report_bloc.dart';
@@ -27,12 +31,14 @@ class _DailySummaryView extends StatefulWidget {
 }
 
 class _DailySummaryViewState extends State<_DailySummaryView> {
+  bool _isFiltersExpanded = true;
+
   String? _lineType;
   String? _line;
   final TextEditingController _dateController = TextEditingController();
 
-  final List<String> _mockLineTypes = ['Type A', 'Type B'];
-  final List<String> _mockLines = ['Line 1', 'Line 2'];
+  
+  
 
   @override
   void initState() {
@@ -65,6 +71,7 @@ class _DailySummaryViewState extends State<_DailySummaryView> {
   }
 
   void _onSubmit() {
+    setState(() { _isFiltersExpanded = false; });
     context.read<ReportBloc>().add(
       LoadDailySummaryRequested(
         date: _dateController.text,
@@ -102,7 +109,19 @@ class _DailySummaryViewState extends State<_DailySummaryView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return BlocBuilder<SettingsBloc, SettingsState>(
+      builder: (context, settingsState) {
+        List<String> _mockLineTypes = [];
+        List<String> _mockLines = [];
+        List<String> _mockAreas = [];
+        
+        if (settingsState is SettingsLoaded) {
+          _mockLines = settingsState.lines.map((e) => e.name).toList();
+          _mockLineTypes = settingsState.lines.map((e) => e.type).toSet().toList(); // Unique types
+          _mockAreas = settingsState.areas.map((e) => e.name).toList();
+        }
+        
+        return Scaffold(
       appBar: AppBar(
         title: const Text('Daily Summary'),
         leading: IconButton(
@@ -168,6 +187,8 @@ class _DailySummaryViewState extends State<_DailySummaryView> {
           ),
         ],
       ),
+    );
+      },
     );
   }
 }

@@ -1,5 +1,9 @@
+import 'package:vasooldrive/features/settings/presentation/bloc/settings_state.dart';
+import 'package:vasooldrive/features/settings/presentation/bloc/settings_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
+
 import '../../../../core/di/injection_container.dart';
 import '../../../../core/widgets/custom_dropdown.dart';
 import '../bloc/report_bloc.dart';
@@ -27,6 +31,8 @@ class _NewCustomerSummaryView extends StatefulWidget {
 }
 
 class _NewCustomerSummaryViewState extends State<_NewCustomerSummaryView> {
+  bool _isFiltersExpanded = true;
+
   String? _lineType;
   String? _line;
   bool _lineAll = true;
@@ -34,8 +40,8 @@ class _NewCustomerSummaryViewState extends State<_NewCustomerSummaryView> {
   final TextEditingController _fromDateController = TextEditingController();
   final TextEditingController _toDateController = TextEditingController();
 
-  final List<String> _mockLineTypes = ['Type A', 'Type B'];
-  final List<String> _mockLines = ['Line 1', 'Line 2'];
+  
+  
 
   @override
   void initState() {
@@ -72,6 +78,7 @@ class _NewCustomerSummaryViewState extends State<_NewCustomerSummaryView> {
   }
 
   void _onSubmit() {
+    setState(() { _isFiltersExpanded = false; });
     context.read<ReportBloc>().add(
       LoadNewCustomerSummaryRequested(
         fromDate: _fromDateController.text,
@@ -105,7 +112,19 @@ class _NewCustomerSummaryViewState extends State<_NewCustomerSummaryView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return BlocBuilder<SettingsBloc, SettingsState>(
+      builder: (context, settingsState) {
+        List<String> _mockLineTypes = [];
+        List<String> _mockLines = [];
+        List<String> _mockAreas = [];
+        
+        if (settingsState is SettingsLoaded) {
+          _mockLines = settingsState.lines.map((e) => e.name).toList();
+          _mockLineTypes = settingsState.lines.map((e) => e.type).toSet().toList(); // Unique types
+          _mockAreas = settingsState.areas.map((e) => e.name).toList();
+        }
+        
+        return Scaffold(
       appBar: AppBar(
         title: const Text('New Customer Summary'),
         leading: IconButton(
@@ -115,7 +134,14 @@ class _NewCustomerSummaryViewState extends State<_NewCustomerSummaryView> {
       ),
       body: Column(
         children: [
-          SingleChildScrollView(
+          if (!_isFiltersExpanded)
+            ListTile(
+              title: const Text('Edit Filters', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.lightBlue)),
+              trailing: const Icon(Icons.edit, color: Colors.lightBlue, size: 20),
+              onTap: () => setState(() => _isFiltersExpanded = true),
+            ),
+          if (_isFiltersExpanded)
+            SingleChildScrollView(
             padding: const EdgeInsets.all(16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -189,6 +215,8 @@ class _NewCustomerSummaryViewState extends State<_NewCustomerSummaryView> {
           ),
         ],
       ),
+    );
+      },
     );
   }
 }

@@ -34,6 +34,7 @@ import '../../features/reports/domain/usecases/get_daily_summary_usecase.dart';
 import '../../features/reports/domain/usecases/get_line_summary_usecase.dart';
 import '../../features/reports/domain/usecases/get_new_customer_summary_usecase.dart';
 import '../../features/reports/presentation/bloc/report_bloc.dart';
+import '../../features/reports/data/datasources/hasura_report_remote_datasource.dart';
 
 // Loans
 import '../../features/loans/data/datasources/loan_remote_datasource.dart';
@@ -225,7 +226,7 @@ Future<void> initDependencies() async {
   // REPORTS FEATURE
   // ---------------------------------------------------------------------------
   sl.registerLazySingleton<ReportRemoteDataSource>(
-    () => MockReportRemoteDataSourceImpl(),
+    () => HasuraReportRemoteDataSourceImpl(client: sl<GraphQLClient>()),
   );
   sl.registerLazySingleton<ReportRepository>(
     () => ReportRepositoryImpl(remoteDataSource: sl()),
@@ -263,7 +264,10 @@ Future<void> initDependencies() async {
   // EXPENSES FEATURE
   // ---------------------------------------------------------------------------
   sl.registerLazySingleton<ExpenseRemoteDataSource>(
-    () => HasuraExpenseRemoteDataSourceImpl(client: sl<GraphQLClient>()) as ExpenseRemoteDataSource,
+    () => HasuraExpenseRemoteDataSourceImpl(
+      client: sl<GraphQLClient>(),
+      storageService: sl<StorageService>(),
+    ) as ExpenseRemoteDataSource,
   );
   sl.registerLazySingleton<ExpenseRepository>(
     () => ExpenseRepositoryImpl(remoteDataSource: sl()),

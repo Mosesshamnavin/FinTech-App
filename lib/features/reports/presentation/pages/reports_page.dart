@@ -1,3 +1,6 @@
+import 'package:vasooldrive/features/settings/presentation/bloc/settings_state.dart';
+import 'package:vasooldrive/features/settings/presentation/bloc/settings_bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -29,7 +32,19 @@ class ReportsPage extends StatelessWidget {
       'Ledger Report',
     ];
 
-    return Scaffold(
+    return BlocBuilder<SettingsBloc, SettingsState>(
+      builder: (context, settingsState) {
+        List<String> _mockLineTypes = [];
+        List<String> _mockLines = [];
+        List<String> _mockAreas = [];
+        
+        if (settingsState is SettingsLoaded) {
+          _mockLines = settingsState.lines.map((e) => e.name).toList();
+          _mockLineTypes = settingsState.lines.map((e) => e.type).toSet().toList(); // Unique types
+          _mockAreas = settingsState.areas.map((e) => e.name).toList();
+        }
+        
+        return Scaffold(
       appBar: AppBar(
         title: const Text('Reports'),
         elevation: 2,
@@ -93,6 +108,8 @@ class ReportsPage extends StatelessWidget {
           );
         },
       ),
+    );
+      },
     );
   }
 }

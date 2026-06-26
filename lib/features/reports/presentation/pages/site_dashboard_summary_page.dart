@@ -1,3 +1,6 @@
+import 'package:vasooldrive/features/settings/presentation/bloc/settings_state.dart';
+import 'package:vasooldrive/features/settings/presentation/bloc/settings_bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/widgets/custom_dropdown.dart';
 
@@ -9,12 +12,14 @@ class SiteDashboardSummaryPage extends StatefulWidget {
 }
 
 class _SiteDashboardSummaryPageState extends State<SiteDashboardSummaryPage> {
+  bool _isFiltersExpanded = true;
+
   String? _lineType;
   
   final TextEditingController _fromDateController = TextEditingController();
   final TextEditingController _toDateController = TextEditingController();
 
-  final List<String> _mockLineTypes = ['Type A', 'Type B'];
+  
 
   @override
   void initState() {
@@ -135,7 +140,19 @@ class _SiteDashboardSummaryPageState extends State<SiteDashboardSummaryPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return BlocBuilder<SettingsBloc, SettingsState>(
+      builder: (context, settingsState) {
+        List<String> _mockLineTypes = [];
+        List<String> _mockLines = [];
+        List<String> _mockAreas = [];
+        
+        if (settingsState is SettingsLoaded) {
+          _mockLines = settingsState.lines.map((e) => e.name).toList();
+          _mockLineTypes = settingsState.lines.map((e) => e.type).toSet().toList(); // Unique types
+          _mockAreas = settingsState.areas.map((e) => e.name).toList();
+        }
+        
+        return Scaffold(
       appBar: AppBar(
         title: const Text('Site Dashboard Summary'),
         leading: IconButton(
@@ -180,6 +197,8 @@ class _SiteDashboardSummaryPageState extends State<SiteDashboardSummaryPage> {
           ],
         ),
       ),
+    );
+      },
     );
   }
 }

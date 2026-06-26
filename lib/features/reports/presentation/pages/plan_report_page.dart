@@ -1,3 +1,6 @@
+import 'package:vasooldrive/features/settings/presentation/bloc/settings_state.dart';
+import 'package:vasooldrive/features/settings/presentation/bloc/settings_bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/widgets/custom_dropdown.dart';
 
@@ -9,6 +12,8 @@ class PlanReportPage extends StatefulWidget {
 }
 
 class _PlanReportPageState extends State<PlanReportPage> {
+  bool _isFiltersExpanded = true;
+
   // Common state
   String? _dateLineType;
   String? _dateLine;

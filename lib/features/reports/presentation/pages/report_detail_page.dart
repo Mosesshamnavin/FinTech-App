@@ -1,3 +1,6 @@
+import 'package:vasooldrive/features/settings/presentation/bloc/settings_state.dart';
+import 'package:vasooldrive/features/settings/presentation/bloc/settings_bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
@@ -11,6 +14,8 @@ class ReportDetailPage extends StatefulWidget {
 }
 
 class _ReportDetailPageState extends State<ReportDetailPage> {
+  bool _isFiltersExpanded = true;
+
   final TextEditingController _dateController = TextEditingController(text: '16/06/2026');
   String _selectedArea = 'All';
   String _selectedLine = 'All';

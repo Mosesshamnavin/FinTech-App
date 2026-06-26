@@ -1,3 +1,6 @@
+import 'package:vasooldrive/features/settings/presentation/bloc/settings_state.dart';
+import 'package:vasooldrive/features/settings/presentation/bloc/settings_bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/widgets/custom_dropdown.dart';
 
@@ -9,6 +12,8 @@ class LedgerReportPage extends StatefulWidget {
 }
 
 class _LedgerReportPageState extends State<LedgerReportPage> {
+  bool _isFiltersExpanded = true;
+
   String? _lineType;
   String? _line;
   String _orientation = 'Portrait';
@@ -16,8 +21,8 @@ class _LedgerReportPageState extends State<LedgerReportPage> {
   final TextEditingController _fromDateController = TextEditingController();
   final TextEditingController _toDateController = TextEditingController();
 
-  final List<String> _mockLineTypes = ['Type A', 'Type B'];
-  final List<String> _mockLines = ['Line 1', 'Line 2'];
+  
+  
 
   @override
   void initState() {
@@ -104,7 +109,19 @@ class _LedgerReportPageState extends State<LedgerReportPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return BlocBuilder<SettingsBloc, SettingsState>(
+      builder: (context, settingsState) {
+        List<String> _mockLineTypes = [];
+        List<String> _mockLines = [];
+        List<String> _mockAreas = [];
+        
+        if (settingsState is SettingsLoaded) {
+          _mockLines = settingsState.lines.map((e) => e.name).toList();
+          _mockLineTypes = settingsState.lines.map((e) => e.type).toSet().toList(); // Unique types
+          _mockAreas = settingsState.areas.map((e) => e.name).toList();
+        }
+        
+        return Scaffold(
       appBar: AppBar(
         title: const Text('Ledger Report'),
         leading: IconButton(
@@ -225,6 +242,8 @@ class _LedgerReportPageState extends State<LedgerReportPage> {
           ],
         ),
       ),
+    );
+      },
     );
   }
 }
