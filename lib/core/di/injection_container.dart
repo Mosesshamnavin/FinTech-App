@@ -73,15 +73,14 @@ final sl = GetIt.instance;
 
 Future<void> initDependencies() async {
   // ─── Core Services ────────────────────────────────────────────────────────
-  sl.registerLazySingleton(() => GraphQLService());
-  sl.registerLazySingleton<GraphQLClient>(() => sl<GraphQLService>().client);
-
-  // ─── External ────────────────────────────────────────────────────────────
+  // StorageService must be registered before GraphQLService so JWT can be read
   final sharedPreferences = await SharedPreferences.getInstance();
   sl.registerLazySingleton(() => sharedPreferences);
-
-  // ─── Core Services ────────────────────────────────────────────────────────
   sl.registerLazySingleton(() => StorageService(sl()));
+
+  // GraphQLService now reads JWT from StorageService dynamically per request
+  sl.registerLazySingleton(() => GraphQLService(storageService: sl<StorageService>()));
+  sl.registerLazySingleton<GraphQLClient>(() => sl<GraphQLService>().client);
 
   // ─── Auth: Data Sources ───────────────────────────────────────────────────
   sl.registerLazySingleton<AuthLocalDataSource>(

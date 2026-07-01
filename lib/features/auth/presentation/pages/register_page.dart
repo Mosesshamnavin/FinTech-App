@@ -50,12 +50,12 @@ class _RegisterViewState extends State<_RegisterView> {
     if (_formKey.currentState!.validate()) {
       context.read<AuthBloc>().add(
             AuthRegisterSubmitted(
-              name: _nameController.text,
-              username: _usernameController.text,
+              name: _nameController.text.trim(),
+              username: _usernameController.text.trim().toLowerCase(),
               password: _passwordController.text,
               confirmPassword: _confirmPasswordController.text,
-              email: _emailController.text,
-              mobile: _mobileController.text,
+              email: _emailController.text.trim(),
+              mobile: _mobileController.text.trim(),
             ),
           );
     }
@@ -139,6 +139,7 @@ class _RegisterViewState extends State<_RegisterView> {
                   validator: (val) {
                     if (val == null || val.trim().isEmpty) return 'Please enter a username';
                     if (val.contains(' ')) return 'Username cannot contain spaces';
+                    if (val != val.toLowerCase()) return 'Username must be in lowercase only';
                     return null;
                   },
                 ),

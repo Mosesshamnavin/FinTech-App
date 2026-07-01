@@ -1,3 +1,4 @@
+import 'package:dart_jsonwebtoken/dart_jsonwebtoken.dart';
 import 'package:graphql_flutter/graphql_flutter.dart' hide ServerException;
 import '../../../../core/error/exceptions.dart';
 import '../models/user_model.dart';
@@ -31,7 +32,29 @@ abstract class AuthRemoteDataSource {
 class HasuraAuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   final GraphQLClient client;
 
+  // Must match HASURA_GRAPHQL_JWT_SECRET configured on the server
+  static const String _jwtSecret = 'vasool-drive-jwt-secret-key-minimum-32-chars!!!';
+
   HasuraAuthRemoteDataSourceImpl({required this.client});
+
+  /// Generates a Hasura-compatible JWT for the given user
+  String _generateJwt({required String userId, required String role}) {
+    final now = DateTime.now();
+    final jwt = JWT(
+      {
+        'sub': userId,
+        // Set iat 60s in the past to account for clock differences between device and server
+        'iat': now.subtract(const Duration(seconds: 60)).millisecondsSinceEpoch ~/ 1000,
+        'exp': now.add(const Duration(days: 30)).millisecondsSinceEpoch ~/ 1000,
+        'https://hasura.io/jwt/claims': {
+          'x-hasura-allowed-roles': [role],
+          'x-hasura-default-role': role,
+          'x-hasura-user-id': userId,
+        },
+      },
+    );
+    return jwt.sign(SecretKey(_jwtSecret));
+  }
 
   @override
   Future<UserModel> login({
@@ -71,13 +94,17 @@ class HasuraAuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     }
 
     final user = usersData.first;
+    final userId = user['id'].toString();
+    final role = user['role'].toString();
+    final token = _generateJwt(userId: userId, role: role);
+
     return UserModel(
-      id: user['id'].toString(),
+      id: userId,
       username: user['username'].toString(),
       name: user['name']?.toString() ?? user['username'].toString(),
       email: user['email'].toString(),
-      role: user['role'].toString(),
-      token: 'mock-jwt-token', // You can replace this with a real JWT if you setup an Auth server later
+      role: role,
+      token: token,
     );
   }
 
@@ -155,13 +182,17 @@ class HasuraAuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       throw const ServerException('Failed to create user. Please try again.');
     }
 
+    final userId = insertData['id'].toString();
+    final role = insertData['role'].toString();
+    final token = _generateJwt(userId: userId, role: role);
+
     return UserModel(
-      id: insertData['id'].toString(),
+      id: userId,
       username: username,
       name: name,
       email: email,
-      role: insertData['role'].toString(),
-      token: 'mock-jwt-token',
+      role: role,
+      token: token,
     );
   }
 

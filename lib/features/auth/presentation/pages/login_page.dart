@@ -40,7 +40,7 @@ class _LoginViewState extends State<_LoginView> {
     if (_formKey.currentState!.validate()) {
       context.read<AuthBloc>().add(
             AuthLoginSubmitted(
-              username: _usernameController.text,
+              username: _usernameController.text.trim().toLowerCase(),
               password: _passwordController.text,
             ),
           );
