@@ -43,6 +43,13 @@ class _CollectionsViewState extends State<_CollectionsView> {
     // Default to today
     final now = DateTime.now();
     _dateController.text = "${now.day.toString().padLeft(2, '0')}/${now.month.toString().padLeft(2, '0')}/${now.year}";
+    
+    // Auto-load collections on startup
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _onSubmit();
+      }
+    });
   }
 
   @override
@@ -266,8 +273,8 @@ class _CollectionsViewState extends State<_CollectionsView> {
                       final collection = item.collection;
 
                       // Find names from settings state if available
-                      String lineName = customer.lineId;
-                      String areaName = customer.areaId;
+                      String lineName = 'Unknown Line';
+                      String areaName = 'Unknown Area';
                       
                       final settingsState = context.read<SettingsBloc>().state;
                       if (settingsState is SettingsLoaded) {

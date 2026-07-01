@@ -113,33 +113,32 @@ class _AddCustomerViewState extends State<_AddCustomerView> {
               const SizedBox(height: 16),
               BlocBuilder<SettingsBloc, SettingsState>(
                 builder: (context, state) {
-                  List<String> lines = [];
-                  List<String> areas = [];
                   if (state is SettingsLoaded) {
-                    lines = state.lines.map((e) => e.name).toList();
-                    areas = state.areas.map((e) => e.name).toList();
+                    final lines = state.lines;
+                    final areas = state.areas;
+                    return Column(
+                      children: [
+                        DropdownButtonFormField<String>(
+                          decoration: const InputDecoration(labelText: 'Line'),
+                          value: _selectedLine,
+                          items: lines.map((line) {
+                            return DropdownMenuItem(value: line.id, child: Text(line.name));
+                          }).toList(),
+                          onChanged: (val) => setState(() => _selectedLine = val),
+                        ),
+                        const SizedBox(height: 16),
+                        DropdownButtonFormField<String>(
+                          decoration: const InputDecoration(labelText: 'Area'),
+                          value: _selectedArea,
+                          items: areas.map((area) {
+                            return DropdownMenuItem(value: area.id, child: Text(area.name));
+                          }).toList(),
+                          onChanged: (val) => setState(() => _selectedArea = val),
+                        ),
+                      ],
+                    );
                   }
-                  return Column(
-                    children: [
-                      DropdownButtonFormField<String>(
-                        decoration: const InputDecoration(labelText: 'Line'),
-                        value: _selectedLine,
-                        items: lines.map((line) {
-                          return DropdownMenuItem(value: line, child: Text(line));
-                        }).toList(),
-                        onChanged: (val) => setState(() => _selectedLine = val),
-                      ),
-                      const SizedBox(height: 16),
-                      DropdownButtonFormField<String>(
-                        decoration: const InputDecoration(labelText: 'Area'),
-                        value: _selectedArea,
-                        items: areas.map((area) {
-                          return DropdownMenuItem(value: area, child: Text(area));
-                        }).toList(),
-                        onChanged: (val) => setState(() => _selectedArea = val),
-                      ),
-                    ],
-                  );
+                  return const Center(child: CircularProgressIndicator());
                 },
               ),
               const SizedBox(height: 32),

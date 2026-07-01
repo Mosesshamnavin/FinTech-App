@@ -54,9 +54,9 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     final areasResult = await getAreas(NoParams());
     final linesResult = await getLines(NoParams());
 
-    // Basic aggregation - if any fail, we could emit an error, or just show what we have.
-    // For simplicity, we assume they all succeed or fail together.
-    if (expenseTypesResult.isRight && investmentTypesResult.isRight && areasResult.isRight && linesResult.isRight) {
+    // Instead of failing entirely if one request fails, we accumulate what we can.
+    // If all fail, then we emit error. If at least one succeeds, we show partial data.
+    if (expenseTypesResult.isRight || investmentTypesResult.isRight || areasResult.isRight || linesResult.isRight) {
       emit(SettingsLoaded(
         expenseTypes: expenseTypesResult.getOrNull() ?? [],
         investmentTypes: investmentTypesResult.getOrNull() ?? [],
@@ -64,7 +64,7 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
         lines: linesResult.getOrNull() ?? [],
       ));
     } else {
-      emit(const SettingsError('Failed to load some settings'));
+      emit(const SettingsError('Failed to load settings. Please check your connection.'));
     }
   }
 

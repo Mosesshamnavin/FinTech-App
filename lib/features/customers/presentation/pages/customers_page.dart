@@ -145,8 +145,8 @@ class _CustomersViewState extends State<_CustomersView> {
                     separatorBuilder: (_, __) => const SizedBox(height: 8),
                     itemBuilder: (context, index) {
                       final customer = state.customers[index];
-                      String lineName = customer.lineId;
-                      String areaName = customer.areaId;
+                      String lineName = 'Unknown Line';
+                      String areaName = 'Unknown Area';
                       final settingsState = context.read<SettingsBloc>().state;
                       if (settingsState is SettingsLoaded) {
                         final line = settingsState.lines.where((l) => l.id == customer.lineId).firstOrNull;
