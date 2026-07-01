@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/di/injection_container.dart';
 import '../widgets/add_line_modal.dart';
 import '../widgets/area_search_modal.dart';
+import '../widgets/calculator_modal.dart';
 import '../widgets/add_collection_modal.dart';
 import '../bloc/collections_bloc.dart';
 import '../bloc/collections_event.dart';
@@ -121,7 +122,12 @@ class _CollectionsViewState extends State<_CollectionsView> {
           ),
           IconButton(
             icon: const FaIcon(FontAwesomeIcons.calculator, size: 20),
-            onPressed: () {},
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (_) => const CalculatorModal(),
+              );
+            },
           ),
           IconButton(
             icon: const FaIcon(FontAwesomeIcons.bell, size: 20),

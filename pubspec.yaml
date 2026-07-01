@@ -47,6 +47,7 @@ dependencies:
   intl: ^0.20.2
   graphql_flutter: ^5.3.0
   dart_jsonwebtoken: ^2.8.4
+  math_expressions: ^3.1.0
 
 dev_dependencies:
   flutter_test:

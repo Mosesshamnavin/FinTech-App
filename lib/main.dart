@@ -123,10 +123,12 @@ final GoRouter _router = GoRouter(
               routes: [
                 GoRoute(
                   path: 'cashout',
+                  parentNavigatorKey: _rootNavigatorKey,
                   builder: (context, state) => const CashOutPage(),
                 ),
                 GoRoute(
                   path: 'reminders',
+                  parentNavigatorKey: _rootNavigatorKey,
                   builder: (context, state) => const RemindersNotesPage(),
                 ),
               ],
