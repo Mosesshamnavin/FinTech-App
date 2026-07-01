@@ -260,15 +260,16 @@ class _CollectionsViewState extends State<_CollectionsView> {
           const Divider(),
           // Daily Collection List
           Expanded(
-            child: BlocBuilder<CollectionsBloc, CollectionsState>(
-              buildWhen: (previous, current) {
-                // Only rebuild list on these states, ignore AddCollection action states
-                return current is DailyCollectionsLoading || 
-                       current is DailyCollectionsLoaded || 
-                       current is DailyCollectionsError || 
-                       current is CollectionsInitial;
-              },
-              builder: (context, state) {
+            child: BlocBuilder<SettingsBloc, SettingsState>(
+              builder: (context, settingsState) {
+                return BlocBuilder<CollectionsBloc, CollectionsState>(
+                  buildWhen: (previous, current) {
+                    return current is DailyCollectionsLoading || 
+                           current is DailyCollectionsLoaded || 
+                           current is DailyCollectionsError || 
+                           current is CollectionsInitial;
+                  },
+                  builder: (context, state) {
                 if (state is CollectionsInitial) {
                   return const Center(
                     child: Text('Select filters and tap SUBMIT to load sheet.'),
@@ -295,7 +296,6 @@ class _CollectionsViewState extends State<_CollectionsView> {
                       String lineName = 'Unknown Line';
                       String areaName = 'Unknown Area';
                       
-                      final settingsState = context.read<SettingsBloc>().state;
                       if (settingsState is SettingsLoaded) {
                         final line = settingsState.lines.where((l) => l.id == customer.lineId).firstOrNull;
                         if (line != null) lineName = line.name;
@@ -362,12 +362,14 @@ class _CollectionsViewState extends State<_CollectionsView> {
                       );
                     },
                   );
-                }
-                return const SizedBox.shrink();
-              },
-            ),
+                  }
+                  return const SizedBox.shrink();
+                },
+              );
+            },
           ),
-        ],
+        ),
+      ],
       ),
     );
   }
