@@ -12,6 +12,7 @@ import '../bloc/collections_event.dart';
 import '../bloc/collections_state.dart';
 import '../../../settings/presentation/bloc/settings_bloc.dart';
 import '../../../settings/presentation/bloc/settings_state.dart';
+import '../../../settings/domain/entities/settings_entities.dart';
 
 class CollectionsPage extends StatelessWidget {
   const CollectionsPage({super.key});
@@ -193,10 +194,22 @@ class _CollectionsViewState extends State<_CollectionsView> {
                               const Icon(Icons.arrow_drop_down, color: Colors.grey),
                               IconButton(
                                 icon: const FaIcon(FontAwesomeIcons.magnifyingGlass, color: Colors.lightBlue, size: 20),
-                                onPressed: () => showDialog(
-                                  context: context,
-                                  builder: (context) => const AreaSearchModal(),
-                                ),
+                                onPressed: () async {
+                                  List<AreaEntity> currentAreas = [];
+                                  if (state is SettingsLoaded) {
+                                    currentAreas = state.areas;
+                                  }
+                                  final selectedId = await showDialog<String>(
+                                    context: context,
+                                    builder: (context) => AreaSearchModal(areas: currentAreas),
+                                  );
+                                  if (selectedId != null && mounted) {
+                                    setState(() {
+                                      _selectedArea = selectedId;
+                                    });
+                                    _onSubmit();
+                                  }
+                                },
                               ),
                             ],
                           ),

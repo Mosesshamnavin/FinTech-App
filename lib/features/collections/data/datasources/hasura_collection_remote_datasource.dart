@@ -2,6 +2,7 @@ import 'package:graphql_flutter/graphql_flutter.dart' hide ServerException;
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/services/storage_service.dart';
 import '../models/collection_model.dart';
+import '../models/reminder_model.dart';
 import 'collection_remote_datasource.dart';
 
 class HasuraCollectionRemoteDataSourceImpl implements CollectionRemoteDataSource {
@@ -149,5 +150,81 @@ class HasuraCollectionRemoteDataSourceImpl implements CollectionRemoteDataSource
       notes: data['notes'],
       status: data['status'],
     );
+  }
+
+  @override
+  Future<void> addReminder(String date, String text) async {
+    final userId = await storageService.getUserId();
+    if (userId == null) throw const ServerException('User not authenticated');
+
+    const String mutation = """
+      mutation addReminder(
+        \$date: timestamp!,
+        \$text: String!,
+        \$user_id: uuid!
+      ) {
+        insert_reminders_one(object: {
+          date: \$date,
+          text: \$text,
+          user_id: \$user_id
+        }) {
+          id
+        }
+      }
+    """;
+
+    final hasuraDate = _formatDateForHasura(date);
+
+    final MutationOptions options = MutationOptions(
+      document: gql(mutation),
+      variables: {
+        'date': hasuraDate,
+        'text': text,
+        'user_id': userId,
+      },
+    );
+
+    final QueryResult result = await client.mutate(options);
+
+    if (result.hasException) {
+      throw ServerException(result.exception.toString());
+    }
+  }
+
+  @override
+  Future<List<ReminderModel>> getReminders() async {
+    final userId = await storageService.getUserId();
+    if (userId == null) throw const ServerException('User not authenticated');
+
+    const String query = """
+      query getReminders(\$userId: uuid!) {
+        reminders(where: {user_id: {_eq: \$userId}}, order_by: {date: asc}) {
+          id
+          date
+          text
+        }
+      }
+    """;
+
+    final QueryOptions options = QueryOptions(
+      document: gql(query),
+      variables: {'userId': userId},
+      fetchPolicy: FetchPolicy.networkOnly,
+    );
+
+    final QueryResult result = await client.query(options);
+
+    if (result.hasException) {
+      throw ServerException(result.exception.toString());
+    }
+
+    final List data = result.data?['reminders'] ?? [];
+    return data.map((json) {
+      return ReminderModel(
+        id: json['id'],
+        date: _formatDateFromHasura(json['date']),
+        text: json['text'],
+      );
+    }).toList();
   }
 }

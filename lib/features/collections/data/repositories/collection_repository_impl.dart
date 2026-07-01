@@ -3,6 +3,7 @@ import '../../../../core/error/failures.dart';
 import '../../../../core/utils/either.dart';
 import '../../../customers/data/datasources/customer_remote_datasource.dart';
 import '../../domain/entities/collection_entity.dart';
+import '../../domain/entities/reminder_entity.dart';
 import '../../domain/repositories/collection_repository.dart';
 import '../datasources/collection_remote_datasource.dart';
 
@@ -72,9 +73,33 @@ class CollectionRepositoryImpl implements CollectionRepository {
     } on ServerException catch (e) {
       return Left(ServerFailure(e.message));
     } on NetworkException catch (e) {
-      return Left(NetworkFailure(e.message));
-    } catch (_) {
-      return const Left(ServerFailure());
+      return Left(ServerFailure(e.message));
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> addReminder(String date, String text) async {
+    try {
+      await collectionRemoteDataSource.addReminder(date, text);
+      return const Right(null);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<ReminderEntity>>> getReminders() async {
+    try {
+      final reminders = await collectionRemoteDataSource.getReminders();
+      return Right(reminders);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
     }
   }
 }

@@ -1,6 +1,7 @@
 import '../../../../core/error/failures.dart';
 import '../../../../core/utils/either.dart';
 import '../entities/collection_entity.dart';
+import '../entities/reminder_entity.dart';
 
 abstract class CollectionRepository {
   /// Fetches the daily collection sheet for a specific line, area, and date.
@@ -19,4 +20,7 @@ abstract class CollectionRepository {
     String? notes,
     required String status,
   });
+
+  Future<Either<Failure, void>> addReminder(String date, String text);
+  Future<Either<Failure, List<ReminderEntity>>> getReminders();
 }

@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import '../models/collection_model.dart';
+import '../models/reminder_model.dart';
 
 abstract class CollectionRemoteDataSource {
   Future<List<CollectionModel>> getCollectionsByDate(String date);
@@ -12,6 +13,9 @@ abstract class CollectionRemoteDataSource {
     String? notes,
     required String status,
   });
+
+  Future<void> addReminder(String date, String text);
+  Future<List<ReminderModel>> getReminders();
 }
 
 class MockCollectionRemoteDataSourceImpl implements CollectionRemoteDataSource {
@@ -73,5 +77,17 @@ class MockCollectionRemoteDataSourceImpl implements CollectionRemoteDataSource {
 
     _mockCollections.add(newCollection);
     return newCollection;
+  }
+
+  @override
+  Future<void> addReminder(String date, String text) async {
+    await Future.delayed(_mockDelay);
+    // Mock implementation does nothing, just succeeds
+  }
+
+  @override
+  Future<List<ReminderModel>> getReminders() async {
+    await Future.delayed(_mockDelay);
+    return [];
   }
 }

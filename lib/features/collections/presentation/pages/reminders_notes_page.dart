@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/di/injection_container.dart';
+import '../bloc/collections_bloc.dart';
+import '../bloc/collections_event.dart';
+import '../bloc/collections_state.dart';
 import '../widgets/add_reminder_modal.dart';
 
 class RemindersNotesPage extends StatelessWidget {
@@ -6,22 +11,30 @@ class RemindersNotesPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
+    return BlocProvider(
+      create: (_) => sl<CollectionsBloc>(),
+      child: DefaultTabController(
       length: 2,
       child: Scaffold(
         appBar: AppBar(
           elevation: 2,
           shadowColor: Colors.black26,
+          backgroundColor: Colors.white,
+          centerTitle: true,
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back_ios_new, size: 20),
+            icon: const Icon(Icons.arrow_back_ios_new, size: 20, color: Colors.black87),
             onPressed: () => Navigator.of(context).pop(),
           ),
+          actions: const [
+            SizedBox(width: 48), // Balances the leading back button for perfect centering
+          ],
           titleSpacing: 0,
           title: const TabBar(
             labelColor: Colors.lightBlue,
             unselectedLabelColor: Colors.grey,
             indicatorColor: Colors.lightBlue,
             indicatorSize: TabBarIndicatorSize.tab,
+            indicatorWeight: 3,
             tabs: [
               Tab(text: 'REMINDER'),
               Tab(text: 'NOTES'),
@@ -35,12 +48,24 @@ class RemindersNotesPage extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 }
 
-class _ReminderTab extends StatelessWidget {
+class _ReminderTab extends StatefulWidget {
   const _ReminderTab();
+
+  @override
+  State<_ReminderTab> createState() => _ReminderTabState();
+}
+
+class _ReminderTabState extends State<_ReminderTab> {
+  @override
+  void initState() {
+    super.initState();
+    context.read<CollectionsBloc>().add(const LoadRemindersRequested());
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -91,17 +116,53 @@ class _ReminderTab extends StatelessWidget {
                           ),
                           const Spacer(),
                           IconButton(
-                            onPressed: () {
-                              showDialog(
+                            onPressed: () async {
+                              final bloc = context.read<CollectionsBloc>();
+                              final result = await showDialog<bool>(
                                 context: context,
-                                builder: (context) => const AddReminderModal(),
+                                builder: (context) => BlocProvider.value(
+                                  value: bloc,
+                                  child: const AddReminderModal(),
+                                ),
                               );
+                              if (result == true) {
+                                bloc.add(const LoadRemindersRequested());
+                              }
                             },
                             icon: const Icon(Icons.add, size: 28),
                           ),
                         ],
                       ),
-                      // List of reminders would go here
+                      const SizedBox(height: 16),
+                      // List of reminders
+                      Expanded(
+                        child: BlocBuilder<CollectionsBloc, CollectionsState>(
+                          builder: (context, state) {
+                            if (state is RemindersLoading) {
+                              return const Center(child: CircularProgressIndicator());
+                            } else if (state is RemindersError) {
+                              return Center(child: Text(state.message, style: const TextStyle(color: Colors.red)));
+                            } else if (state is RemindersLoaded) {
+                              if (state.reminders.isEmpty) {
+                                return const Center(child: Text('No reminders found.', style: TextStyle(color: Colors.grey)));
+                              }
+                              return ListView.separated(
+                                itemCount: state.reminders.length,
+                                separatorBuilder: (context, index) => const Divider(height: 1, color: Colors.grey),
+                                itemBuilder: (context, index) {
+                                  final reminder = state.reminders[index];
+                                  return ListTile(
+                                    contentPadding: EdgeInsets.zero,
+                                    title: Text(reminder.text, style: const TextStyle(fontSize: 14)),
+                                    subtitle: Text(reminder.date, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                                  );
+                                },
+                              );
+                            }
+                            return const Center(child: Text('No reminders found.', style: TextStyle(color: Colors.grey)));
+                          },
+                        ),
+                      ),
                     ],
                   ),
                 ),

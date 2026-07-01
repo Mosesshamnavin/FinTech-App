@@ -40,3 +40,20 @@ class AddCollectionRecordSubmitted extends CollectionsEvent {
   @override
   List<Object?> get props => [customerId, amount, date, notes, status];
 }
+
+class AddReminderSubmitted extends CollectionsEvent {
+  final String date;
+  final String text;
+
+  const AddReminderSubmitted({
+    required this.date,
+    required this.text,
+  });
+
+  @override
+  List<Object?> get props => [date, text];
+}
+
+class LoadRemindersRequested extends CollectionsEvent {
+  const LoadRemindersRequested();
+}

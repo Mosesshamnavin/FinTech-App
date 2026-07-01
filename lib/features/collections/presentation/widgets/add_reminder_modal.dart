@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../bloc/collections_bloc.dart';
+import '../bloc/collections_event.dart';
+import '../bloc/collections_state.dart';
 
 class AddReminderModal extends StatefulWidget {
   const AddReminderModal({super.key});
@@ -9,10 +13,12 @@ class AddReminderModal extends StatefulWidget {
 
 class _AddReminderModalState extends State<AddReminderModal> {
   final TextEditingController _dateController = TextEditingController();
+  final TextEditingController _textController = TextEditingController();
 
   @override
   void dispose() {
     _dateController.dispose();
+    _textController.dispose();
     super.dispose();
   }
 
@@ -32,13 +38,26 @@ class _AddReminderModalState extends State<AddReminderModal> {
 
   @override
   Widget build(BuildContext context) {
-    return Dialog(
-      insetPadding: const EdgeInsets.all(16),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
+    return BlocListener<CollectionsBloc, CollectionsState>(
+      listener: (context, state) {
+        if (state is AddReminderActionSuccess) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Reminder saved successfully')),
+          );
+          Navigator.of(context).pop(true);
+        } else if (state is AddReminderActionError) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(state.message)),
+          );
+        }
+      },
+      child: Dialog(
+        insetPadding: const EdgeInsets.all(16),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
               child: Row(
@@ -74,11 +93,12 @@ class _AddReminderModalState extends State<AddReminderModal> {
                   const SizedBox(height: 24),
                   const Text('Reminder Text', style: TextStyle(fontSize: 16, color: Colors.black87)),
                   const SizedBox(height: 8),
-                  const TextField(
+                  TextField(
+                    controller: _textController,
                     maxLines: 8,
                     minLines: 8,
                     textAlignVertical: TextAlignVertical.top,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       border: UnderlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
                       enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
                     ),
@@ -87,7 +107,15 @@ class _AddReminderModalState extends State<AddReminderModal> {
                   Center(
                     child: ElevatedButton(
                       onPressed: () {
-                        Navigator.of(context).pop();
+                        final date = _dateController.text.trim();
+                        final text = _textController.text.trim();
+                        if (date.isEmpty || text.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Please select a date and enter a reminder text')),
+                          );
+                          return;
+                        }
+                        context.read<CollectionsBloc>().add(AddReminderSubmitted(date: date, text: text));
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.lightBlue.shade300,
@@ -98,13 +126,13 @@ class _AddReminderModalState extends State<AddReminderModal> {
                       child: const Text('SUBMIT', style: TextStyle(fontSize: 16)),
                     ),
                   ),
-                  const SizedBox(height: 8),
                 ],
               ),
             ),
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 }

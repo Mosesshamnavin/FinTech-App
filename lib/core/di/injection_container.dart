@@ -19,6 +19,8 @@ import '../../features/collections/data/repositories/collection_repository_impl.
 import '../../features/collections/domain/repositories/collection_repository.dart';
 import '../../features/collections/domain/usecases/add_collection_usecase.dart';
 import '../../features/collections/domain/usecases/get_daily_collections_usecase.dart';
+import '../../features/collections/domain/usecases/add_reminder_usecase.dart';
+import '../../features/collections/domain/usecases/get_reminders_usecase.dart';
 import '../../features/collections/presentation/bloc/collections_bloc.dart';
 import '../../features/customers/data/datasources/customer_remote_datasource.dart';
 import '../../features/customers/data/datasources/hasura_customer_remote_datasource.dart';
@@ -217,12 +219,16 @@ Future<void> initDependencies() async {
   // ─── Collections: Use Cases ───────────────────────────────────────────────
   sl.registerLazySingleton(() => GetDailyCollectionsUseCase(sl()));
   sl.registerLazySingleton(() => AddCollectionUseCase(sl()));
+  sl.registerLazySingleton(() => AddReminderUseCase(sl()));
+  sl.registerLazySingleton(() => GetRemindersUseCase(sl()));
 
   // ─── Collections: BLoC ────────────────────────────────────────────────────
   sl.registerFactory(
     () => CollectionsBloc(
       getDailyCollectionsUseCase: sl(),
       addCollectionUseCase: sl(),
+      addReminderUseCase: sl(),
+      getRemindersUseCase: sl(),
     ),
   );
 
