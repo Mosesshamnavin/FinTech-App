@@ -1,12 +1,14 @@
 import 'package:graphql_flutter/graphql_flutter.dart' hide ServerException;
 import '../../../../core/error/exceptions.dart';
+import '../../../../core/services/storage_service.dart';
 import '../models/collection_model.dart';
 import 'collection_remote_datasource.dart';
 
 class HasuraCollectionRemoteDataSourceImpl implements CollectionRemoteDataSource {
   final GraphQLClient client;
+  final StorageService storageService;
 
-  HasuraCollectionRemoteDataSourceImpl({required this.client});
+  HasuraCollectionRemoteDataSourceImpl({required this.client, required this.storageService});
 
   String _formatDateForHasura(String dateStr) {
     // Expects "dd/MM/yyyy"
@@ -33,9 +35,12 @@ class HasuraCollectionRemoteDataSourceImpl implements CollectionRemoteDataSource
 
   @override
   Future<List<CollectionModel>> getCollectionsByDate(String date) async {
+    final userId = await storageService.getUserId();
+    if (userId == null) throw const ServerException('User not authenticated');
+
     const String query = """
-      query getCollectionsByDate(\$date: timestamp!) {
-        collections(where: {date: {_eq: \$date}}) {
+      query getCollectionsByDate(\$date: timestamp!, \$userId: uuid!) {
+        collections(where: {date: {_eq: \$date}, user_id: {_eq: \$userId}}) {
           id
           customer_id
           amount
@@ -50,7 +55,7 @@ class HasuraCollectionRemoteDataSourceImpl implements CollectionRemoteDataSource
 
     final QueryOptions options = QueryOptions(
       document: gql(query),
-      variables: {'date': hasuraDate},
+      variables: {'date': hasuraDate, 'userId': userId},
       fetchPolicy: FetchPolicy.networkOnly,
     );
 
@@ -81,20 +86,25 @@ class HasuraCollectionRemoteDataSourceImpl implements CollectionRemoteDataSource
     String? notes,
     required String status,
   }) async {
+    final userId = await storageService.getUserId();
+    if (userId == null) throw const ServerException('User not authenticated');
+
     const String mutation = """
       mutation addCollection(
         \$customer_id: uuid!,
         \$amount: numeric!,
         \$date: timestamp!,
         \$notes: String,
-        \$status: String!
+        \$status: String!,
+        \$user_id: uuid!
       ) {
         insert_collections_one(object: {
           customer_id: \$customer_id,
           amount: \$amount,
           date: \$date,
           notes: \$notes,
-          status: \$status
+          status: \$status,
+          user_id: \$user_id
         }) {
           id
           customer_id
@@ -116,6 +126,7 @@ class HasuraCollectionRemoteDataSourceImpl implements CollectionRemoteDataSource
         'date': hasuraDate,
         'notes': notes,
         'status': status,
+        'user_id': userId,
       },
     );
 

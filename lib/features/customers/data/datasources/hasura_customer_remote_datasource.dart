@@ -1,16 +1,23 @@
 import 'package:graphql_flutter/graphql_flutter.dart' hide ServerException;
 import '../../../../core/error/exceptions.dart';
+import '../../../../core/services/storage_service.dart';
 import '../models/customer_model.dart';
 import 'customer_remote_datasource.dart';
 
 class HasuraCustomerRemoteDataSourceImpl implements CustomerRemoteDataSource {
   final GraphQLClient client;
+  final StorageService storageService;
 
-  HasuraCustomerRemoteDataSourceImpl({required this.client});
+  HasuraCustomerRemoteDataSourceImpl({required this.client, required this.storageService});
 
   @override
   Future<List<CustomerModel>> getCustomers({String? lineId, String? areaId}) async {
-    Map<String, dynamic> whereClause = {};
+    final userId = await storageService.getUserId();
+    if (userId == null) throw const ServerException('User not authenticated');
+
+    Map<String, dynamic> whereClause = {
+      'user_id': {'_eq': userId}
+    };
     if (lineId != null && lineId.isNotEmpty) {
       whereClause['line_id'] = {'_eq': lineId};
     }
@@ -71,6 +78,9 @@ class HasuraCustomerRemoteDataSourceImpl implements CustomerRemoteDataSource {
     required String lineId,
     required String areaId,
   }) async {
+    final userId = await storageService.getUserId();
+    if (userId == null) throw const ServerException('User not authenticated');
+
     const String mutation = '''
       mutation InsertCustomer(\$object: customers_insert_input!) {
         insert_customers_one(object: \$object) {
@@ -91,6 +101,7 @@ class HasuraCustomerRemoteDataSourceImpl implements CustomerRemoteDataSource {
           'phone': phone,
           'line_id': lineId,
           'area_id': areaId,
+          'user_id': userId,
         }
       },
     );

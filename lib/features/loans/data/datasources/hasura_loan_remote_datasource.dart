@@ -1,15 +1,20 @@
 import 'package:graphql_flutter/graphql_flutter.dart' hide ServerException;
 import '../../../../core/error/exceptions.dart';
+import '../../../../core/services/storage_service.dart';
 import '../../domain/entities/loan_entity.dart';
 import 'loan_remote_datasource.dart';
 
 class HasuraLoanRemoteDataSourceImpl implements LoanRemoteDataSource {
   final GraphQLClient client;
+  final StorageService storageService;
 
-  HasuraLoanRemoteDataSourceImpl({required this.client});
+  HasuraLoanRemoteDataSourceImpl({required this.client, required this.storageService});
 
   @override
   Future<LoanEntity> addLoan(LoanEntity loan) async {
+    final userId = await storageService.getUserId();
+    if (userId == null) throw const ServerException('User not authenticated');
+
     const String mutation = '''
       mutation InsertLoan(\$object: loans_insert_input!) {
         insert_loans_one(object: \$object) {
@@ -41,6 +46,7 @@ class HasuraLoanRemoteDataSourceImpl implements LoanRemoteDataSource {
           'start_date': loan.startDate.toIso8601String().split('T')[0],
           'end_date': loan.endDate.toIso8601String().split('T')[0],
           'status': loan.status,
+          'user_id': userId,
         }
       },
     );
@@ -64,9 +70,12 @@ class HasuraLoanRemoteDataSourceImpl implements LoanRemoteDataSource {
 
   @override
   Future<List<LoanEntity>> getAllLoans() async {
+    final userId = await storageService.getUserId();
+    if (userId == null) throw const ServerException('User not authenticated');
+
     const String query = '''
-      query GetAllLoans {
-        loans(order_by: { created_at: desc }) {
+      query GetAllLoans(\$userId: uuid!) {
+        loans(where: {user_id: {_eq: \$userId}}, order_by: { created_at: desc }) {
           id
           customer_id
           principal_amount
@@ -84,6 +93,9 @@ class HasuraLoanRemoteDataSourceImpl implements LoanRemoteDataSource {
 
     final QueryOptions options = QueryOptions(
       document: gql(query),
+      variables: {
+        'userId': userId,
+      },
       fetchPolicy: FetchPolicy.networkOnly,
     );
 
@@ -103,9 +115,12 @@ class HasuraLoanRemoteDataSourceImpl implements LoanRemoteDataSource {
 
   @override
   Future<List<LoanEntity>> getLoansByCustomer(String customerId) async {
+    final userId = await storageService.getUserId();
+    if (userId == null) throw const ServerException('User not authenticated');
+
     const String query = '''
-      query GetLoansByCustomer(\$customerId: uuid!) {
-        loans(where: { customer_id: { _eq: \$customerId } }, order_by: { created_at: desc }) {
+      query GetLoansByCustomer(\$customerId: uuid!, \$userId: uuid!) {
+        loans(where: { customer_id: { _eq: \$customerId }, user_id: { _eq: \$userId } }, order_by: { created_at: desc }) {
           id
           customer_id
           principal_amount
@@ -125,6 +140,7 @@ class HasuraLoanRemoteDataSourceImpl implements LoanRemoteDataSource {
       document: gql(query),
       variables: {
         'customerId': customerId,
+        'userId': userId,
       },
       fetchPolicy: FetchPolicy.networkOnly,
     );

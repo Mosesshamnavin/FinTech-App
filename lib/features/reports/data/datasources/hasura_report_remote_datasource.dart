@@ -2,12 +2,14 @@ import 'package:graphql_flutter/graphql_flutter.dart' hide ServerException;
 import 'package:intl/intl.dart';
 import '../../../../core/error/exceptions.dart';
 import '../../domain/entities/report_entity.dart';
+import '../../../../core/services/storage_service.dart';
 import 'report_remote_datasource.dart';
 
 class HasuraReportRemoteDataSourceImpl implements ReportRemoteDataSource {
   final GraphQLClient client;
+  final StorageService storageService;
 
-  HasuraReportRemoteDataSourceImpl({required this.client});
+  HasuraReportRemoteDataSourceImpl({required this.client, required this.storageService});
 
   @override
   Future<ReportEntity> getDailySummary({
@@ -15,6 +17,9 @@ class HasuraReportRemoteDataSourceImpl implements ReportRemoteDataSource {
     String? lineType,
     String? line,
   }) async {
+    final userId = await storageService.getUserId();
+    if (userId == null) throw const ServerException('User not authenticated');
+
     // date format is usually dd/MM/yyyy from UI. Let's parse it to start and end of day.
     final parsedDate = DateFormat('dd/MM/yyyy').parse(date);
     final startOfDay = DateTime(parsedDate.year, parsedDate.month, parsedDate.day);
@@ -23,6 +28,7 @@ class HasuraReportRemoteDataSourceImpl implements ReportRemoteDataSource {
     final Map<String, dynamic> variables = {
       'start': startOfDay.toIso8601String(),
       'end': endOfDay.toIso8601String(),
+      'userId': userId,
     };
     
     String lineFilter = '';
@@ -113,6 +119,9 @@ class HasuraReportRemoteDataSourceImpl implements ReportRemoteDataSource {
     String? line,
     bool all = true,
   }) async {
+    final userId = await storageService.getUserId();
+    if (userId == null) throw const ServerException('User not authenticated');
+
     final fromParsed = DateFormat('dd/MM/yyyy').parse(fromDate);
     final toParsed = DateFormat('dd/MM/yyyy').parse(toDate);
     final endOfDay = DateTime(toParsed.year, toParsed.month, toParsed.day, 23, 59, 59);
@@ -120,6 +129,7 @@ class HasuraReportRemoteDataSourceImpl implements ReportRemoteDataSource {
     final Map<String, dynamic> variables = {
       'start': fromParsed.toIso8601String(),
       'end': endOfDay.toIso8601String(),
+      'userId': userId,
     };
 
     String lineFilter = '';
@@ -143,7 +153,7 @@ class HasuraReportRemoteDataSourceImpl implements ReportRemoteDataSource {
           amount
           customer { line { id } }
         }
-        customers(where: { is_active: {_eq: true} }) {
+        customers(where: { is_active: {_eq: true}, user_id: {_eq: $userId} }) {
           line_id
         }
       }
@@ -225,6 +235,9 @@ class HasuraReportRemoteDataSourceImpl implements ReportRemoteDataSource {
     String? line,
     bool all = true,
   }) async {
+    final userId = await storageService.getUserId();
+    if (userId == null) throw const ServerException('User not authenticated');
+
     final fromParsed = DateFormat('dd/MM/yyyy').parse(fromDate);
     final toParsed = DateFormat('dd/MM/yyyy').parse(toDate);
     final endOfDay = DateTime(toParsed.year, toParsed.month, toParsed.day, 23, 59, 59);
@@ -232,6 +245,7 @@ class HasuraReportRemoteDataSourceImpl implements ReportRemoteDataSource {
     final Map<String, dynamic> variables = {
       'start': fromParsed.toIso8601String(),
       'end': endOfDay.toIso8601String(),
+      'userId': userId,
     };
 
     String lineFilter = '';

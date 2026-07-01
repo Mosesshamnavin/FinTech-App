@@ -35,7 +35,10 @@ class CashOutBloc extends Bloc<CashOutEvent, CashOutState> {
         historyCashOuts: historyResult.getOrNull() ?? [],
       ));
     } else {
-      emit(const CashOutError('Failed to load CashOuts'));
+      final error = activeResult.isLeft
+          ? activeResult.fold((f) => f.message, (_) => 'Unknown error')
+          : historyResult.fold((f) => f.message, (_) => 'Unknown error');
+      emit(CashOutError(error));
     }
   }
 

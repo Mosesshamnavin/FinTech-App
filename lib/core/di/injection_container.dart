@@ -42,6 +42,7 @@ import '../../features/loans/data/datasources/hasura_loan_remote_datasource.dart
 import '../../features/loans/data/repositories/loan_repository_impl.dart';
 import '../../features/loans/domain/repositories/loan_repository.dart';
 import '../../features/collections/data/datasources/cashout_remote_datasource.dart';
+import '../../features/collections/data/datasources/hasura_cashout_remote_datasource.dart';
 import '../../features/collections/data/repositories/cashout_repository_impl.dart';
 import '../../features/collections/domain/repositories/cashout_repository.dart';
 import '../../features/collections/domain/usecases/cashout_usecases.dart';
@@ -119,7 +120,7 @@ Future<void> initDependencies() async {
   );
   // ─── Customers: Data Sources ──────────────────────────────────────────────
   sl.registerLazySingleton<CustomerRemoteDataSource>(
-    () => HasuraCustomerRemoteDataSourceImpl(client: sl<GraphQLClient>()),
+    () => HasuraCustomerRemoteDataSourceImpl(client: sl<GraphQLClient>(), storageService: sl<StorageService>()),
   );
 
   // ─── Customers: Repository ────────────────────────────────────────────────
@@ -141,10 +142,15 @@ Future<void> initDependencies() async {
 
   // ─── Collections: Data Sources ────────────────────────────────────────────
   sl.registerLazySingleton<CollectionRemoteDataSource>(
-    () => HasuraCollectionRemoteDataSourceImpl(client: sl<GraphQLClient>()),
+    () => HasuraCollectionRemoteDataSourceImpl(client: sl<GraphQLClient>(), storageService: sl<StorageService>()),
   );
 
-  sl.registerLazySingleton(() => CashOutRemoteDataSource());
+  sl.registerLazySingleton<CashOutRemoteDataSource>(
+    () => HasuraCashOutRemoteDataSourceImpl(
+      client: sl<GraphQLClient>(),
+      storageService: sl<StorageService>(),
+    ),
+  );
 
 
   sl.registerLazySingleton<CashOutRepository>(
@@ -226,7 +232,7 @@ Future<void> initDependencies() async {
   // REPORTS FEATURE
   // ---------------------------------------------------------------------------
   sl.registerLazySingleton<ReportRemoteDataSource>(
-    () => HasuraReportRemoteDataSourceImpl(client: sl<GraphQLClient>()),
+    () => HasuraReportRemoteDataSourceImpl(client: sl<GraphQLClient>(), storageService: sl<StorageService>()),
   );
   sl.registerLazySingleton<ReportRepository>(
     () => ReportRepositoryImpl(remoteDataSource: sl()),
@@ -245,7 +251,7 @@ Future<void> initDependencies() async {
   // LOANS FEATURE
   // ---------------------------------------------------------------------------
   sl.registerLazySingleton<LoanRemoteDataSource>(
-    () => HasuraLoanRemoteDataSourceImpl(client: sl<GraphQLClient>()),
+    () => HasuraLoanRemoteDataSourceImpl(client: sl<GraphQLClient>(), storageService: sl<StorageService>()),
   );
   sl.registerLazySingleton<LoanRepository>(
     () => LoanRepositoryImpl(remoteDataSource: sl()),
