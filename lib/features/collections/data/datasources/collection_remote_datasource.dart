@@ -2,6 +2,7 @@ import 'dart:math';
 
 import '../models/collection_model.dart';
 import '../models/reminder_model.dart';
+import '../models/note_model.dart';
 
 abstract class CollectionRemoteDataSource {
   Future<List<CollectionModel>> getCollectionsByDate(String date);
@@ -16,6 +17,8 @@ abstract class CollectionRemoteDataSource {
 
   Future<void> addReminder(String date, String text);
   Future<List<ReminderModel>> getReminders();
+  Future<void> addNote(String text);
+  Future<List<NoteModel>> getNotes();
 }
 
 class MockCollectionRemoteDataSourceImpl implements CollectionRemoteDataSource {
@@ -87,6 +90,17 @@ class MockCollectionRemoteDataSourceImpl implements CollectionRemoteDataSource {
 
   @override
   Future<List<ReminderModel>> getReminders() async {
+    await Future.delayed(_mockDelay);
+    return [];
+  }
+
+  @override
+  Future<void> addNote(String text) async {
+    await Future.delayed(_mockDelay);
+  }
+
+  @override
+  Future<List<NoteModel>> getNotes() async {
     await Future.delayed(_mockDelay);
     return [];
   }

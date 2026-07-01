@@ -21,6 +21,8 @@ import '../../features/collections/domain/usecases/add_collection_usecase.dart';
 import '../../features/collections/domain/usecases/get_daily_collections_usecase.dart';
 import '../../features/collections/domain/usecases/add_reminder_usecase.dart';
 import '../../features/collections/domain/usecases/get_reminders_usecase.dart';
+import '../../features/collections/domain/usecases/add_note_usecase.dart';
+import '../../features/collections/domain/usecases/get_notes_usecase.dart';
 import '../../features/collections/presentation/bloc/collections_bloc.dart';
 import '../../features/customers/data/datasources/customer_remote_datasource.dart';
 import '../../features/customers/data/datasources/hasura_customer_remote_datasource.dart';
@@ -221,6 +223,8 @@ Future<void> initDependencies() async {
   sl.registerLazySingleton(() => AddCollectionUseCase(sl()));
   sl.registerLazySingleton(() => AddReminderUseCase(sl()));
   sl.registerLazySingleton(() => GetRemindersUseCase(sl()));
+  sl.registerLazySingleton(() => AddNoteUseCase(sl()));
+  sl.registerLazySingleton(() => GetNotesUseCase(sl()));
 
   // ─── Collections: BLoC ────────────────────────────────────────────────────
   sl.registerFactory(
@@ -229,6 +233,8 @@ Future<void> initDependencies() async {
       addCollectionUseCase: sl(),
       addReminderUseCase: sl(),
       getRemindersUseCase: sl(),
+      addNoteUseCase: sl(),
+      getNotesUseCase: sl(),
     ),
   );
 

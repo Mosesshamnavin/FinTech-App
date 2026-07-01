@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 import '../../domain/entities/reminder_entity.dart';
+import '../../domain/entities/note_entity.dart';
 import '../../domain/entities/collection_entity.dart';
-import '../../domain/entities/reminder_entity.dart';
 
 abstract class CollectionsState extends Equatable {
   const CollectionsState();
@@ -84,6 +84,42 @@ class RemindersLoaded extends CollectionsState {
 class RemindersError extends CollectionsState {
   final String message;
   const RemindersError(this.message);
+
+  @override
+  List<Object> get props => [message];
+}
+
+class NotesLoading extends CollectionsState {
+  const NotesLoading();
+}
+
+class NotesLoaded extends CollectionsState {
+  final List<NoteEntity> notes;
+  const NotesLoaded(this.notes);
+
+  @override
+  List<Object> get props => [notes];
+}
+
+class NotesError extends CollectionsState {
+  final String message;
+  const NotesError(this.message);
+
+  @override
+  List<Object> get props => [message];
+}
+
+class AddNoteActionLoading extends CollectionsState {
+  const AddNoteActionLoading();
+}
+
+class AddNoteActionSuccess extends CollectionsState {
+  const AddNoteActionSuccess();
+}
+
+class AddNoteActionError extends CollectionsState {
+  final String message;
+  const AddNoteActionError(this.message);
 
   @override
   List<Object> get props => [message];

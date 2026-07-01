@@ -4,6 +4,7 @@ import '../../../../core/utils/either.dart';
 import '../../../customers/data/datasources/customer_remote_datasource.dart';
 import '../../domain/entities/collection_entity.dart';
 import '../../domain/entities/reminder_entity.dart';
+import '../../domain/entities/note_entity.dart';
 import '../../domain/repositories/collection_repository.dart';
 import '../datasources/collection_remote_datasource.dart';
 
@@ -96,6 +97,30 @@ class CollectionRepositoryImpl implements CollectionRepository {
     try {
       final reminders = await collectionRemoteDataSource.getReminders();
       return Right(reminders);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> addNote(String text) async {
+    try {
+      await collectionRemoteDataSource.addNote(text);
+      return const Right(null);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<NoteEntity>>> getNotes() async {
+    try {
+      final notes = await collectionRemoteDataSource.getNotes();
+      return Right(notes);
     } on ServerException catch (e) {
       return Left(ServerFailure(e.message));
     } catch (e) {

@@ -57,3 +57,16 @@ class AddReminderSubmitted extends CollectionsEvent {
 class LoadRemindersRequested extends CollectionsEvent {
   const LoadRemindersRequested();
 }
+
+class LoadNotesRequested extends CollectionsEvent {
+  const LoadNotesRequested();
+}
+
+class AddNoteSubmitted extends CollectionsEvent {
+  final String text;
+
+  const AddNoteSubmitted({required this.text});
+
+  @override
+  List<Object?> get props => [text];
+}

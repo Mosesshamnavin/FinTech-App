@@ -199,42 +199,119 @@ class _ReminderTabState extends State<_ReminderTab> {
   }
 }
 
-class _NotesTab extends StatelessWidget {
+class _NotesTab extends StatefulWidget {
   const _NotesTab();
 
   @override
+  State<_NotesTab> createState() => _NotesTabState();
+}
+
+class _NotesTabState extends State<_NotesTab> {
+  final TextEditingController _noteController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    context.read<CollectionsBloc>().add(const LoadNotesRequested());
+  }
+
+  @override
+  void dispose() {
+    _noteController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const Text('Notes', style: TextStyle(fontSize: 16)),
-          const SizedBox(height: 8),
-          const TextField(
-            maxLines: 8,
-            minLines: 8,
-            textAlignVertical: TextAlignVertical.top,
-            decoration: InputDecoration(
-              border: UnderlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
-              enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
-            ),
-          ),
-          const SizedBox(height: 16),
-          Center(
-            child: ElevatedButton(
-              onPressed: () {},
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.lightBlue.shade300,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+    return BlocListener<CollectionsBloc, CollectionsState>(
+      listener: (context, state) {
+        if (state is AddNoteActionSuccess) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Note saved successfully!')),
+          );
+          _noteController.clear();
+          context.read<CollectionsBloc>().add(const LoadNotesRequested());
+        } else if (state is AddNoteActionError) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(state.message), backgroundColor: Colors.red),
+          );
+        }
+      },
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const Text('Notes', style: TextStyle(fontSize: 16)),
+            const SizedBox(height: 8),
+            TextField(
+              controller: _noteController,
+              maxLines: 4,
+              minLines: 4,
+              textAlignVertical: TextAlignVertical.top,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
+                hintText: 'Type your note here...',
               ),
-              child: const Text('SAVE', style: TextStyle(fontSize: 16)),
             ),
-          ),
-          const SizedBox(height: 32),
-        ],
+            const SizedBox(height: 16),
+            Center(
+              child: ElevatedButton(
+                onPressed: () {
+                  if (_noteController.text.trim().isNotEmpty) {
+                    context.read<CollectionsBloc>().add(AddNoteSubmitted(text: _noteController.text));
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.lightBlue.shade300,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                ),
+                child: const Text('SAVE', style: TextStyle(fontSize: 16)),
+              ),
+            ),
+            const SizedBox(height: 24),
+            const Text('Past Notes', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black54)),
+            const Divider(),
+            Expanded(
+              child: BlocBuilder<CollectionsBloc, CollectionsState>(
+                buildWhen: (previous, current) {
+                  return current is NotesLoading || current is NotesLoaded || current is NotesError;
+                },
+                builder: (context, state) {
+                  if (state is NotesLoading) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (state is NotesError) {
+                    return Center(child: Text(state.message, style: const TextStyle(color: Colors.red)));
+                  } else if (state is NotesLoaded) {
+                    if (state.notes.isEmpty) {
+                      return const Center(child: Text('No notes found.', style: TextStyle(color: Colors.grey)));
+                    }
+                    return ListView.separated(
+                      itemCount: state.notes.length,
+                      separatorBuilder: (context, index) => const Divider(height: 1, color: Colors.grey),
+                      itemBuilder: (context, index) {
+                        final note = state.notes[index];
+                        // Parse timestamp if needed, or just display
+                        return ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          title: Text(note.text, style: const TextStyle(fontSize: 14)),
+                          subtitle: Text(
+                            note.createdAt, 
+                            style: const TextStyle(fontSize: 12, color: Colors.grey)
+                          ),
+                        );
+                      },
+                    );
+                  }
+                  return const SizedBox.shrink();
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

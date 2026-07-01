@@ -3,6 +3,7 @@ import '../../../../core/error/exceptions.dart';
 import '../../../../core/services/storage_service.dart';
 import '../models/collection_model.dart';
 import '../models/reminder_model.dart';
+import '../models/note_model.dart';
 import 'collection_remote_datasource.dart';
 
 class HasuraCollectionRemoteDataSourceImpl implements CollectionRemoteDataSource {
@@ -224,6 +225,74 @@ class HasuraCollectionRemoteDataSourceImpl implements CollectionRemoteDataSource
         id: json['id'],
         date: _formatDateFromHasura(json['date']),
         text: json['text'],
+      );
+    }).toList();
+  }
+
+  @override
+  Future<void> addNote(String text) async {
+    final userId = await storageService.getUserId();
+    if (userId == null) throw const ServerException('User not authenticated');
+
+    const String mutation = """
+      mutation addNote(\$text: String!, \$user_id: uuid!) {
+        insert_notes_one(object: {
+          text: \$text,
+          user_id: \$user_id
+        }) {
+          id
+        }
+      }
+    """;
+
+    final MutationOptions options = MutationOptions(
+      document: gql(mutation),
+      variables: {
+        'text': text,
+        'user_id': userId,
+      },
+    );
+
+    final QueryResult result = await client.mutate(options);
+
+    if (result.hasException) {
+      throw ServerException(result.exception.toString());
+    }
+  }
+
+  @override
+  Future<List<NoteModel>> getNotes() async {
+    final userId = await storageService.getUserId();
+    if (userId == null) throw const ServerException('User not authenticated');
+
+    const String query = """
+      query getNotes(\$userId: uuid!) {
+        notes(where: {user_id: {_eq: \$userId}}, order_by: {created_at: desc}) {
+          id
+          text
+          created_at
+        }
+      }
+    """;
+
+    final QueryOptions options = QueryOptions(
+      document: gql(query),
+      variables: {'userId': userId},
+      fetchPolicy: FetchPolicy.networkOnly,
+    );
+
+    final QueryResult result = await client.query(options);
+
+    if (result.hasException) {
+      throw ServerException(result.exception.toString());
+    }
+
+    final List data = result.data?['notes'] ?? [];
+    return data.map((json) {
+      return NoteModel(
+        id: json['id'],
+        text: json['text'],
+        createdAt: json['created_at'],
       );
     }).toList();
   }

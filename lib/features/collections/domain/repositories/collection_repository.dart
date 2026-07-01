@@ -2,6 +2,7 @@ import '../../../../core/error/failures.dart';
 import '../../../../core/utils/either.dart';
 import '../entities/collection_entity.dart';
 import '../entities/reminder_entity.dart';
+import '../entities/note_entity.dart';
 
 abstract class CollectionRepository {
   /// Fetches the daily collection sheet for a specific line, area, and date.
@@ -21,6 +22,15 @@ abstract class CollectionRepository {
     required String status,
   });
 
+  /// Adds a reminder
   Future<Either<Failure, void>> addReminder(String date, String text);
+  
+  /// Fetches reminders
   Future<Either<Failure, List<ReminderEntity>>> getReminders();
+
+  /// Adds a note
+  Future<Either<Failure, void>> addNote(String text);
+  
+  /// Fetches notes
+  Future<Either<Failure, List<NoteEntity>>> getNotes();
 }
