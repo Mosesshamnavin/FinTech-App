@@ -2,219 +2,50 @@ import 'package:vasooldrive/features/settings/presentation/bloc/settings_state.d
 import 'package:vasooldrive/features/settings/presentation/bloc/settings_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
+import '../../../../core/di/injection_container.dart';
 import '../../../../core/widgets/custom_dropdown.dart';
+import '../bloc/report_bloc.dart';
+import '../bloc/report_event.dart';
+import '../bloc/report_state.dart';
+import 'report_detail_page.dart';
 
 class MissingCustomerSummaryPage extends StatefulWidget {
   const MissingCustomerSummaryPage({super.key});
-
-  @override
-  State<MissingCustomerSummaryPage> createState() => _MissingCustomerSummaryPageState();
+  @override State<MissingCustomerSummaryPage> createState() => _MissingCustomerSummaryPageState();
 }
-
 class _MissingCustomerSummaryPageState extends State<MissingCustomerSummaryPage> {
-  bool _isFiltersExpanded = true;
-
-  String? _lineType;
-  String? _line;
-  bool _lineAll = true;
-  bool _searchByDate = true;
-  
-  final TextEditingController _fromDateController = TextEditingController();
-  final TextEditingController _toDateController = TextEditingController();
-
-  
-  
-
-  @override
-  void initState() {
-    super.initState();
-    final now = DateTime.now();
-    final firstDayOfYear = DateTime(now.year, 1, 1);
-    
-    _fromDateController.text = _formatDate(firstDayOfYear);
-    _toDateController.text = _formatDate(now);
-  }
-
-  @override
-  void dispose() {
-    _fromDateController.dispose();
-    _toDateController.dispose();
-    super.dispose();
-  }
-
-  String _formatDate(DateTime date) {
-    return "${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}";
-  }
-
-  Future<void> _selectDate(BuildContext context, TextEditingController controller) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2100),
-    );
-    if (picked != null) {
-      setState(() {
-        controller.text = _formatDate(picked);
-      });
-    }
-  }
-
-  Widget _buildDatePicker({
-    required String label,
-    required TextEditingController controller,
-  }) {
-    return TextField(
-      controller: controller,
-      readOnly: true,
-      onTap: () => _selectDate(context, controller),
-      decoration: InputDecoration(
-        labelText: label,
-        labelStyle: const TextStyle(color: Colors.black54),
-        floatingLabelBehavior: FloatingLabelBehavior.always,
-        suffixIcon: const Icon(Icons.calendar_today, color: Colors.lightBlue, size: 20),
-        border: const UnderlineInputBorder(
-          borderSide: BorderSide(color: Colors.grey),
-        ),
-        enabledBorder: const UnderlineInputBorder(
-          borderSide: BorderSide(color: Colors.grey),
-        ),
-        focusedBorder: const UnderlineInputBorder(
-          borderSide: BorderSide(color: Colors.grey),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSubmitButton() {
-    return Center(
-      child: ElevatedButton(
-        onPressed: () {
-          // Action for viewing report
-        },
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.lightBlue[300],
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(4),
-          ),
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-        ),
-        child: const Text(
-          'SUBMIT',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
-      ),
-    );
-  }
-
+  String? _line; bool _lineAll = true;
+  final TextEditingController _date = TextEditingController();
+  @override void initState() { super.initState(); _date.text = _fmt(DateTime.now()); }
+  @override void dispose() { _date.dispose(); super.dispose(); }
+  String _fmt(DateTime d) => "${d.day.toString().padLeft(2,'0')}/${d.month.toString().padLeft(2,'0')}/${d.year}";
+  Future<void> _pick() async { final p = await showDatePicker(context: context, initialDate: DateTime.now(), firstDate: DateTime(2000), lastDate: DateTime(2100)); if (p != null) setState(() => _date.text = _fmt(p)); }
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<SettingsBloc, SettingsState>(
-      builder: (context, settingsState) {
-        List<String> _mockLineTypes = [];
-        List<String> _mockLines = [];
-        List<String> _mockAreas = [];
-        
-        if (settingsState is SettingsLoaded) {
-          _mockLines = settingsState.lines.map((e) => e.name).toList();
-          _mockLineTypes = settingsState.lines.map((e) => e.type).toSet().toList(); // Unique types
-          _mockAreas = settingsState.areas.map((e) => e.name).toList();
-        }
-        
-        return Scaffold(
-      appBar: AppBar(
-        title: const Text('Missing Customer Summary'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, size: 20),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 16),
-            CustomDropdownFormField<String>(
-              label: 'Line Type',
-              value: _lineType,
-              items: _mockLineTypes.map((String val) {
-                return DropdownMenuItem<String>(
-                  value: val,
-                  child: Text(val),
-                );
-              }).toList(),
-              onChanged: (val) {
-                setState(() => _lineType = val);
-              },
-            ),
-            const SizedBox(height: 16),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Expanded(
-                  child: CustomDropdownFormField<String>(
-                    label: 'Line',
-                    value: _line,
-                    items: _mockLines.map((String val) {
-                      return DropdownMenuItem<String>(
-                        value: val,
-                        child: Text(val),
-                      );
-                    }).toList(),
-                    onChanged: (val) {
-                      setState(() => _line = val);
-                    },
-                  ),
-                ),
+    return BlocProvider(
+      create: (_) => sl<ReportBloc>(),
+      child: BlocConsumer<ReportBloc, ReportState>(
+        listener: (ctx, state) { if (state is ReportLoaded) Navigator.push(ctx, MaterialPageRoute(builder: (_) => ReportDetailPage(report: state.report))); },
+        builder: (ctx, state) => BlocBuilder<SettingsBloc, SettingsState>(builder: (context, ss) {
+          List<String> lines = ss is SettingsLoaded ? ss.lines.map((e) => e.name).toList() : [];
+          return Scaffold(
+            appBar: AppBar(title: const Text('Missing Customer Summary'), leading: IconButton(icon: const Icon(Icons.arrow_back_ios_new, size: 20), onPressed: () => Navigator.pop(context))),
+            body: SingleChildScrollView(padding: const EdgeInsets.all(16), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              const SizedBox(height: 16),
+              Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
+                Expanded(child: CustomDropdownFormField<String>(label: 'Line', value: _line, items: lines.map((v) => DropdownMenuItem(value: v, child: Text(v))).toList(), onChanged: (v) => setState(() { _line = v; _lineAll = false; }))),
                 const SizedBox(width: 16),
-                Row(
-                  children: [
-                    Checkbox(
-                      value: _lineAll,
-                      activeColor: Colors.lightBlue,
-                      onChanged: (val) {
-                        setState(() => _lineAll = val ?? false);
-                      },
-                    ),
-                    const Text('All'),
-                  ],
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            _buildDatePicker(
-              label: 'From Date',
-              controller: _fromDateController,
-            ),
-            const SizedBox(height: 16),
-            _buildDatePicker(
-              label: 'To Date',
-              controller: _toDateController,
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Checkbox(
-                  value: _searchByDate,
-                  activeColor: Colors.lightBlue,
-                  onChanged: (val) {
-                    setState(() => _searchByDate = val ?? false);
-                  },
-                ),
-                const Text(
-                  'Search By Date',
-                  style: TextStyle(fontSize: 16),
-                ),
-              ],
-            ),
-            const SizedBox(height: 32),
-            _buildSubmitButton(),
-          ],
-        ),
+                Row(children: [Checkbox(value: _lineAll, activeColor: Colors.lightBlue, onChanged: (v) => setState(() { _lineAll = v ?? true; if (_lineAll) _line = null; })), const Text('All')]),
+              ]),
+              const SizedBox(height: 16),
+              TextField(controller: _date, readOnly: true, onTap: _pick, decoration: const InputDecoration(labelText: 'Date', labelStyle: TextStyle(color: Colors.black54), floatingLabelBehavior: FloatingLabelBehavior.always, suffixIcon: Icon(Icons.calendar_today, color: Colors.lightBlue, size: 20), border: UnderlineInputBorder(), enabledBorder: UnderlineInputBorder(), focusedBorder: UnderlineInputBorder())),
+              const SizedBox(height: 32),
+              Center(child: state is ReportLoading ? const CircularProgressIndicator() : ElevatedButton(onPressed: () => ctx.read<ReportBloc>().add(LoadMissingCustomerSummaryRequested(date: _date.text, line: _lineAll ? null : _line)), style: ElevatedButton.styleFrom(backgroundColor: Colors.lightBlue[300], padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12)), child: const Text('SUBMIT', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)))),
+              if (state is ReportError) Padding(padding: const EdgeInsets.only(top: 16), child: Text(state.message, style: const TextStyle(color: Colors.red))),
+            ])),
+          );
+        }),
       ),
-    );
-      },
     );
   }
 }
