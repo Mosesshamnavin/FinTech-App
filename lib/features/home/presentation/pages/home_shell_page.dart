@@ -13,6 +13,13 @@ class HomeShellPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final String location = GoRouterState.of(context).uri.path;
+    final bool isMainPage = location == '/collections' ||
+                            location == '/expenses' ||
+                            location == '/customers' ||
+                            location == '/reports' ||
+                            location == '/settings';
+
     return PopScope(
       canPop: false,
       onPopInvoked: (didPop) async {
@@ -43,53 +50,56 @@ class HomeShellPage extends StatelessWidget {
       },
       child: Scaffold(
         body: navigationShell,
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: navigationShell.currentIndex,
-        onTap: (index) {
-          navigationShell.goBranch(
-            index,
-            initialLocation: index == navigationShell.currentIndex,
-          );
-        },
-        items: const [
-          BottomNavigationBarItem(
-            icon: Padding(
-              padding: EdgeInsets.only(bottom: 4.0),
-              child: FaIcon(FontAwesomeIcons.moneyBill1Wave, size: 20),
-            ),
-            label: 'Collection',
-          ),
-          BottomNavigationBarItem(
-            icon: Padding(
-              padding: EdgeInsets.only(bottom: 4.0),
-              child: FaIcon(FontAwesomeIcons.solidCreditCard, size: 20),
-            ),
-            label: 'Expense',
-          ),
-          BottomNavigationBarItem(
-            icon: Padding(
-              padding: EdgeInsets.only(bottom: 4.0),
-              child: FaIcon(FontAwesomeIcons.users, size: 20),
-            ),
-            label: 'Customer',
-          ),
-          BottomNavigationBarItem(
-            icon: Padding(
-              padding: EdgeInsets.only(bottom: 4.0),
-              child: FaIcon(FontAwesomeIcons.chartSimple, size: 20),
-            ),
-            label: 'Reports',
-          ),
-          BottomNavigationBarItem(
-            icon: Padding(
-              padding: EdgeInsets.only(bottom: 4.0),
-              child: FaIcon(FontAwesomeIcons.gear, size: 20),
-            ),
-            label: 'Settings',
-          ),
-        ],
+        bottomNavigationBar: isMainPage
+            ? BottomNavigationBar(
+                currentIndex: navigationShell.currentIndex,
+                type: BottomNavigationBarType.fixed,
+                onTap: (index) {
+                  navigationShell.goBranch(
+                    index,
+                    initialLocation: index == navigationShell.currentIndex,
+                  );
+                },
+                items: const [
+                  BottomNavigationBarItem(
+                    icon: Padding(
+                      padding: EdgeInsets.only(bottom: 4.0),
+                      child: FaIcon(FontAwesomeIcons.moneyBill1Wave, size: 20),
+                    ),
+                    label: 'Collection',
+                  ),
+                  BottomNavigationBarItem(
+                    icon: Padding(
+                      padding: EdgeInsets.only(bottom: 4.0),
+                      child: FaIcon(FontAwesomeIcons.solidCreditCard, size: 20),
+                    ),
+                    label: 'Expense',
+                  ),
+                  BottomNavigationBarItem(
+                    icon: Padding(
+                      padding: EdgeInsets.only(bottom: 4.0),
+                      child: FaIcon(FontAwesomeIcons.users, size: 20),
+                    ),
+                    label: 'Customer',
+                  ),
+                  BottomNavigationBarItem(
+                    icon: Padding(
+                      padding: EdgeInsets.only(bottom: 4.0),
+                      child: FaIcon(FontAwesomeIcons.chartSimple, size: 20),
+                    ),
+                    label: 'Reports',
+                  ),
+                  BottomNavigationBarItem(
+                    icon: Padding(
+                      padding: EdgeInsets.only(bottom: 4.0),
+                      child: FaIcon(FontAwesomeIcons.gear, size: 20),
+                    ),
+                    label: 'Settings',
+                  ),
+                ],
+              )
+            : null,
       ),
-    ),
     );
   }
 }

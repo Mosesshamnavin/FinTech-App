@@ -2,41 +2,51 @@ import 'package:vasooldrive/features/settings/presentation/bloc/settings_state.d
 import 'package:vasooldrive/features/settings/presentation/bloc/settings_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
+import '../../../../core/di/injection_container.dart';
 import '../../../../core/widgets/custom_dropdown.dart';
+import '../bloc/report_bloc.dart';
+import '../bloc/report_event.dart';
+import '../bloc/report_state.dart';
+import '../widgets/report_result_widget.dart';
 
-class AboutToCloseLoanSummaryPage extends StatefulWidget {
+class AboutToCloseLoanSummaryPage extends StatelessWidget {
   const AboutToCloseLoanSummaryPage({super.key});
 
   @override
-  State<AboutToCloseLoanSummaryPage> createState() => _AboutToCloseLoanSummaryPageState();
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (_) => sl<ReportBloc>(),
+      child: const _AboutToCloseLoanSummaryView(),
+    );
+  }
 }
 
-class _AboutToCloseLoanSummaryPageState extends State<AboutToCloseLoanSummaryPage> {
+class _AboutToCloseLoanSummaryView extends StatefulWidget {
+  const _AboutToCloseLoanSummaryView();
+
+  @override
+  State<_AboutToCloseLoanSummaryView> createState() => _AboutToCloseLoanSummaryViewState();
+}
+
+class _AboutToCloseLoanSummaryViewState extends State<_AboutToCloseLoanSummaryView> {
   bool _isFiltersExpanded = true;
-
-  String? _lineType;
   String? _line;
+  bool _lineAll = true;
+  final TextEditingController _daysController = TextEditingController(text: '30');
 
-  
-  
+  @override
+  void dispose() {
+    _daysController.dispose();
+    super.dispose();
+  }
 
-  Widget _buildSubmitButton() {
-    return Center(
-      child: ElevatedButton(
-        onPressed: () {
-          // Action for viewing report
-        },
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.lightBlue[300],
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(4),
-          ),
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-        ),
-        child: const Text(
-          'SUBMIT',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
+  void _onSubmit() {
+    setState(() { _isFiltersExpanded = false; });
+    final days = int.tryParse(_daysController.text) ?? 30;
+    context.read<ReportBloc>().add(
+      LoadAboutToCloseLoanSummaryRequested(
+        withinDays: days,
+        line: _lineAll ? null : _line,
       ),
     );
   }
@@ -45,63 +55,117 @@ class _AboutToCloseLoanSummaryPageState extends State<AboutToCloseLoanSummaryPag
   Widget build(BuildContext context) {
     return BlocBuilder<SettingsBloc, SettingsState>(
       builder: (context, settingsState) {
-        List<String> _mockLineTypes = [];
-        List<String> _mockLines = [];
-        List<String> _mockAreas = [];
-        
+        List<String> mockLines = [];
         if (settingsState is SettingsLoaded) {
-          _mockLines = settingsState.lines.map((e) => e.name).toList();
-          _mockLineTypes = settingsState.lines.map((e) => e.type).toSet().toList(); // Unique types
-          _mockAreas = settingsState.areas.map((e) => e.name).toList();
+          mockLines = settingsState.lines.map((e) => e.name).toList();
         }
-        
+
         return Scaffold(
-      appBar: AppBar(
-        title: const Text('About to Close Loan Summary'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, size: 20),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 16),
-            CustomDropdownFormField<String>(
-              label: 'Line Type',
-              value: _lineType,
-              items: _mockLineTypes.map((String val) {
-                return DropdownMenuItem<String>(
-                  value: val,
-                  child: Text(val),
-                );
-              }).toList(),
-              onChanged: (val) {
-                setState(() => _lineType = val);
-              },
+          appBar: AppBar(
+            title: const Text('About to Close Loan Summary'),
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back_ios_new, size: 20),
+              onPressed: () => Navigator.of(context).pop(),
             ),
-            const SizedBox(height: 16),
-            CustomDropdownFormField<String>(
-              label: 'Line',
-              value: _line,
-              items: _mockLines.map((String val) {
-                return DropdownMenuItem<String>(
-                  value: val,
-                  child: Text(val),
-                );
-              }).toList(),
-              onChanged: (val) {
-                setState(() => _line = val);
-              },
-            ),
-            const SizedBox(height: 64),
-            _buildSubmitButton(),
-          ],
-        ),
-      ),
-    );
+          ),
+          body: Column(
+            children: [
+              if (!_isFiltersExpanded)
+                ListTile(
+                  title: const Text('Edit Filters', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.lightBlue)),
+                  trailing: const Icon(Icons.edit, color: Colors.lightBlue, size: 20),
+                  onTap: () => setState(() => _isFiltersExpanded = true),
+                ),
+              if (_isFiltersExpanded)
+                SingleChildScrollView(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 16),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Expanded(
+                            child: CustomDropdownFormField<String>(
+                              label: 'Line',
+                              value: _line,
+                              items: mockLines.map((String val) {
+                                return DropdownMenuItem<String>(value: val, child: Text(val));
+                              }).toList(),
+                              onChanged: (val) {
+                                setState(() {
+                                  _line = val;
+                                  if (val != null) _lineAll = false;
+                                });
+                              },
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Row(
+                            children: [
+                              Checkbox(
+                                value: _lineAll,
+                                activeColor: Colors.lightBlue,
+                                onChanged: (val) {
+                                  setState(() {
+                                    _lineAll = val ?? false;
+                                    if (_lineAll) _line = null;
+                                  });
+                                },
+                              ),
+                              const Text('All'),
+                            ],
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      TextField(
+                        controller: _daysController,
+                        keyboardType: TextInputType.number,
+                        decoration: const InputDecoration(
+                          labelText: 'Closing Within Days',
+                          floatingLabelBehavior: FloatingLabelBehavior.always,
+                          border: UnderlineInputBorder(),
+                        ),
+                      ),
+                      const SizedBox(height: 32),
+                      Center(
+                        child: ElevatedButton(
+                          onPressed: _onSubmit,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.lightBlue[300],
+                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                          ),
+                          child: const Text(
+                            'SUBMIT',
+                            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              const Divider(),
+              Expanded(
+                child: BlocBuilder<ReportBloc, ReportState>(
+                  builder: (context, state) {
+                    if (state is ReportInitial) {
+                      return const Center(child: Text('Select filters and tap SUBMIT.'));
+                    } else if (state is ReportLoading) {
+                      return const Center(child: CircularProgressIndicator());
+                    } else if (state is ReportError) {
+                      return Center(child: Text(state.message, style: const TextStyle(color: Colors.red)));
+                    } else if (state is ReportLoaded) {
+                      return ReportResultWidget(report: state.report);
+                    }
+                    return const SizedBox.shrink();
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
       },
     );
   }

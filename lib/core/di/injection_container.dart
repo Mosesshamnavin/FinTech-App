@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -37,6 +36,7 @@ import '../../features/reports/domain/repositories/report_repository.dart';
 import '../../features/reports/domain/usecases/get_daily_summary_usecase.dart';
 import '../../features/reports/domain/usecases/get_line_summary_usecase.dart';
 import '../../features/reports/domain/usecases/get_new_customer_summary_usecase.dart';
+import '../../features/reports/domain/usecases/report_usecases.dart';
 import '../../features/reports/presentation/bloc/report_bloc.dart';
 import '../../features/reports/data/datasources/hasura_report_remote_datasource.dart';
 
@@ -248,14 +248,48 @@ Future<void> initDependencies() async {
   sl.registerLazySingleton<ReportRepository>(
     () => ReportRepositoryImpl(remoteDataSource: sl()),
   );
+  sl.registerLazySingleton(() => GetPlanReportUseCase(sl()));
   sl.registerLazySingleton(() => GetDailySummaryUseCase(sl()));
   sl.registerLazySingleton(() => GetLineSummaryUseCase(sl()));
   sl.registerLazySingleton(() => GetNewCustomerSummaryUseCase(sl()));
+  sl.registerLazySingleton(() => GetLoanSummaryUseCase(sl()));
+  sl.registerLazySingleton(() => GetExpenseSummaryUseCase(sl()));
+  sl.registerLazySingleton(() => GetCompletedLoanSummaryUseCase(sl()));
+  sl.registerLazySingleton(() => GetBadLoanSummaryUseCase(sl()));
+  sl.registerLazySingleton(() => GetMissingCustomerSummaryUseCase(sl()));
+  sl.registerLazySingleton(() => GetInvestmentSummaryUseCase(sl()));
+  sl.registerLazySingleton(() => GetInvestmentExpenseSummaryUseCase(sl()));
+  sl.registerLazySingleton(() => GetLedgerReportUseCase(sl()));
+  sl.registerLazySingleton(() => GetAboutToCloseLoanSummaryUseCase(sl()));
+  sl.registerLazySingleton(() => GetMonthlyInterestPendingSummaryUseCase(sl()));
+  sl.registerLazySingleton(() => GetNonPerformanceLoanSummaryUseCase(sl()));
+  sl.registerLazySingleton(() => GetNewBadLoanByDateSummaryUseCase(sl()));
+  sl.registerLazySingleton(() => GetLoanAnalysisUseCase(sl()));
+  sl.registerLazySingleton(() => GetOnlineCollectionSummaryUseCase(sl()));
+  sl.registerLazySingleton(() => GetSiteDashboardSummaryUseCase(sl()));
+  sl.registerLazySingleton(() => GetBookExcessLossSummaryUseCase(sl()));
 
   sl.registerFactory(() => ReportBloc(
+        getPlanReportUseCase: sl(),
         getDailySummaryUseCase: sl(),
         getLineSummaryUseCase: sl(),
         getNewCustomerSummaryUseCase: sl(),
+        getLoanSummaryUseCase: sl(),
+        getExpenseSummaryUseCase: sl(),
+        getCompletedLoanSummaryUseCase: sl(),
+        getBadLoanSummaryUseCase: sl(),
+        getMissingCustomerSummaryUseCase: sl(),
+        getInvestmentSummaryUseCase: sl(),
+        getInvestmentExpenseSummaryUseCase: sl(),
+        getLedgerReportUseCase: sl(),
+        getAboutToCloseLoanSummaryUseCase: sl(),
+        getMonthlyInterestPendingSummaryUseCase: sl(),
+        getNonPerformanceLoanSummaryUseCase: sl(),
+        getNewBadLoanByDateSummaryUseCase: sl(),
+        getLoanAnalysisUseCase: sl(),
+        getOnlineCollectionSummaryUseCase: sl(),
+        getSiteDashboardSummaryUseCase: sl(),
+        getBookExcessLossSummaryUseCase: sl(),
       ));
 
   // ---------------------------------------------------------------------------

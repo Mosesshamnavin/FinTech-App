@@ -48,6 +48,7 @@ import 'features/reports/presentation/pages/new_bad_loan_by_date_summary_page.da
 import 'features/reports/presentation/pages/loan_analysis_page.dart';
 import 'features/reports/presentation/pages/ledger_report_page.dart';
 import 'features/reports/presentation/pages/report_detail_page.dart';
+import 'features/reports/domain/entities/report_entity.dart';
 import 'features/reports/presentation/pages/reports_page.dart';
 import 'features/settings/presentation/pages/language_settings_page.dart';
 import 'features/settings/presentation/pages/my_settings_page.dart';
@@ -269,8 +270,8 @@ final GoRouter _router = GoRouter(
                 GoRoute(
                   path: ':reportId',
                   builder: (context, state) {
-                    final reportId = state.pathParameters['reportId']!;
-                    return ReportDetailPage(reportName: Uri.decodeComponent(reportId));
+                    final report = state.extra as ReportEntity;
+                    return ReportDetailPage(report: report);
                   },
                 ),
               ],
