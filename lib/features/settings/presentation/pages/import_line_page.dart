@@ -132,14 +132,14 @@ class _ImportLinePageState extends State<ImportLinePage> {
             ),
             const SizedBox(height: 16),
             Container(
-              color: Colors.grey.shade50,
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
               child: ExpansionTile(
                 title: Text('Help', style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.w500)),
-                iconColor: Colors.black,
-                collapsedIconColor: Colors.black,
+                iconColor: Theme.of(context).colorScheme.onSurface,
+                collapsedIconColor: Theme.of(context).colorScheme.onSurface,
                 children: [
                   Container(
-                    color: Colors.white,
+                    color: Theme.of(context).colorScheme.surface,
                     width: double.infinity,
                     padding: const EdgeInsets.all(16.0),
                     child: Column(
@@ -167,14 +167,14 @@ class _ImportLinePageState extends State<ImportLinePage> {
               ),
             ),
             Container(
-              color: Colors.grey.shade50,
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
               child: ExpansionTile(
                 title: Text('History', style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.w500)),
-                iconColor: Colors.black,
-                collapsedIconColor: Colors.black,
+                iconColor: Theme.of(context).colorScheme.onSurface,
+                collapsedIconColor: Theme.of(context).colorScheme.onSurface,
                 children: [
                   Container(
-                    color: Colors.white,
+                    color: Theme.of(context).colorScheme.surface,
                     width: double.infinity,
                     padding: const EdgeInsets.all(16.0),
                     child: const Text('No history available.'),

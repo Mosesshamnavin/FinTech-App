@@ -40,7 +40,7 @@ This document tracks completed achievements and pending todo tasks for the proje
 - [ ] **Download Sample CSV**: Generate sample CSV file structure for user guide in `import_line_page.dart`.
 
 ### 🔒 Security & Auth Settings
-- [ ] **Change Password**: Connect old/new password update mutation in `change_password_page.dart`.
-- [ ] **Fingerprint Toggles**: Save settings state to preferences in `enable_fingerprint_page.dart`.
-- [ ] **Security Alert**: Save OTP trigger flag locally in `enable_security_alert_page.dart`.
+- [x] **Change Password**: Connect old/new password update mutation in `change_password_page.dart`.
+- [x] **Fingerprint Toggles**: Save settings state to preferences in `enable_fingerprint_page.dart`.
+- [x] **Security Alert**: Save OTP trigger flag locally in `enable_security_alert_page.dart`.
 

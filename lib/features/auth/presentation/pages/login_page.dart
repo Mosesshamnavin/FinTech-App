@@ -104,7 +104,7 @@ class _LoginViewState extends State<_LoginView> {
                       hintText: 'Enter Your User Name',
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                       filled: true,
-                      fillColor: Colors.grey.shade50,
+                      fillColor: Theme.of(context).colorScheme.surface,
                       prefixIcon: const Icon(Icons.person_outline, color: Colors.grey),
                     ),
                     validator: (value) => value == null || value.trim().isEmpty ? 'Please enter your username' : null,
@@ -119,7 +119,7 @@ class _LoginViewState extends State<_LoginView> {
                       labelText: 'PASSWORD',
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                       filled: true,
-                      fillColor: Colors.grey.shade50,
+                      fillColor: Theme.of(context).colorScheme.surface,
                       prefixIcon: const Icon(Icons.lock_outline, color: Colors.grey),
                       suffixIcon: IconButton(
                         icon: Icon(

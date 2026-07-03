@@ -66,7 +66,7 @@ class _RegisterViewState extends State<_RegisterView> {
       labelText: label,
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
       filled: true,
-      fillColor: Colors.grey.shade50,
+      fillColor: Theme.of(context).colorScheme.surface,
       prefixIcon: Icon(icon, color: Colors.grey),
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
     );

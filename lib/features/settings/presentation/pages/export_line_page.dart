@@ -313,11 +313,11 @@ class _ExportLinePageState extends State<ExportLinePage> {
                   ),
                   const SizedBox(height: 24),
                   Container(
-                    decoration: BoxDecoration(color: Colors.grey.shade50),
+                    decoration: BoxDecoration(color: Theme.of(context).colorScheme.surfaceContainerHighest),
                     child: ExpansionTile(
                       title: Text('Export Fields', style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface)),
-                      iconColor: Colors.black,
-                      collapsedIconColor: Colors.black,
+                      iconColor: Theme.of(context).colorScheme.onSurface,
+                      collapsedIconColor: Theme.of(context).colorScheme.onSurface,
                       onExpansionChanged: (expanded) {
                         setState(() {
                           _isExportFieldsExpanded = expanded;
@@ -325,12 +325,12 @@ class _ExportLinePageState extends State<ExportLinePage> {
                       },
                       children: [
                         Container(
-                          color: Colors.white,
+                          color: Theme.of(context).colorScheme.surface,
                           child: Column(
                             children: _exportFields.keys.map((String key) {
                               return Container(
                                 decoration: BoxDecoration(
-                                  border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
+                                  border: Border(bottom: BorderSide(color: Theme.of(context).dividerColor)),
                                 ),
                                 child: SwitchListTile(
                                   title: Text(key),
