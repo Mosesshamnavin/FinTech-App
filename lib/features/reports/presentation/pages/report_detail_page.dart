@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/theme/app_colors.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../domain/entities/report_entity.dart';
 
@@ -33,7 +34,7 @@ class _ReportDetailPageState extends State<ReportDetailPage> {
             Container(
               margin: const EdgeInsets.all(12),
               padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(color: Colors.lightBlue.shade50, borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.lightBlue.shade200)),
+              decoration: BoxDecoration(color: Theme.of(context).colorScheme.primaryContainer, borderRadius: BorderRadius.circular(12), border: Border.all(color: Theme.of(context).colorScheme.primaryContainer)),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -45,7 +46,7 @@ class _ReportDetailPageState extends State<ReportDetailPage> {
                     children: report.summaryFields.entries.map((e) => Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(e.key, style: const TextStyle(color: Colors.black54, fontSize: 12)),
+                        Text(e.key, style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withAlpha(153), fontSize: 12)),
                         Text(e.value, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
                       ],
                     )).toList(),
@@ -76,7 +77,7 @@ class _ReportDetailPageState extends State<ReportDetailPage> {
                   scrollDirection: Axis.horizontal,
                   child: SingleChildScrollView(
                     child: DataTable(
-                      headingRowColor: WidgetStateProperty.all(Colors.lightBlue.shade100),
+                      headingRowColor: WidgetStateProperty.all(Theme.of(context).colorScheme.primaryContainer),
                       columnSpacing: 20,
                       dataRowMinHeight: 44,
                       dataRowMaxHeight: 56,

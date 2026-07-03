@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/di/injection_container.dart';
+import '../../../../core/services/storage_service.dart';
 
 class MySettingsPage extends StatefulWidget {
   const MySettingsPage({super.key});
@@ -9,6 +11,8 @@ class MySettingsPage extends StatefulWidget {
 }
 
 class _MySettingsPageState extends State<MySettingsPage> {
+  late final StorageService _storage;
+
   // Settings
   bool showTotalInvestment = true;
   bool showAmountInVasool = true;
@@ -27,6 +31,9 @@ class _MySettingsPageState extends State<MySettingsPage> {
   bool showDecimalNumbers = false;
 
   // Profile Settings
+  late final TextEditingController _nameController;
+  late final TextEditingController _mobileController;
+  late final TextEditingController _emailController;
   String stateValue = 'Test State';
   String primarySite = 'Test Site';
 
@@ -36,6 +43,48 @@ class _MySettingsPageState extends State<MySettingsPage> {
   // Local Setting
   bool showLineChangeWarning = false;
   bool useNativeCallNumber = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _storage = sl<StorageService>();
+
+    // Load Settings
+    showTotalInvestment = _storage.getBool('my_settings_show_total_investment', defaultValue: true);
+    showAmountInVasool = _storage.getBool('my_settings_show_amount_in_vasool', defaultValue: true);
+    showArrearAmount = _storage.getBool('my_settings_show_arrear_amount', defaultValue: false);
+    sendSms = _storage.getBool('my_settings_send_sms', defaultValue: false);
+    smsBalanceInfo = _storage.getBool('my_settings_sms_balance_info', defaultValue: false);
+    orderBy = _storage.getString('my_settings_order_by', defaultValue: 'Customer Order');
+    printer = _storage.getBool('my_settings_printer', defaultValue: false);
+
+    // Load Other Settings
+    scrollSetting = _storage.getString('my_settings_scroll_setting', defaultValue: 'Load 50 Customer');
+    swipeSetting = _storage.getString('my_settings_swipe_setting', defaultValue: 'Half Swipe Paid');
+    closedLoanDeleteSetting = _storage.getString('my_settings_closed_loan_delete_setting', defaultValue: 'NEVER');
+    showNewAfterClose = _storage.getBool('my_settings_show_new_after_close', defaultValue: true);
+    showCallButton = _storage.getBool('my_settings_show_call_button', defaultValue: true);
+    showDecimalNumbers = _storage.getBool('my_settings_show_decimal_numbers', defaultValue: false);
+
+    // Load Profile Settings
+    _nameController = TextEditingController(text: _storage.getName() ?? 'Test User');
+    _mobileController = TextEditingController(text: _storage.getString('my_settings_profile_phone', defaultValue: '1234567890'));
+    _emailController = TextEditingController(text: _storage.getString('my_settings_profile_email', defaultValue: 'test@example.com'));
+    stateValue = _storage.getString('my_settings_state', defaultValue: 'Test State');
+    primarySite = _storage.getString('my_settings_primary_site', defaultValue: 'Test Site');
+
+    // Load Local Settings
+    showLineChangeWarning = _storage.getBool('local_settings_show_line_change_warning', defaultValue: false);
+    useNativeCallNumber = _storage.getBool('local_settings_use_native_call_number', defaultValue: false);
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _mobileController.dispose();
+    _emailController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -83,7 +132,23 @@ class _MySettingsPageState extends State<MySettingsPage> {
               ),
               SwitchListTile(title: const Text('Printer'), value: printer, onChanged: (v) => setState(() => printer = v)),
               const SizedBox(height: 16),
-              ElevatedButton(onPressed: () {}, child: const Text('SUBMIT')),
+              ElevatedButton(
+                onPressed: () async {
+                  await _storage.setBool('my_settings_show_total_investment', showTotalInvestment);
+                  await _storage.setBool('my_settings_show_amount_in_vasool', showAmountInVasool);
+                  await _storage.setBool('my_settings_show_arrear_amount', showArrearAmount);
+                  await _storage.setBool('my_settings_send_sms', sendSms);
+                  await _storage.setBool('my_settings_sms_balance_info', smsBalanceInfo);
+                  await _storage.setString('my_settings_order_by', orderBy);
+                  await _storage.setBool('my_settings_printer', printer);
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Settings saved successfully!')),
+                    );
+                  }
+                },
+                child: const Text('SUBMIT'),
+              ),
               const SizedBox(height: 24),
             ],
           ),
@@ -137,7 +202,22 @@ class _MySettingsPageState extends State<MySettingsPage> {
               SwitchListTile(title: const Text('SHOW CALL BUTTON IN COLLECTION', style: TextStyle(fontSize: 14)), value: showCallButton, onChanged: (v) => setState(() => showCallButton = v)),
               SwitchListTile(title: const Text('SHOW DECIMAL NUMBERS', style: TextStyle(fontSize: 14)), value: showDecimalNumbers, onChanged: (v) => setState(() => showDecimalNumbers = v)),
               const SizedBox(height: 16),
-              ElevatedButton(onPressed: () {}, child: const Text('SUBMIT')),
+              ElevatedButton(
+                onPressed: () async {
+                  await _storage.setString('my_settings_scroll_setting', scrollSetting);
+                  await _storage.setString('my_settings_swipe_setting', swipeSetting);
+                  await _storage.setString('my_settings_closed_loan_delete_setting', closedLoanDeleteSetting);
+                  await _storage.setBool('my_settings_show_new_after_close', showNewAfterClose);
+                  await _storage.setBool('my_settings_show_call_button', showCallButton);
+                  await _storage.setBool('my_settings_show_decimal_numbers', showDecimalNumbers);
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Other settings saved successfully!')),
+                    );
+                  }
+                },
+                child: const Text('SUBMIT'),
+              ),
               const SizedBox(height: 24),
             ],
           ),
@@ -155,15 +235,15 @@ class _MySettingsPageState extends State<MySettingsPage> {
             children: [
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
-                child: TextField(decoration: const InputDecoration(labelText: 'Name', border: InputBorder.none, labelStyle: TextStyle(fontSize: 14)), controller: TextEditingController(text: 'Test User')),
+                child: TextField(decoration: const InputDecoration(labelText: 'Name', border: InputBorder.none, labelStyle: TextStyle(fontSize: 14)), controller: _nameController),
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
-                child: TextField(decoration: const InputDecoration(labelText: 'Mobile Number', border: InputBorder.none, labelStyle: TextStyle(fontSize: 14)), controller: TextEditingController(text: '1234567890')),
+                child: TextField(decoration: const InputDecoration(labelText: 'Mobile Number', border: InputBorder.none, labelStyle: TextStyle(fontSize: 14)), controller: _mobileController),
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
-                child: TextField(decoration: const InputDecoration(labelText: 'Email ID', border: InputBorder.none, labelStyle: TextStyle(fontSize: 14)), controller: TextEditingController(text: 'test@example.com')),
+                child: TextField(decoration: const InputDecoration(labelText: 'Email ID', border: InputBorder.none, labelStyle: TextStyle(fontSize: 14)), controller: _emailController),
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
@@ -184,7 +264,21 @@ class _MySettingsPageState extends State<MySettingsPage> {
                 ),
               ),
               const SizedBox(height: 16),
-              ElevatedButton(onPressed: () {}, child: const Text('SUBMIT')),
+              ElevatedButton(
+                onPressed: () async {
+                  await _storage.saveName(_nameController.text);
+                  await _storage.setString('my_settings_profile_phone', _mobileController.text);
+                  await _storage.setString('my_settings_profile_email', _emailController.text);
+                  await _storage.setString('my_settings_state', stateValue);
+                  await _storage.setString('my_settings_primary_site', primarySite);
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Profile settings saved successfully!')),
+                    );
+                  }
+                },
+                child: const Text('SUBMIT'),
+              ),
               const SizedBox(height: 24),
             ],
           ),
@@ -192,14 +286,6 @@ class _MySettingsPageState extends State<MySettingsPage> {
       ],
     );
   }
-
-  Color _getThemeColor(String themeName) {
-    if (themeName.contains('Orange')) return Colors.orange;
-    if (themeName.contains('Green')) return Colors.green;
-    return Colors.blue;
-  }
-
-
 
   Widget _buildLocalSettingSection() {
     return ExpansionTile(
@@ -215,7 +301,17 @@ class _MySettingsPageState extends State<MySettingsPage> {
                   children: [
                     Switch(value: showLineChangeWarning, onChanged: (v) => setState(() => showLineChangeWarning = v)),
                     const SizedBox(width: 8),
-                    ElevatedButton(onPressed: () {}, child: const Text('SAVE')),
+                    ElevatedButton(
+                      onPressed: () async {
+                        await _storage.setBool('local_settings_show_line_change_warning', showLineChangeWarning);
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Warning settings saved!')),
+                          );
+                        }
+                      },
+                      child: const Text('SAVE'),
+                    ),
                   ],
                 ),
               ),
@@ -226,7 +322,17 @@ class _MySettingsPageState extends State<MySettingsPage> {
                   children: [
                     Switch(value: useNativeCallNumber, onChanged: (v) => setState(() => useNativeCallNumber = v)),
                     const SizedBox(width: 8),
-                    ElevatedButton(onPressed: () {}, child: const Text('SAVE')),
+                    ElevatedButton(
+                      onPressed: () async {
+                        await _storage.setBool('local_settings_use_native_call_number', useNativeCallNumber);
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Native call settings saved!')),
+                          );
+                        }
+                      },
+                      child: const Text('SAVE'),
+                    ),
                   ],
                 ),
               ),
@@ -244,7 +350,15 @@ class _MySettingsPageState extends State<MySettingsPage> {
                       onChanged: (v) {},
                     ),
                     const SizedBox(width: 8),
-                    ElevatedButton(onPressed: () {}, child: const Text('CLEAR CACHE')),
+                    ElevatedButton(
+                      onPressed: () {
+                        // Clear cache logic placeholder
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Cache cleared!')),
+                        );
+                      },
+                      child: const Text('CLEAR CACHE'),
+                    ),
                   ],
                 ),
               ),

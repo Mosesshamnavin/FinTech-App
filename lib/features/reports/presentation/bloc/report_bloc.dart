@@ -1,7 +1,4 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../domain/usecases/get_daily_summary_usecase.dart';
-import '../../domain/usecases/get_line_summary_usecase.dart';
-import '../../domain/usecases/get_new_customer_summary_usecase.dart';
 import '../../domain/usecases/report_usecases.dart';
 import 'report_event.dart';
 import 'report_state.dart';

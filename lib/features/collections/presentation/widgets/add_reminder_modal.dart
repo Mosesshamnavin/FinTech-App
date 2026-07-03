@@ -63,9 +63,9 @@ class _AddReminderModalState extends State<AddReminderModal> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('Add Reminder', style: TextStyle(fontSize: 18, color: Colors.black87)),
+                  Text('Add Reminder', style: TextStyle(fontSize: 18, color: Theme.of(context).colorScheme.onSurface)),
                   IconButton(
-                    icon: const Icon(Icons.close, size: 24),
+                    icon: Icon(Icons.close, size: 24),
                     onPressed: () => Navigator.of(context).pop(),
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(),
@@ -83,22 +83,22 @@ class _AddReminderModalState extends State<AddReminderModal> {
                     controller: _dateController,
                     readOnly: true,
                     onTap: _selectDate,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       labelText: 'Date',
-                      labelStyle: TextStyle(color: Colors.black87),
+                      labelStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface),
                       border: UnderlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
                       enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
                     ),
                   ),
                   const SizedBox(height: 24),
-                  const Text('Reminder Text', style: TextStyle(fontSize: 16, color: Colors.black87)),
+                  Text('Reminder Text', style: TextStyle(fontSize: 16, color: Theme.of(context).colorScheme.onSurface)),
                   const SizedBox(height: 8),
                   TextField(
                     controller: _textController,
                     maxLines: 8,
                     minLines: 8,
                     textAlignVertical: TextAlignVertical.top,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       border: UnderlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
                       enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
                     ),
@@ -118,12 +118,12 @@ class _AddReminderModalState extends State<AddReminderModal> {
                         context.read<CollectionsBloc>().add(AddReminderSubmitted(date: date, text: text));
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.lightBlue.shade300,
+                        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
                         foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
                         padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
                       ),
-                      child: const Text('SUBMIT', style: TextStyle(fontSize: 16)),
+                      child: Text('SUBMIT', style: TextStyle(fontSize: 16)),
                     ),
                   ),
                 ],

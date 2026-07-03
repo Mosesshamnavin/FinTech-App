@@ -22,17 +22,17 @@ class RemindersNotesPage extends StatelessWidget {
           backgroundColor: Colors.white,
           centerTitle: true,
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back_ios_new, size: 20, color: Colors.black87),
+            icon: Icon(Icons.arrow_back_ios_new, size: 20, color: Theme.of(context).colorScheme.onSurface),
             onPressed: () => Navigator.of(context).pop(),
           ),
           actions: const [
             SizedBox(width: 48), // Balances the leading back button for perfect centering
           ],
           titleSpacing: 0,
-          title: const TabBar(
-            labelColor: Colors.lightBlue,
+          title: TabBar(
+            labelColor: Theme.of(context).colorScheme.primary,
             unselectedLabelColor: Colors.grey,
-            indicatorColor: Colors.lightBlue,
+            indicatorColor: Theme.of(context).colorScheme.primary,
             indicatorSize: TabBarIndicatorSize.tab,
             indicatorWeight: 3,
             tabs: [
@@ -73,10 +73,10 @@ class _ReminderTabState extends State<_ReminderTab> {
       length: 2,
       child: Column(
         children: [
-          const TabBar(
-            labelColor: Colors.lightBlue,
+          TabBar(
+            labelColor: Theme.of(context).colorScheme.primary,
             unselectedLabelColor: Colors.grey,
-            indicatorColor: Colors.lightBlue,
+            indicatorColor: Theme.of(context).colorScheme.primary,
             indicatorSize: TabBarIndicatorSize.tab,
             tabs: [
               Tab(text: 'TODAY'),
@@ -96,7 +96,7 @@ class _ReminderTabState extends State<_ReminderTab> {
                           ElevatedButton(
                             onPressed: () {},
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.lightBlue.shade600,
+                              backgroundColor: Theme.of(context).colorScheme.primaryContainer,
                               foregroundColor: Colors.white,
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
                               padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -107,7 +107,7 @@ class _ReminderTabState extends State<_ReminderTab> {
                           ElevatedButton(
                             onPressed: () {},
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.lightBlue.shade600,
+                              backgroundColor: Theme.of(context).colorScheme.primaryContainer,
                               foregroundColor: Colors.white,
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
                               padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -129,7 +129,7 @@ class _ReminderTabState extends State<_ReminderTab> {
                                 bloc.add(const LoadRemindersRequested());
                               }
                             },
-                            icon: const Icon(Icons.add, size: 28),
+                            icon: Icon(Icons.add, size: 28),
                           ),
                         ],
                       ),
@@ -141,7 +141,7 @@ class _ReminderTabState extends State<_ReminderTab> {
                             if (state is RemindersLoading) {
                               return const Center(child: CircularProgressIndicator());
                             } else if (state is RemindersError) {
-                              return Center(child: Text(state.message, style: const TextStyle(color: Colors.red)));
+                              return Center(child: Text(state.message, style: TextStyle(color: Theme.of(context).colorScheme.error)));
                             } else if (state is RemindersLoaded) {
                               if (state.reminders.isEmpty) {
                                 return const Center(child: Text('No reminders found.', style: TextStyle(color: Colors.grey)));
@@ -177,7 +177,7 @@ class _ReminderTabState extends State<_ReminderTab> {
                           ElevatedButton(
                             onPressed: () {},
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.lightBlue.shade600,
+                              backgroundColor: Theme.of(context).colorScheme.primaryContainer,
                               foregroundColor: Colors.white,
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
                               padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -249,7 +249,7 @@ class _NotesTabState extends State<_NotesTab> {
               maxLines: 4,
               minLines: 4,
               textAlignVertical: TextAlignVertical.top,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 border: OutlineInputBorder(),
                 enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
                 hintText: 'Type your note here...',
@@ -264,7 +264,7 @@ class _NotesTabState extends State<_NotesTab> {
                   }
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.lightBlue.shade300,
+                  backgroundColor: Theme.of(context).colorScheme.primaryContainer,
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
                   padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
@@ -273,7 +273,7 @@ class _NotesTabState extends State<_NotesTab> {
               ),
             ),
             const SizedBox(height: 24),
-            const Text('Past Notes', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black54)),
+            Text('Past Notes', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface.withAlpha(153))),
             const Divider(),
             Expanded(
               child: BlocBuilder<CollectionsBloc, CollectionsState>(
@@ -284,7 +284,7 @@ class _NotesTabState extends State<_NotesTab> {
                   if (state is NotesLoading) {
                     return const Center(child: CircularProgressIndicator());
                   } else if (state is NotesError) {
-                    return Center(child: Text(state.message, style: const TextStyle(color: Colors.red)));
+                    return Center(child: Text(state.message, style: TextStyle(color: Theme.of(context).colorScheme.error)));
                   } else if (state is NotesLoaded) {
                     if (state.notes.isEmpty) {
                       return const Center(child: Text('No notes found.', style: TextStyle(color: Colors.grey)));

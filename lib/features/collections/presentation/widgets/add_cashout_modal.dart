@@ -70,7 +70,7 @@ class _AddCashOutModalState extends State<AddCashOutModal> {
                     builder: (context, state) {
                       if (state is SettingsLoaded) {
                         return DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
+                          decoration: InputDecoration(
                             contentPadding: EdgeInsets.symmetric(vertical: 8.0),
                           ),
                           isExpanded: true,
@@ -95,7 +95,7 @@ class _AddCashOutModalState extends State<AddCashOutModal> {
                   const SizedBox(height: 8),
                   TextField(
                     controller: _amountController,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       labelText: 'Amount',
                     ),
                     keyboardType: TextInputType.number,
@@ -104,12 +104,12 @@ class _AddCashOutModalState extends State<AddCashOutModal> {
                   InkWell(
                     onTap: () => _selectDate(context),
                     child: InputDecorator(
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         labelText: 'Date',
                         floatingLabelBehavior: FloatingLabelBehavior.always,
                         suffixIcon: Padding(
                           padding: EdgeInsets.only(top: 14.0, bottom: 14.0),
-                          child: FaIcon(FontAwesomeIcons.calendarDay, color: Colors.lightBlue, size: 20),
+                          child: FaIcon(FontAwesomeIcons.calendarDay, color: Theme.of(context).colorScheme.primary, size: 20),
                         ),
                         suffixIconConstraints: BoxConstraints(minWidth: 40, minHeight: 0),
                       ),
@@ -119,14 +119,14 @@ class _AddCashOutModalState extends State<AddCashOutModal> {
                   const SizedBox(height: 8),
                   TextField(
                     controller: _nameController,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       labelText: 'Name',
                     ),
                   ),
                   const SizedBox(height: 8),
                   TextField(
                     controller: _commentsController,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       labelText: 'Comments',
                     ),
                   ),

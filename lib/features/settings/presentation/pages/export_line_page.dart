@@ -132,7 +132,7 @@ class _ExportLinePageState extends State<ExportLinePage> {
                   Text(label, style: const TextStyle(fontSize: 12, color: Colors.green)),
                 Text(
                   displayValue ?? label,
-                  style: TextStyle(fontSize: 16, color: isOpen ? Colors.redAccent : Colors.black87),
+                  style: TextStyle(fontSize: 16, color: isOpen ? Colors.redAccent : Theme.of(context).colorScheme.onSurface),
                 ),
               ],
             ),
@@ -159,11 +159,11 @@ class _ExportLinePageState extends State<ExportLinePage> {
             icon: const Icon(Icons.arrow_back_ios_new, size: 20),
             onPressed: () => Navigator.of(context).pop(),
           ),
-          bottom: const TabBar(
-            labelColor: Colors.lightBlue,
+          bottom: TabBar(
+            labelColor: Theme.of(context).colorScheme.primary,
             unselectedLabelColor: Colors.grey,
-            indicatorColor: Colors.lightBlue,
-            tabs: [
+            indicatorColor: Theme.of(context).colorScheme.primary,
+            tabs: const [
               Tab(text: 'DOWNLOAD'),
               Tab(text: 'EXPORT'),
             ],
@@ -237,7 +237,7 @@ class _ExportLinePageState extends State<ExportLinePage> {
                         Switch(
                           value: _groupCustomerByArea,
                           onChanged: (val) => setState(() => _groupCustomerByArea = val),
-                          activeColor: Colors.lightBlue,
+                          activeColor: Theme.of(context).colorScheme.primary,
                         ),
                       ],
                     ),
@@ -246,7 +246,7 @@ class _ExportLinePageState extends State<ExportLinePage> {
                   ElevatedButton(
                     onPressed: () {},
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.lightBlue.shade600,
+                      backgroundColor: Theme.of(context).colorScheme.primaryContainer,
                       foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
                       padding: const EdgeInsets.symmetric(vertical: 16),
@@ -282,7 +282,7 @@ class _ExportLinePageState extends State<ExportLinePage> {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text('Line', style: TextStyle(fontSize: 16, color: _isExportLineOpen ? Colors.redAccent : Colors.black87)),
+                                Text('Line', style: TextStyle(fontSize: 16, color: _isExportLineOpen ? Colors.redAccent : Theme.of(context).colorScheme.onSurface)),
                                 Icon(_isExportLineOpen ? Icons.arrow_drop_up : Icons.arrow_drop_down, color: _isExportLineOpen ? Colors.redAccent : Colors.grey),
                               ],
                             ),
@@ -294,7 +294,7 @@ class _ExportLinePageState extends State<ExportLinePage> {
                             Checkbox(
                               value: _isAllLines,
                               onChanged: (val) => setState(() => _isAllLines = val!),
-                              activeColor: Colors.lightBlue,
+                              activeColor: Theme.of(context).colorScheme.primary,
                             ),
                             const Text('All', style: TextStyle(fontSize: 16)),
                           ],
@@ -304,7 +304,7 @@ class _ExportLinePageState extends State<ExportLinePage> {
                   ),
                   const SizedBox(height: 16),
                   TextField(
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       labelText: 'Email ID',
                       labelStyle: TextStyle(fontSize: 12),
                       border: UnderlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
@@ -315,7 +315,7 @@ class _ExportLinePageState extends State<ExportLinePage> {
                   Container(
                     decoration: BoxDecoration(color: Colors.grey.shade50),
                     child: ExpansionTile(
-                      title: const Text('Export Fields', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black87)),
+                      title: Text('Export Fields', style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface)),
                       iconColor: Colors.black,
                       collapsedIconColor: Colors.black,
                       onExpansionChanged: (expanded) {
@@ -340,7 +340,7 @@ class _ExportLinePageState extends State<ExportLinePage> {
                                       _exportFields[key] = val;
                                     });
                                   },
-                                  activeColor: Colors.lightBlue,
+                                  activeColor: Theme.of(context).colorScheme.primary,
                                   contentPadding: const EdgeInsets.symmetric(horizontal: 16.0),
                                 ),
                               );
@@ -354,7 +354,7 @@ class _ExportLinePageState extends State<ExportLinePage> {
                   ElevatedButton(
                     onPressed: () {},
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.lightBlue.shade600,
+                      backgroundColor: Theme.of(context).colorScheme.primaryContainer,
                       foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
                       padding: const EdgeInsets.symmetric(vertical: 16),

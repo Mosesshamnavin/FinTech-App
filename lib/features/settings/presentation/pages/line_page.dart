@@ -36,7 +36,7 @@ class LinePage extends StatelessWidget {
           if (state is SettingsLoading) {
             return const Center(child: CircularProgressIndicator());
           } else if (state is SettingsError) {
-            return Center(child: Text(state.message, style: const TextStyle(color: Colors.red)));
+            return Center(child: Text(state.message, style: TextStyle(color: Theme.of(context).colorScheme.error)));
           } else if (state is SettingsLoaded) {
             if (state.lines.isEmpty) {
               return const Center(child: Text('No Lines found.'));
@@ -51,7 +51,7 @@ class LinePage extends StatelessWidget {
                       ElevatedButton(
                         onPressed: () {},
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.lightBlue.shade600,
+                          backgroundColor: Theme.of(context).colorScheme.primaryContainer,
                           foregroundColor: Colors.white,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(4),
@@ -78,7 +78,7 @@ class LinePage extends StatelessWidget {
                         context.push('/settings/move-line-customer');
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.lightBlue.shade600,
+                        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
                         foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(4),

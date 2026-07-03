@@ -1,4 +1,5 @@
 import 'core/theme/app_theme.dart';
+import 'core/services/storage_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -74,6 +75,9 @@ import 'features/settings/presentation/pages/support_page.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await di.initDependencies();
+  // Restore saved theme before widget tree builds
+  final savedTheme = di.sl<StorageService>().getString('app_theme', defaultValue: 'Blue');
+  AppTheme.themeNotifier.value = savedTheme;
   runApp(const MyApp());
 }
 

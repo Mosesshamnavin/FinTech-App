@@ -86,11 +86,11 @@ class _AddLineModalState extends State<AddLineModal> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('CANCEL', style: TextStyle(color: Colors.lightBlue)),
+                  child: Text('CANCEL', style: TextStyle(color: Theme.of(context).colorScheme.primary)),
                 ),
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('OK', style: TextStyle(color: Colors.lightBlue)),
+                  child: Text('OK', style: TextStyle(color: Theme.of(context).colorScheme.primary)),
                 ),
               ],
             );
@@ -140,7 +140,7 @@ class _AddLineModalState extends State<AddLineModal> {
                         children: [
                           Text(
                             _selectedLineType ?? 'Line Type',
-                            style: TextStyle(fontSize: 16, color: _isLineTypeOpen ? Colors.redAccent : Colors.black87),
+                            style: TextStyle(fontSize: 16, color: _isLineTypeOpen ? Colors.redAccent : Theme.of(context).colorScheme.onSurface),
                           ),
                           Icon(
                             _isLineTypeOpen ? Icons.arrow_drop_up : Icons.arrow_drop_down,
@@ -219,7 +219,7 @@ class _AddLineModalState extends State<AddLineModal> {
           title: Text(title),
           value: value,
           onChanged: onChanged,
-          activeColor: Colors.lightBlue,
+          activeColor: Theme.of(context).colorScheme.primary,
         ),
         const Divider(height: 1),
       ],
@@ -265,14 +265,14 @@ class _AddLineModalState extends State<AddLineModal> {
                             children: [
                               IconButton(
                                 onPressed: () {},
-                                icon: const Icon(Icons.camera_alt, color: Colors.white),
-                                style: IconButton.styleFrom(backgroundColor: Colors.lightBlue, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4))),
+                                icon: Icon(Icons.camera_alt, color: Colors.white),
+                                style: IconButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.primary, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4))),
                               ),
                               const SizedBox(width: 8),
                               IconButton(
                                 onPressed: () {},
-                                icon: const Icon(Icons.delete, color: Colors.white),
-                                style: IconButton.styleFrom(backgroundColor: Colors.lightBlue, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4))),
+                                icon: Icon(Icons.delete, color: Colors.white),
+                                style: IconButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.primary, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4))),
                               ),
                             ],
                           ),

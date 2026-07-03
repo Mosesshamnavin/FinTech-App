@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/widgets/custom_dropdown.dart';
+import '../../../../core/theme/app_colors.dart';
 
 import '../../../../core/di/injection_container.dart';
 import '../bloc/customers_bloc.dart';
@@ -96,8 +97,8 @@ class _CustomersViewState extends State<_CustomersView> {
                           context.read<CustomersBloc>().add(const LoadCustomersRequested());
                         },
                         style: OutlinedButton.styleFrom(
-                          side: const BorderSide(color: Colors.red),
-                          foregroundColor: Colors.red,
+                          side: BorderSide(color: context.danger),
+                          foregroundColor: context.danger,
                         ),
                         child: const Text('CLEAR'),
                       ),
@@ -130,7 +131,7 @@ class _CustomersViewState extends State<_CustomersView> {
                   return Center(
                     child: Text(
                       state.message,
-                      style: const TextStyle(color: Colors.red),
+                      style: TextStyle(color: context.danger),
                     ),
                   );
                 } else if (state is CustomersLoaded) {
@@ -160,12 +161,12 @@ class _CustomersViewState extends State<_CustomersView> {
                         elevation: 0,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
-                          side: BorderSide(color: Colors.grey.shade300),
+                          side: BorderSide(color: context.surfaceVariant),
                         ),
                         child: ListTile(
                           leading: CircleAvatar(
-                            backgroundColor: Colors.blue.shade100,
-                            child: const Icon(Icons.person, color: Colors.blue),
+                            backgroundColor: context.primaryContainer,
+                            child: Icon(Icons.person, color: context.primary),
                           ),
                           title: Text(
                             customer.name,
@@ -177,7 +178,7 @@ class _CustomersViewState extends State<_CustomersView> {
                               Text(customer.phone),
                               Text(
                                 '$lineName - $areaName',
-                                style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+                                style: TextStyle(color: context.textSecondary, fontSize: 12),
                               ),
                             ],
                           ),

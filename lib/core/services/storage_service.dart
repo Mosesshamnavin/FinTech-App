@@ -59,7 +59,23 @@ class StorageService {
     await _prefs.setString(AppConfig.kTheme, theme);
   }
 
-  String getTheme() => _prefs.getString(AppConfig.kTheme) ?? 'Blue';
+  // ─── Generic Preferences ──────────────────────────────────────────────────
+
+  Future<void> setBool(String key, bool value) async {
+    await _prefs.setBool(key, value);
+  }
+
+  bool getBool(String key, {bool defaultValue = false}) {
+    return _prefs.getBool(key) ?? defaultValue;
+  }
+
+  Future<void> setString(String key, String value) async {
+    await _prefs.setString(key, value);
+  }
+
+  String getString(String key, {String defaultValue = ''}) {
+    return _prefs.getString(key) ?? defaultValue;
+  }
 
   // ─── Clear ────────────────────────────────────────────────────────────────
 

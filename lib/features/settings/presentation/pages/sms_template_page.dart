@@ -73,7 +73,7 @@ class _SmsTemplatePageState extends State<SmsTemplatePage> with SingleTickerProv
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text(label, style: const TextStyle(fontWeight: FontWeight.normal)),
+          title: Text(label, style: TextStyle(fontWeight: FontWeight.normal)),
           contentPadding: const EdgeInsets.only(top: 16.0),
           content: SingleChildScrollView(
             child: Column(
@@ -94,7 +94,7 @@ class _SmsTemplatePageState extends State<SmsTemplatePage> with SingleTickerProv
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('CANCEL', style: TextStyle(color: Colors.cyan)),
+              child: Text('CANCEL', style: TextStyle(color: Colors.cyan)),
             ),
           ],
         );
@@ -126,10 +126,10 @@ class _SmsTemplatePageState extends State<SmsTemplatePage> with SingleTickerProv
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 if (displayValue != null)
-                  Text(label, style: const TextStyle(fontSize: 12, color: Colors.green)),
+                  Text(label, style: TextStyle(fontSize: 12, color: Colors.green)),
                 Text(
                   displayValue ?? label,
-                  style: TextStyle(fontSize: 16, color: isOpen ? Colors.redAccent : Colors.black87),
+                  style: TextStyle(fontSize: 16, color: isOpen ? Colors.redAccent : Theme.of(context).colorScheme.onSurface),
                 ),
               ],
             ),
@@ -165,17 +165,17 @@ class _SmsTemplatePageState extends State<SmsTemplatePage> with SingleTickerProv
             padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
             child: Row(
               children: [
-                const Icon(Icons.drag_handle, color: Colors.grey),
+                Icon(Icons.drag_handle, color: Colors.grey),
                 const SizedBox(width: 8),
-                const Text('+ Field', style: TextStyle(color: Colors.grey, fontSize: 14)),
-                const Icon(Icons.arrow_drop_down, color: Colors.grey),
+                Text('+ Field', style: TextStyle(color: Colors.grey, fontSize: 14)),
+                Icon(Icons.arrow_drop_down, color: Colors.grey),
                 const Spacer(),
                 TextButton(
                   onPressed: () {},
-                  child: const Text('BOLD', style: TextStyle(color: Colors.lightBlue)),
+                  child: Text('BOLD', style: TextStyle(color: Theme.of(context).colorScheme.primary)),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
+                  icon: Icon(Icons.delete_outline, color: Colors.redAccent),
                   onPressed: () {
                     setState(() {
                       _templateRows.removeAt(index);
@@ -191,12 +191,12 @@ class _SmsTemplatePageState extends State<SmsTemplatePage> with SingleTickerProv
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
             child: Row(
               children: [
-                const Text('EN', style: TextStyle(fontSize: 16, color: Colors.black87)),
+                Text('EN', style: TextStyle(fontSize: 16, color: Theme.of(context).colorScheme.onSurface)),
                 const SizedBox(width: 32),
                 Expanded(
                   child: Text(
                     _templateRows[index]['en'] ?? '',
-                    style: const TextStyle(fontSize: 16, color: Colors.black87),
+                    style: TextStyle(fontSize: 16, color: Theme.of(context).colorScheme.onSurface),
                   ),
                 ),
               ],
@@ -208,12 +208,12 @@ class _SmsTemplatePageState extends State<SmsTemplatePage> with SingleTickerProv
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
             child: Row(
               children: [
-                const Text('TA', style: TextStyle(fontSize: 16, color: Colors.black87)),
+                Text('TA', style: TextStyle(fontSize: 16, color: Theme.of(context).colorScheme.onSurface)),
                 const SizedBox(width: 32),
                 Expanded(
                   child: Text(
                     _templateRows[index]['ta'] ?? '',
-                    style: const TextStyle(fontSize: 16, color: Colors.black87),
+                    style: TextStyle(fontSize: 16, color: Theme.of(context).colorScheme.onSurface),
                   ),
                 ),
               ],
@@ -226,154 +226,154 @@ class _SmsTemplatePageState extends State<SmsTemplatePage> with SingleTickerProv
 
   Widget _buildEnglishPreview() {
     if (_selectedFlow == 'Collection') {
-      return const Column(
+      return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text('Preview (sample data)', style: TextStyle(color: Colors.grey, fontSize: 14)),
           SizedBox(height: 16),
-          Text('*Ramesh*', style: TextStyle(color: Colors.black87, fontSize: 15)),
+          Text('*Ramesh*', style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 15)),
           SizedBox(height: 4),
-          Text('*Today: 500*', style: TextStyle(color: Colors.black87, fontSize: 15)),
+          Text('*Today: 500*', style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 15)),
           SizedBox(height: 4),
-          Text('Total: 11,000', style: TextStyle(color: Colors.black87, fontSize: 15)),
+          Text('Total: 11,000', style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 15)),
           SizedBox(height: 4),
-          Text('Start Date: 01/01/26', style: TextStyle(color: Colors.black87, fontSize: 15)),
+          Text('Start Date: 01/01/26', style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 15)),
           SizedBox(height: 4),
-          Text('Thank you', style: TextStyle(color: Colors.black87, fontSize: 15)),
+          Text('Thank you', style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 15)),
           SizedBox(height: 4),
-          Text('Demo User', style: TextStyle(color: Colors.black87, fontSize: 15)),
+          Text('Demo User', style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 15)),
         ],
       );
     } else if (_selectedFlow == 'Loan Detail') {
-      return const Column(
+      return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text('Preview (sample data)', style: TextStyle(color: Colors.grey, fontSize: 14)),
           SizedBox(height: 16),
-          Text('*Ramesh*', style: TextStyle(color: Colors.black87, fontSize: 15)),
+          Text('*Ramesh*', style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 15)),
           SizedBox(height: 4),
-          Text('Product: Gold Chain', style: TextStyle(color: Colors.black87, fontSize: 15)),
+          Text('Product: Gold Chain', style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 15)),
           SizedBox(height: 4),
-          Text('Amount: 10,000', style: TextStyle(color: Colors.black87, fontSize: 15)),
+          Text('Amount: 10,000', style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 15)),
           SizedBox(height: 4),
-          Text('Interest: 1,000', style: TextStyle(color: Colors.black87, fontSize: 15)),
+          Text('Interest: 1,000', style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 15)),
           SizedBox(height: 4),
-          Text('Total: 11,000', style: TextStyle(color: Colors.black87, fontSize: 15)),
+          Text('Total: 11,000', style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 15)),
           SizedBox(height: 4),
-          Text('Start Date: 01/01/26', style: TextStyle(color: Colors.black87, fontSize: 15)),
+          Text('Start Date: 01/01/26', style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 15)),
           SizedBox(height: 4),
-          Text('01) 23/05/26 10:15 - 500', style: TextStyle(color: Colors.black87, fontSize: 15)),
+          Text('01) 23/05/26 10:15 - 500', style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 15)),
           SizedBox(height: 4),
-          Text('02) 22/05/26 09:40 - 500', style: TextStyle(color: Colors.black87, fontSize: 15)),
+          Text('02) 22/05/26 09:40 - 500', style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 15)),
           SizedBox(height: 4),
-          Text('03) 21/05/26 11:05 - 1,000', style: TextStyle(color: Colors.black87, fontSize: 15)),
+          Text('03) 21/05/26 11:05 - 1,000', style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 15)),
           SizedBox(height: 4),
-          Text('Thank you', style: TextStyle(color: Colors.black87, fontSize: 15)),
+          Text('Thank you', style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 15)),
           SizedBox(height: 4),
-          Text('Demo User', style: TextStyle(color: Colors.black87, fontSize: 15)),
+          Text('Demo User', style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 15)),
         ],
       );
     }
-    return const Column(
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text('Preview (sample data)', style: TextStyle(color: Colors.grey, fontSize: 14)),
         SizedBox(height: 16),
-        Text('*Ramesh*', style: TextStyle(color: Colors.black87, fontSize: 15)),
+        Text('*Ramesh*', style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 15)),
         SizedBox(height: 4),
-        Text('Product: Gold Chain', style: TextStyle(color: Colors.black87, fontSize: 15)),
+        Text('Product: Gold Chain', style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 15)),
         SizedBox(height: 4),
-        Text('Amount: 10,000', style: TextStyle(color: Colors.black87, fontSize: 15)),
+        Text('Amount: 10,000', style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 15)),
         SizedBox(height: 4),
-        Text('Interest: 1,000', style: TextStyle(color: Colors.black87, fontSize: 15)),
+        Text('Interest: 1,000', style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 15)),
         SizedBox(height: 4),
-        Text('Total: 11,000', style: TextStyle(color: Colors.black87, fontSize: 15)),
+        Text('Total: 11,000', style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 15)),
         SizedBox(height: 4),
-        Text('Start Date: 01/01/26', style: TextStyle(color: Colors.black87, fontSize: 15)),
+        Text('Start Date: 01/01/26', style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 15)),
         SizedBox(height: 4),
-        Text('01) 23/05/26 10:15 - 500', style: TextStyle(color: Colors.black87, fontSize: 15)),
+        Text('01) 23/05/26 10:15 - 500', style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 15)),
         SizedBox(height: 4),
-        Text('02) 22/05/26 09:40 - 500', style: TextStyle(color: Colors.black87, fontSize: 15)),
+        Text('02) 22/05/26 09:40 - 500', style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 15)),
         SizedBox(height: 4),
-        Text('03) 21/05/26 11:05 - 1,000', style: TextStyle(color: Colors.black87, fontSize: 15)),
+        Text('03) 21/05/26 11:05 - 1,000', style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 15)),
         SizedBox(height: 4),
-        Text('Thank you', style: TextStyle(color: Colors.black87, fontSize: 15)),
+        Text('Thank you', style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 15)),
         SizedBox(height: 4),
-        Text('Demo User', style: TextStyle(color: Colors.black87, fontSize: 15)),
+        Text('Demo User', style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 15)),
       ],
     );
   }
 
   Widget _buildTamilPreview() {
     if (_selectedFlow == 'Collection') {
-      return const Column(
+      return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text('Preview (sample data)', style: TextStyle(color: Colors.grey, fontSize: 14)),
           SizedBox(height: 16),
-          Text('*Ramesh*', style: TextStyle(color: Colors.black87, fontSize: 15)),
+          Text('*Ramesh*', style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 15)),
           SizedBox(height: 4),
-          Text('*இன்று: 500*', style: TextStyle(color: Colors.black87, fontSize: 15)),
+          Text('*இன்று: 500*', style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 15)),
           SizedBox(height: 4),
-          Text('மொத்தம்: 11,000', style: TextStyle(color: Colors.black87, fontSize: 15)),
+          Text('மொத்தம்: 11,000', style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 15)),
           SizedBox(height: 4),
-          Text('தேதி: 01/01/26', style: TextStyle(color: Colors.black87, fontSize: 15)),
+          Text('தேதி: 01/01/26', style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 15)),
           SizedBox(height: 4),
-          Text('நன்றி', style: TextStyle(color: Colors.black87, fontSize: 15)),
+          Text('நன்றி', style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 15)),
           SizedBox(height: 4),
-          Text('Demo User', style: TextStyle(color: Colors.black87, fontSize: 15)),
+          Text('Demo User', style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 15)),
         ],
       );
     } else if (_selectedFlow == 'Loan Detail') {
-      return const Column(
+      return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text('Preview (sample data)', style: TextStyle(color: Colors.grey, fontSize: 14)),
           SizedBox(height: 16),
-          Text('*Ramesh*', style: TextStyle(color: Colors.black87, fontSize: 15)),
+          Text('*Ramesh*', style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 15)),
           SizedBox(height: 4),
-          Text('பொருள்: Gold Chain', style: TextStyle(color: Colors.black87, fontSize: 15)),
+          Text('பொருள்: Gold Chain', style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 15)),
           SizedBox(height: 4),
-          Text('அசல்: 10,000', style: TextStyle(color: Colors.black87, fontSize: 15)),
+          Text('அசல்: 10,000', style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 15)),
           SizedBox(height: 4),
-          Text('வட்டி: 1,000', style: TextStyle(color: Colors.black87, fontSize: 15)),
+          Text('வட்டி: 1,000', style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 15)),
           SizedBox(height: 4),
-          Text('மொத்தம்: 11,000', style: TextStyle(color: Colors.black87, fontSize: 15)),
+          Text('மொத்தம்: 11,000', style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 15)),
           SizedBox(height: 4),
-          Text('தேதி: 01/01/26', style: TextStyle(color: Colors.black87, fontSize: 15)),
+          Text('தேதி: 01/01/26', style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 15)),
           SizedBox(height: 4),
-          Text('01) 23/05/26 10:15 - 500', style: TextStyle(color: Colors.black87, fontSize: 15)),
+          Text('01) 23/05/26 10:15 - 500', style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 15)),
           SizedBox(height: 4),
-          Text('02) 22/05/26 09:40 - 500', style: TextStyle(color: Colors.black87, fontSize: 15)),
+          Text('02) 22/05/26 09:40 - 500', style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 15)),
           SizedBox(height: 4),
-          Text('03) 21/05/26 11:05 - 1,000', style: TextStyle(color: Colors.black87, fontSize: 15)),
+          Text('03) 21/05/26 11:05 - 1,000', style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 15)),
           SizedBox(height: 4),
-          Text('நன்றி', style: TextStyle(color: Colors.black87, fontSize: 15)),
+          Text('நன்றி', style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 15)),
           SizedBox(height: 4),
-          Text('Demo User', style: TextStyle(color: Colors.black87, fontSize: 15)),
+          Text('Demo User', style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 15)),
         ],
       );
     }
-    return const Column(
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text('Preview (sample data)', style: TextStyle(color: Colors.grey, fontSize: 14)),
         SizedBox(height: 16),
-        Text('*Ramesh*', style: TextStyle(color: Colors.black87, fontSize: 15)),
+        Text('*Ramesh*', style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 15)),
         SizedBox(height: 4),
-        Text('பொருள்: Gold Chain', style: TextStyle(color: Colors.black87, fontSize: 15)),
+        Text('பொருள்: Gold Chain', style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 15)),
         SizedBox(height: 4),
-        Text('அசல்: 10,000', style: TextStyle(color: Colors.black87, fontSize: 15)),
+        Text('அசல்: 10,000', style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 15)),
         SizedBox(height: 4),
-        Text('வட்டி: 1,000', style: TextStyle(color: Colors.black87, fontSize: 15)),
+        Text('வட்டி: 1,000', style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 15)),
         SizedBox(height: 4),
-        Text('மொத்தம்: 11,000', style: TextStyle(color: Colors.black87, fontSize: 15)),
+        Text('மொத்தம்: 11,000', style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 15)),
         SizedBox(height: 4),
-        Text('தேதி: 01/01/26', style: TextStyle(color: Colors.black87, fontSize: 15)),
+        Text('தேதி: 01/01/26', style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 15)),
         SizedBox(height: 4),
-        Text('நன்றி', style: TextStyle(color: Colors.black87, fontSize: 15)),
+        Text('நன்றி', style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 15)),
         SizedBox(height: 4),
-        Text('Demo User', style: TextStyle(color: Colors.black87, fontSize: 15)),
+        Text('Demo User', style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 15)),
       ],
     );
   }
@@ -382,11 +382,11 @@ class _SmsTemplatePageState extends State<SmsTemplatePage> with SingleTickerProv
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('SMS Template'),
+        title: Text('SMS Template'),
         elevation: 2,
         shadowColor: Colors.black26,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, size: 20),
+          icon: Icon(Icons.arrow_back_ios_new, size: 20),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
@@ -424,7 +424,7 @@ class _SmsTemplatePageState extends State<SmsTemplatePage> with SingleTickerProv
                 },
               ),
               const SizedBox(height: 16),
-              const Text(
+              Text(
                 'Type any text and tap + Field to drop a field where the cursor is — so one line can mix several fields with your own separators, e.g. Next Due: {NextDueAmount} / {NextDueDate}. Use Bold to bold the whole line for WhatsApp, or wrap part of a line in *stars* to bold just that part. An empty row makes a blank line.',
                 style: TextStyle(color: Colors.grey, fontSize: 13, height: 1.5),
               ),
@@ -439,10 +439,10 @@ class _SmsTemplatePageState extends State<SmsTemplatePage> with SingleTickerProv
                   Expanded(
                     child: OutlinedButton.icon(
                       onPressed: () {},
-                      icon: const Icon(Icons.add, color: Colors.lightBlue),
-                      label: const Text('ADD ROW', style: TextStyle(color: Colors.lightBlue)),
+                      icon: Icon(Icons.add, color: Theme.of(context).colorScheme.primary),
+                      label: Text('ADD ROW', style: TextStyle(color: Theme.of(context).colorScheme.primary)),
                       style: OutlinedButton.styleFrom(
-                        side: const BorderSide(color: Colors.lightBlue),
+                        side: BorderSide(color: Theme.of(context).colorScheme.primary),
                         padding: const EdgeInsets.symmetric(vertical: 12),
                       ),
                     ),
@@ -451,10 +451,10 @@ class _SmsTemplatePageState extends State<SmsTemplatePage> with SingleTickerProv
                   Expanded(
                     child: OutlinedButton.icon(
                       onPressed: () {},
-                      icon: const Icon(Icons.remove, color: Colors.lightBlue),
-                      label: const Text('ADD BLANK LINE', style: TextStyle(color: Colors.lightBlue)),
+                      icon: Icon(Icons.remove, color: Theme.of(context).colorScheme.primary),
+                      label: Text('ADD BLANK LINE', style: TextStyle(color: Theme.of(context).colorScheme.primary)),
                       style: OutlinedButton.styleFrom(
-                        side: const BorderSide(color: Colors.lightBlue),
+                        side: BorderSide(color: Theme.of(context).colorScheme.primary),
                         padding: const EdgeInsets.symmetric(vertical: 12),
                       ),
                     ),
@@ -465,11 +465,11 @@ class _SmsTemplatePageState extends State<SmsTemplatePage> with SingleTickerProv
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('Preview line', style: TextStyle(fontSize: 16)),
+                  Text('Preview line', style: TextStyle(fontSize: 16)),
                   Row(
                     children: [
-                      const Text('Select a line', style: TextStyle(color: Colors.grey, fontSize: 16)),
-                      const Icon(Icons.arrow_drop_down, color: Colors.grey),
+                      Text('Select a line', style: TextStyle(color: Colors.grey, fontSize: 16)),
+                      Icon(Icons.arrow_drop_down, color: Colors.grey),
                     ],
                   ),
                 ],
@@ -479,10 +479,10 @@ class _SmsTemplatePageState extends State<SmsTemplatePage> with SingleTickerProv
               // Preview Tabs
               TabBar(
                 controller: _tabController,
-                labelColor: Colors.lightBlue,
+                labelColor: Theme.of(context).colorScheme.primary,
                 unselectedLabelColor: Colors.grey,
-                indicatorColor: Colors.lightBlue,
-                tabs: const [
+                indicatorColor: Theme.of(context).colorScheme.primary,
+                tabs: [
                   Tab(text: 'ENGLISH'),
                   Tab(text: 'தமிழ்'),
                 ],
@@ -509,12 +509,12 @@ class _SmsTemplatePageState extends State<SmsTemplatePage> with SingleTickerProv
               ElevatedButton(
                 onPressed: () {},
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.lightBlue.shade600,
+                  backgroundColor: Theme.of(context).colorScheme.primaryContainer,
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
                   padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
-                child: const Text('SAVE TEMPLATE', style: TextStyle(fontSize: 16)),
+                child: Text('SAVE TEMPLATE', style: TextStyle(fontSize: 16)),
               ),
               const SizedBox(height: 32),
             ],

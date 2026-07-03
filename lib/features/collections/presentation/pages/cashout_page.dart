@@ -34,12 +34,12 @@ class _CashOutPageState extends State<CashOutPage> {
         appBar: AppBar(
           title: const Text('CashOut'),
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back_ios_new, size: 20),
+            icon: Icon(Icons.arrow_back_ios_new, size: 20),
             onPressed: () => Navigator.of(context).pop(),
           ),
           actions: [
             IconButton(
-              icon: const Icon(Icons.add, size: 28),
+              icon: Icon(Icons.add, size: 28),
               onPressed: () {
                 showDialog(
                   context: context,
@@ -48,10 +48,10 @@ class _CashOutPageState extends State<CashOutPage> {
               },
             ),
           ],
-          bottom: const TabBar(
-            labelColor: Colors.lightBlue,
+          bottom: TabBar(
+            labelColor: Theme.of(context).colorScheme.primary,
             unselectedLabelColor: Colors.grey,
-            indicatorColor: Colors.lightBlue,
+            indicatorColor: Theme.of(context).colorScheme.primary,
             tabs: [
               Tab(text: 'ACTIVE'),
               Tab(text: 'HISTORY'),
@@ -67,7 +67,7 @@ class _CashOutPageState extends State<CashOutPage> {
                   if (state is SettingsLoaded) {
                     final lines = state.lines;
                     return DropdownButtonFormField<String?>(
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         labelText: 'Line',
                         contentPadding: EdgeInsets.symmetric(vertical: 8.0),
                       ),
@@ -103,7 +103,7 @@ class _CashOutPageState extends State<CashOutPage> {
                   if (state is CashOutLoading) {
                     return const Center(child: CircularProgressIndicator());
                   } else if (state is CashOutError) {
-                    return Center(child: Text(state.message, style: const TextStyle(color: Colors.red)));
+                    return Center(child: Text(state.message, style: TextStyle(color: Theme.of(context).colorScheme.error)));
                   } else if (state is CashOutLoaded) {
                     return TabBarView(
                       children: [
@@ -154,7 +154,7 @@ class _CashOutPageState extends State<CashOutPage> {
                   ),
                   child: const Text('SETTLE'),
                 )
-              : const Icon(Icons.check_circle, color: Colors.green),
+              : Icon(Icons.check_circle, color: Colors.green),
         );
       },
     );

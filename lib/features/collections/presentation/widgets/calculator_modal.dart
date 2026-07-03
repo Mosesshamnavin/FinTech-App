@@ -190,14 +190,14 @@ class _CalculatorModalState extends State<CalculatorModal> {
                 children: [
                   Text(
                     _formatExpressionDisplay(_preview),
-                    style: const TextStyle(fontSize: 20, color: Colors.black54),
+                    style: TextStyle(fontSize: 20, color: Theme.of(context).colorScheme.onSurface.withAlpha(153)),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 8),
                   Text(
                     _expression.isEmpty ? '0' : _formatExpressionDisplay(_expression),
-                    style: const TextStyle(fontSize: 36, fontWeight: FontWeight.bold, color: Colors.black87),
+                    style: TextStyle(fontSize: 36, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -223,7 +223,7 @@ class _CalculatorModalState extends State<CalculatorModal> {
 
                   return Material(
                     color: isOperator
-                        ? Colors.lightBlue
+                        ? Theme.of(context).colorScheme.primary
                         : (isAction ? Colors.grey.shade300 : Colors.white),
                     borderRadius: BorderRadius.circular(8),
                     elevation: isAction || isOperator ? 0 : 2,
@@ -238,7 +238,7 @@ class _CalculatorModalState extends State<CalculatorModal> {
                             fontWeight: isAction ? FontWeight.bold : FontWeight.w500,
                             color: isOperator
                                 ? Colors.white
-                                : (isAction ? Colors.black87 : Colors.black87),
+                                : (isAction ? Theme.of(context).colorScheme.onSurface : Theme.of(context).colorScheme.onSurface),
                           ),
                         ),
                       ),

@@ -130,7 +130,7 @@ class _AddAreaPageState extends State<AddAreaPage> {
                             ],
                           )
                         else
-                          const Text('Line', style: TextStyle(fontSize: 16, color: Colors.black87)),
+                          Text('Line', style: TextStyle(fontSize: 16, color: Theme.of(context).colorScheme.onSurface)),
                         Icon(
                           _isDropdownOpen ? Icons.arrow_drop_up : Icons.arrow_drop_down,
                           color: _isDropdownOpen ? Colors.red : Colors.grey,

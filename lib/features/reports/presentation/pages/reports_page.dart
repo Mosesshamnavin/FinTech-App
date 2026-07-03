@@ -2,6 +2,7 @@ import 'package:vasooldrive/features/settings/presentation/bloc/settings_state.d
 import 'package:vasooldrive/features/settings/presentation/bloc/settings_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
+import '../../../../core/theme/app_colors.dart';
 import 'package:go_router/go_router.dart';
 
 class ReportsPage extends StatelessWidget {
@@ -48,7 +49,7 @@ class ReportsPage extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Reports'),
         elevation: 2,
-        shadowColor: Colors.black45,
+        shadowColor: Theme.of(context).colorScheme.onSurface.withAlpha(115),
       ),
       body: ListView.separated(
         itemCount: reports.length,

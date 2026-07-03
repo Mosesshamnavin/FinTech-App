@@ -86,7 +86,7 @@ class _SupportPageState extends State<SupportPage> with SingleTickerProviderStat
           leading: const FaIcon(FontAwesomeIcons.youtube, color: Colors.red, size: 28),
           title: Text(
             item.title,
-            style: const TextStyle(fontSize: 16, color: Colors.black87),
+            style: TextStyle(fontSize: 16, color: Theme.of(context).colorScheme.onSurface),
           ),
           onTap: () => _launchUrl(item.url),
         );
@@ -98,9 +98,9 @@ class _SupportPageState extends State<SupportPage> with SingleTickerProviderStat
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Support'),
+        title: Text('Support'),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, size: 20),
+          icon: Icon(Icons.arrow_back_ios_new, size: 20),
           onPressed: () => Navigator.of(context).pop(),
         ),
         elevation: 1,
@@ -115,21 +115,21 @@ class _SupportPageState extends State<SupportPage> with SingleTickerProviderStat
               children: [
                 ListTile(
                   contentPadding: EdgeInsets.zero,
-                  leading: const Icon(Icons.phone_outlined, color: Colors.green, size: 28),
-                  title: const Text(
+                  leading: Icon(Icons.phone_outlined, color: Colors.green, size: 28),
+                  title: Text(
                     '8838070830',
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                   ),
-                  subtitle: const Text(
+                  subtitle: Text(
                     'Timing: 8 AM to 9 PM',
-                    style: TextStyle(fontSize: 14, color: Colors.black54),
+                    style: TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.onSurface.withAlpha(153)),
                   ),
                 ),
                 const Divider(height: 16),
                 ListTile(
                   contentPadding: EdgeInsets.zero,
-                  leading: const Icon(Icons.mail_outline, color: Colors.orange, size: 28),
-                  title: const Text(
+                  leading: Icon(Icons.mail_outline, color: Colors.orange, size: 28),
+                  title: Text(
                     'vasooldrive@gmail.com',
                     style: TextStyle(fontSize: 16),
                   ),
@@ -141,9 +141,9 @@ class _SupportPageState extends State<SupportPage> with SingleTickerProviderStat
           // Tabs
           TabBar(
             controller: _tabController,
-            labelColor: Colors.lightBlue,
+            labelColor: Theme.of(context).colorScheme.primary,
             unselectedLabelColor: Colors.grey,
-            indicatorColor: Colors.lightBlue,
+            indicatorColor: Theme.of(context).colorScheme.primary,
             tabs: const [
               Tab(text: 'TAMIL'),
               Tab(text: 'ENGLISH'),
@@ -166,10 +166,10 @@ class _SupportPageState extends State<SupportPage> with SingleTickerProviderStat
             width: double.infinity,
             padding: const EdgeInsets.all(16.0),
             color: Colors.white,
-            child: const Text(
+            child: Text(
               'Device ID : ccbfffa62',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 18, color: Colors.black87),
+              style: TextStyle(fontSize: 18, color: Theme.of(context).colorScheme.onSurface),
             ),
           ),
         ],

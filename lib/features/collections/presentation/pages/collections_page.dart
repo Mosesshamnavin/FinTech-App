@@ -4,6 +4,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection_container.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../widgets/add_line_modal.dart';
 import '../widgets/area_search_modal.dart';
 import '../widgets/calculator_modal.dart';
@@ -146,11 +147,11 @@ class _CollectionsViewState extends State<_CollectionsView> {
                   controller: _dateController,
                   readOnly: true,
                   onTap: () => _selectDate(context),
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'Date',
                     suffixIcon: Padding(
-                      padding: EdgeInsets.only(top: 14.0, bottom: 14.0),
-                      child: FaIcon(FontAwesomeIcons.calendarDay, color: Colors.lightBlue, size: 20),
+                      padding: const EdgeInsets.only(top: 14.0, bottom: 14.0),
+                      child: FaIcon(FontAwesomeIcons.calendarDay, color: context.accent, size: 20),
                     ),
                   ),
                 ),
@@ -199,7 +200,7 @@ class _CollectionsViewState extends State<_CollectionsView> {
                             children: [
                               const Icon(Icons.arrow_drop_down, color: Colors.grey),
                               IconButton(
-                                icon: const FaIcon(FontAwesomeIcons.magnifyingGlass, color: Colors.lightBlue, size: 20),
+                                icon: FaIcon(FontAwesomeIcons.magnifyingGlass, color: context.accent, size: 20),
                                 onPressed: () async {
                                   List<AreaEntity> currentAreas = [];
                                   if (state is SettingsLoaded) {
@@ -239,8 +240,8 @@ class _CollectionsViewState extends State<_CollectionsView> {
                           _onSubmit();
                         },
                         style: OutlinedButton.styleFrom(
-                          side: const BorderSide(color: Colors.red),
-                          foregroundColor: Colors.red,
+                          side: BorderSide(color: context.danger),
+                          foregroundColor: context.danger,
                         ),
                         child: const Text('CLEAR'),
                       ),
@@ -277,7 +278,7 @@ class _CollectionsViewState extends State<_CollectionsView> {
                 } else if (state is DailyCollectionsLoading) {
                   return const Center(child: CircularProgressIndicator());
                 } else if (state is DailyCollectionsError) {
-                  return Center(child: Text(state.message, style: const TextStyle(color: Colors.red)));
+                  return Center(child: Text(state.message, style: TextStyle(color: context.danger)));
                 } else if (state is DailyCollectionsLoaded) {
                   if (state.dailyList.isEmpty) {
                     return const Center(child: Text('No customers found for this line/area.'));
@@ -309,17 +310,17 @@ class _CollectionsViewState extends State<_CollectionsView> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
                           side: BorderSide(
-                            color: item.hasPaid ? Colors.green.shade300 : Colors.grey.shade300,
+                            color: item.hasPaid ? context.success : context.surfaceVariant,
                             width: item.hasPaid ? 2 : 1,
                           ),
                         ),
                         child: ListTile(
                           onTap: () => _showAddCollectionModal(context, customer.id, customer.name),
                           leading: CircleAvatar(
-                            backgroundColor: item.hasPaid ? Colors.green.shade100 : Colors.blue.shade100,
+                            backgroundColor: item.hasPaid ? context.successLight : context.primaryContainer,
                             child: Icon(
                               item.hasPaid ? Icons.check : Icons.person,
-                              color: item.hasPaid ? Colors.green : Colors.blue,
+                              color: item.hasPaid ? context.success : context.primary,
                             ),
                           ),
                           title: Text(
@@ -335,8 +336,8 @@ class _CollectionsViewState extends State<_CollectionsView> {
                                 if (collection.status == 'paid')
                                   Text(
                                     '₹ ${collection.amount.toStringAsFixed(0)}',
-                                    style: const TextStyle(
-                                      color: Colors.green,
+                                    style: TextStyle(
+                                      color: context.success,
                                       fontWeight: FontWeight.bold,
                                       fontSize: 16,
                                     ),
@@ -345,7 +346,7 @@ class _CollectionsViewState extends State<_CollectionsView> {
                                   Text(
                                     collection.status.toUpperCase(),
                                     style: TextStyle(
-                                      color: Colors.orange.shade800,
+                                      color: context.warning,
                                       fontWeight: FontWeight.bold,
                                       fontSize: 14,
                                     ),

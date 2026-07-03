@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/di/injection_container.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../bloc/customers_bloc.dart';
 import '../bloc/customers_event.dart';
 import '../bloc/customers_state.dart';
@@ -61,9 +62,9 @@ class _AddCustomerViewState extends State<_AddCustomerView> {
       listener: (context, state) {
         if (state is AddCustomerSuccess) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Customer added successfully!'),
-              backgroundColor: Colors.green,
+            SnackBar(
+              content: const Text('Customer added successfully!'),
+              backgroundColor: context.success,
               behavior: SnackBarBehavior.floating,
             ),
           );
@@ -72,7 +73,7 @@ class _AddCustomerViewState extends State<_AddCustomerView> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(state.message),
-              backgroundColor: Colors.red.shade600,
+              backgroundColor: context.danger,
               behavior: SnackBarBehavior.floating,
             ),
           );

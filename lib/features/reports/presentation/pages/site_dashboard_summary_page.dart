@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../../../core/di/injection_container.dart';
 import '../bloc/report_bloc.dart';
 import '../bloc/report_event.dart';
@@ -81,8 +82,8 @@ class _SiteDashboardSummaryViewState extends State<_SiteDashboardSummaryView> {
         children: [
           if (!_isFiltersExpanded)
             ListTile(
-              title: const Text('Edit Filters', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.lightBlue)),
-              trailing: const Icon(Icons.edit, color: Colors.lightBlue, size: 20),
+              title: Text('Edit Filters', style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary)),
+              trailing: Icon(Icons.edit, color: Theme.of(context).colorScheme.primary, size: 20),
               onTap: () => setState(() => _isFiltersExpanded = true),
             ),
           if (_isFiltersExpanded)
@@ -96,10 +97,10 @@ class _SiteDashboardSummaryViewState extends State<_SiteDashboardSummaryView> {
                     controller: _dateController,
                     readOnly: true,
                     onTap: () => _selectDate(context),
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       labelText: 'Select Date',
                       floatingLabelBehavior: FloatingLabelBehavior.always,
-                      suffixIcon: Icon(Icons.calendar_today, color: Colors.lightBlue, size: 20),
+                      suffixIcon: Icon(Icons.calendar_today, color: Theme.of(context).colorScheme.primary, size: 20),
                       border: UnderlineInputBorder(),
                     ),
                   ),
@@ -108,7 +109,7 @@ class _SiteDashboardSummaryViewState extends State<_SiteDashboardSummaryView> {
                     child: ElevatedButton(
                       onPressed: _onSubmit,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.lightBlue[300],
+                        backgroundColor: Theme.of(context).colorScheme.primary,
                         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                       ),
                       child: const Text(
@@ -129,7 +130,7 @@ class _SiteDashboardSummaryViewState extends State<_SiteDashboardSummaryView> {
                 } else if (state is ReportLoading) {
                   return const Center(child: CircularProgressIndicator());
                 } else if (state is ReportError) {
-                  return Center(child: Text(state.message, style: const TextStyle(color: Colors.red)));
+                  return Center(child: Text(state.message, style: TextStyle(color: Theme.of(context).colorScheme.error)));
                 } else if (state is ReportLoaded) {
                   final report = state.report;
                   return ListView(
@@ -204,7 +205,7 @@ class _SiteDashboardSummaryViewState extends State<_SiteDashboardSummaryView> {
                                       style: TextStyle(
                                         fontWeight: FontWeight.bold,
                                         fontSize: 18,
-                                        color: color == Colors.red ? Colors.red.shade700 : Colors.black87,
+                                        color: color == Colors.red ? Colors.red.shade700 : Theme.of(context).colorScheme.onSurface,
                                       ),
                                     )
                                   : null,

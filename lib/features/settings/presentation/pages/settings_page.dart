@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/di/injection_container.dart';
+import '../../../../core/services/storage_service.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_event.dart';
@@ -112,6 +114,7 @@ class SettingsPage extends StatelessWidget {
                   ),
                   onTap: () {
                     AppTheme.themeNotifier.value = theme;
+                    sl<StorageService>().setString('app_theme', theme);
                     Navigator.pop(context);
                   },
                 );

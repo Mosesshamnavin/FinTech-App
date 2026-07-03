@@ -45,7 +45,9 @@ class _CustomDropdownFormFieldState<T> extends State<CustomDropdownFormField<T>>
 
   @override
   Widget build(BuildContext context) {
-    final color = _hasFocus ? Colors.red[300]! : Colors.black87;
+    final theme = Theme.of(context);
+    final primaryColor = theme.colorScheme.primary;
+    final labelColor = _hasFocus ? primaryColor : theme.colorScheme.onSurface.withAlpha(180);
 
     return BlocBuilder<SettingsBloc, SettingsState>(
       builder: (context, state) {
@@ -56,7 +58,6 @@ class _CustomDropdownFormFieldState<T> extends State<CustomDropdownFormField<T>>
           if (widget.label == 'Line' || widget.label == 'Select Line') {
             final lines = state.lines;
             displayItems = lines.map((line) => DropdownMenuItem(value: line.id as T, child: Text(line.name))).toList();
-            // We need to check if displayValue is one of the valid IDs.
             if (displayValue != null && !lines.any((l) => l.id == displayValue)) {
               displayValue = null;
             }
@@ -73,18 +74,18 @@ class _CustomDropdownFormFieldState<T> extends State<CustomDropdownFormField<T>>
           focusNode: _focusNode,
           decoration: InputDecoration(
             labelText: widget.label,
-            labelStyle: TextStyle(color: color),
-            border: const UnderlineInputBorder(
-              borderSide: BorderSide(color: Colors.grey),
+            labelStyle: TextStyle(color: labelColor),
+            border: UnderlineInputBorder(
+              borderSide: BorderSide(color: theme.colorScheme.onSurface.withAlpha(60)),
             ),
-            enabledBorder: const UnderlineInputBorder(
-              borderSide: BorderSide(color: Colors.grey),
+            enabledBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: theme.colorScheme.onSurface.withAlpha(60)),
             ),
             focusedBorder: UnderlineInputBorder(
-              borderSide: BorderSide(color: Colors.red[300]!),
+              borderSide: BorderSide(color: primaryColor),
             ),
           ),
-          icon: Icon(Icons.arrow_drop_down, color: color),
+          icon: Icon(Icons.arrow_drop_down, color: labelColor),
           isExpanded: widget.isExpanded,
           value: displayValue,
           items: displayItems,

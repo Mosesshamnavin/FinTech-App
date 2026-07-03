@@ -19,11 +19,11 @@ class MoveLineCustomerPage extends StatelessWidget {
               onPressed: () => Navigator.of(context).pop(),
             ),
           ],
-          bottom: const TabBar(
-            labelColor: Colors.lightBlue,
+          bottom: TabBar(
+            labelColor: Theme.of(context).colorScheme.primary,
             unselectedLabelColor: Colors.grey,
-            indicatorColor: Colors.lightBlue,
-            tabs: [
+            indicatorColor: Theme.of(context).colorScheme.primary,
+            tabs: const [
               Tab(text: 'CUSTOMER'),
               Tab(text: 'LINE'),
             ],
@@ -106,7 +106,7 @@ class MoveLineCustomerPage extends StatelessWidget {
                     child: ElevatedButton(
                       onPressed: () {},
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.lightBlue.shade600,
+                        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
                         foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(4),
@@ -185,7 +185,7 @@ class _MoveDropdownState extends State<_MoveDropdown> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(widget.label, style: TextStyle(fontSize: 16, color: _isOpen ? Colors.redAccent : Colors.black87)),
+            Text(widget.label, style: TextStyle(fontSize: 16, color: _isOpen ? Colors.redAccent : Theme.of(context).colorScheme.onSurface)),
             Icon(
               _isOpen ? Icons.arrow_drop_up : Icons.arrow_drop_down,
               color: _isOpen ? Colors.redAccent : Colors.grey,

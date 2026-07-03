@@ -91,7 +91,7 @@ class AppTheme {
       textTheme: GoogleFonts.outfitTextTheme(ThemeData.light().textTheme),
       appBarTheme: const AppBarTheme(
         backgroundColor: Colors.white,
-        foregroundColor: Colors.black87,
+        foregroundColor: Colors.black,
         elevation: 1,
         shadowColor: Colors.black12,
         centerTitle: false,
@@ -125,7 +125,7 @@ class AppTheme {
       inputDecorationTheme: InputDecorationTheme(
         border: const UnderlineInputBorder(),
         enabledBorder: const UnderlineInputBorder(
-          borderSide: BorderSide(color: Colors.black12),
+          borderSide: BorderSide(color: Colors.black38),
         ),
         focusedBorder: UnderlineInputBorder(
           borderSide: BorderSide(color: seedColor),

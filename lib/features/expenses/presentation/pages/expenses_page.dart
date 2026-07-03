@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../bloc/expenses_bloc.dart';
 import '../bloc/expenses_event.dart';
 import '../bloc/expenses_state.dart';
@@ -107,9 +108,9 @@ class _ExpensesPageState extends State<ExpensesPage> with SingleTickerProviderSt
         titleSpacing: 0,
         title: TabBar(
           controller: _tabController,
-          labelColor: Colors.lightBlue,
+          labelColor: context.accent,
           unselectedLabelColor: Colors.grey,
-          indicatorColor: Colors.lightBlue,
+          indicatorColor: context.accent,
           indicatorSize: TabBarIndicatorSize.tab,
           tabs: const [
             Tab(text: 'EXPENSE'),
@@ -186,34 +187,34 @@ class _ExpensesPageState extends State<ExpensesPage> with SingleTickerProviderSt
                         controller: _fromDateController,
                         readOnly: true,
                         onTap: () => _selectDate(context, _fromDateController),
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           labelText: 'From Date',
                           floatingLabelBehavior: FloatingLabelBehavior.always,
                           suffixIcon: Padding(
-                            padding: EdgeInsets.only(top: 14.0, bottom: 14.0),
-                            child: FaIcon(FontAwesomeIcons.calendarDay, color: Colors.lightBlue, size: 20),
+                            padding: const EdgeInsets.only(top: 14.0, bottom: 14.0),
+                            child: FaIcon(FontAwesomeIcons.calendarDay, color: context.accent, size: 20),
                           ),
-                          suffixIconConstraints: BoxConstraints(minWidth: 40, minHeight: 0),
-                          border: UnderlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
-                          enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
-                          contentPadding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                          suffixIconConstraints: const BoxConstraints(minWidth: 40, minHeight: 0),
+                          border: const UnderlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
+                          enabledBorder: const UnderlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                         ),
                       ),
                       TextField(
                         controller: _toDateController,
                         readOnly: true,
                         onTap: () => _selectDate(context, _toDateController),
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           labelText: 'To Date',
                           floatingLabelBehavior: FloatingLabelBehavior.always,
                           suffixIcon: Padding(
-                            padding: EdgeInsets.only(top: 14.0, bottom: 14.0),
-                            child: FaIcon(FontAwesomeIcons.calendarDay, color: Colors.lightBlue, size: 20),
+                            padding: const EdgeInsets.only(top: 14.0, bottom: 14.0),
+                            child: FaIcon(FontAwesomeIcons.calendarDay, color: context.accent, size: 20),
                           ),
-                          suffixIconConstraints: BoxConstraints(minWidth: 40, minHeight: 0),
-                          border: UnderlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
-                          enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
-                          contentPadding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                          suffixIconConstraints: const BoxConstraints(minWidth: 40, minHeight: 0),
+                          border: const UnderlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
+                          enabledBorder: const UnderlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                         ),
                       ),
                       BlocBuilder<SettingsBloc, SettingsState>(
@@ -276,7 +277,7 @@ class _ExpensesPageState extends State<ExpensesPage> with SingleTickerProviderSt
                   child: Center(child: CircularProgressIndicator()),
                 );
               } else if (state is ExpensesError) {
-                return Center(child: Text(state.message, style: const TextStyle(color: Colors.red)));
+                return Center(child: Text(state.message, style: TextStyle(color: context.danger)));
               } else if (state is ExpensesLoaded) {
                 // Filter by online/cash switch
                 final filtered = state.expenses.where((e) => _isOnlineChecked ? e.isOnline : true).toList();
@@ -319,10 +320,10 @@ class _ExpensesPageState extends State<ExpensesPage> with SingleTickerProviderSt
                         final expense = filtered[index];
                         return ListTile(
                           leading: CircleAvatar(
-                            backgroundColor: expense.isOnline ? Colors.blue.withOpacity(0.2) : Colors.green.withOpacity(0.2),
+                            backgroundColor: expense.isOnline ? context.primaryContainer : context.successLight,
                             child: Icon(
                               expense.isOnline ? Icons.account_balance : Icons.money,
-                              color: expense.isOnline ? Colors.blue : Colors.green,
+                              color: expense.isOnline ? context.primary : context.success,
                             ),
                           ),
                           title: BlocBuilder<SettingsBloc, SettingsState>(
@@ -341,7 +342,7 @@ class _ExpensesPageState extends State<ExpensesPage> with SingleTickerProviderSt
                             },
                           ),
                           subtitle: Text('${DateFormat('dd MMM yyyy').format(expense.date)} - ${expense.description}'),
-                          trailing: Text('₹${expense.amount}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.red)),
+                          trailing: Text('₹${expense.amount}', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: context.danger)),
                         );
                       },
                     ),

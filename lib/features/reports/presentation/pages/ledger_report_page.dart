@@ -2,6 +2,7 @@ import 'package:vasooldrive/features/settings/presentation/bloc/settings_state.d
 import 'package:vasooldrive/features/settings/presentation/bloc/settings_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../../../core/di/injection_container.dart';
 import '../../../../core/widgets/custom_dropdown.dart';
 import '../bloc/report_bloc.dart';
@@ -57,10 +58,10 @@ class _LedgerReportPageState extends State<LedgerReportPage> {
                   }
                   ctx.read<ReportBloc>().add(LoadLedgerReportRequested(fromDate: _from.text, toDate: _to.text, lineId: selectedLineId));
                 },
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.lightBlue[300], padding: const EdgeInsets.symmetric(vertical: 14)),
+                style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.primary, padding: EdgeInsets.symmetric(vertical: 14)),
                 child: const Text('VIEW LEDGER', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
               )),
-              if (state is ReportError) Padding(padding: const EdgeInsets.only(top: 16), child: Text(state.message, style: const TextStyle(color: Colors.red))),
+              if (state is ReportError) Padding(padding: EdgeInsets.only(top: 16), child: Text(state.message, style: TextStyle(color: Theme.of(context).colorScheme.error))),
             ])),
           );
         }),
@@ -68,5 +69,5 @@ class _LedgerReportPageState extends State<LedgerReportPage> {
     );
   }
 
-  Widget _dp(String label, TextEditingController c) => TextField(controller: c, readOnly: true, onTap: () => _pick(c), decoration: InputDecoration(labelText: label, labelStyle: const TextStyle(color: Colors.black54), floatingLabelBehavior: FloatingLabelBehavior.always, suffixIcon: const Icon(Icons.calendar_today, color: Colors.lightBlue, size: 20), border: const UnderlineInputBorder(), enabledBorder: const UnderlineInputBorder(), focusedBorder: const UnderlineInputBorder()));
+  Widget _dp(String label, TextEditingController c) => TextField(controller: c, readOnly: true, onTap: () => _pick(c), decoration: InputDecoration(labelText: label, labelStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface.withAlpha(153)), floatingLabelBehavior: FloatingLabelBehavior.always, suffixIcon: Icon(Icons.calendar_today, color: Theme.of(context).colorScheme.primary, size: 20), border: UnderlineInputBorder(), enabledBorder: UnderlineInputBorder(), focusedBorder: UnderlineInputBorder()));
 }

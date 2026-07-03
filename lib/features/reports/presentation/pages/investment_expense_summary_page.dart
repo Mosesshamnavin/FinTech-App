@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../../../core/di/injection_container.dart';
 import '../bloc/report_bloc.dart';
 import '../bloc/report_event.dart';
@@ -29,12 +30,12 @@ class _InvestmentExpenseSummaryPageState extends State<InvestmentExpenseSummaryP
             const SizedBox(height: 16),
             _dp('From Date', _from), const SizedBox(height: 16), _dp('To Date', _to),
             const SizedBox(height: 32),
-            Center(child: state is ReportLoading ? const CircularProgressIndicator() : ElevatedButton(onPressed: () => ctx.read<ReportBloc>().add(LoadInvestmentExpenseSummaryRequested(fromDate: _from.text, toDate: _to.text)), style: ElevatedButton.styleFrom(backgroundColor: Colors.lightBlue[300], padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12)), child: const Text('SUBMIT', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)))),
-            if (state is ReportError) Padding(padding: const EdgeInsets.only(top: 16), child: Text(state.message, style: const TextStyle(color: Colors.red))),
+            Center(child: state is ReportLoading ? CircularProgressIndicator() : ElevatedButton(onPressed: () => ctx.read<ReportBloc>().add(LoadInvestmentExpenseSummaryRequested(fromDate: _from.text, toDate: _to.text)), style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.primary, padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12)), child: Text('SUBMIT', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)))),
+            if (state is ReportError) Padding(padding: EdgeInsets.only(top: 16), child: Text(state.message, style: TextStyle(color: Theme.of(context).colorScheme.error))),
           ])),
         ),
       ),
     );
   }
-  Widget _dp(String label, TextEditingController c) => TextField(controller: c, readOnly: true, onTap: () => _pick(c), decoration: InputDecoration(labelText: label, labelStyle: const TextStyle(color: Colors.black54), floatingLabelBehavior: FloatingLabelBehavior.always, suffixIcon: const Icon(Icons.calendar_today, color: Colors.lightBlue, size: 20), border: const UnderlineInputBorder(), enabledBorder: const UnderlineInputBorder(), focusedBorder: const UnderlineInputBorder()));
+  Widget _dp(String label, TextEditingController c) => TextField(controller: c, readOnly: true, onTap: () => _pick(c), decoration: InputDecoration(labelText: label, labelStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface.withAlpha(153)), floatingLabelBehavior: FloatingLabelBehavior.always, suffixIcon: Icon(Icons.calendar_today, color: Theme.of(context).colorScheme.primary, size: 20), border: UnderlineInputBorder(), enabledBorder: UnderlineInputBorder(), focusedBorder: UnderlineInputBorder()));
 }

@@ -232,8 +232,8 @@ class HasuraReportRemoteDataSourceImpl implements ReportRemoteDataSource {
     if (line != null && line != 'All') { lineFilter = ', customer: {line_id: {_eq: \$lineId}}'; vars['lineId'] = line; }
     final query = '''
       query GetCompletedLoans(\$start: timestamp!, \$end: timestamp!${line != null && line != 'All' ? ', \$lineId: uuid' : ''}) {
-        loans(where: {status: {_eq: "Completed"}, updated_at: {_gte: \$start, _lte: \$end}$lineFilter}, order_by: {updated_at: desc}) {
-          id principal_amount total_amount start_date updated_at
+        loans(where: {status: {_eq: "Completed"}, end_date: {_gte: \$start, _lte: \$end}$lineFilter}, order_by: {end_date: desc}) {
+          id principal_amount total_amount start_date end_date
           customer { name line { name } }
         }
       }
@@ -247,7 +247,7 @@ class HasuraReportRemoteDataSourceImpl implements ReportRemoteDataSource {
       final principal = double.tryParse(l['principal_amount']?.toString() ?? '0') ?? 0;
       final total = double.tryParse(l['total_amount']?.toString() ?? '0') ?? 0;
       totalPrincipal += principal; totalAmount += total;
-      rows.add({'Customer': l['customer']?['name']?.toString() ?? '', 'Line': l['customer']?['line']?['name']?.toString() ?? '', 'Principal': _fmt(principal), 'Total Paid': _fmt(total), 'Start Date': _fmtDate(l['start_date']), 'Closed On': _fmtDate(l['updated_at'])});
+      rows.add({'Customer': l['customer']?['name']?.toString() ?? '', 'Line': l['customer']?['line']?['name']?.toString() ?? '', 'Principal': _fmt(principal), 'Total Paid': _fmt(total), 'Start Date': _fmtDate(l['start_date']), 'Closed On': _fmtDate(l['end_date'])});
     }
     return ReportEntity(title: 'Completed Loans — $fromDate to $toDate', summaryFields: {'Total Completed': loansData.length.toString(), 'Principal Recovered': _fmt(totalPrincipal), 'Total Amount Collected': _fmt(totalAmount)}, columns: ['Customer', 'Line', 'Principal', 'Total Paid', 'Start Date', 'Closed On'], rows: rows);
   }
@@ -300,7 +300,7 @@ class HasuraReportRemoteDataSourceImpl implements ReportRemoteDataSource {
     if (line != null && line != 'All') { lineFilter = ', line_id: {_eq: \$lineId}'; vars['lineId'] = line; }
     final query = '''
       query GetMissingCustomers(\$start: timestamp!, \$end: timestamp!${line != null && line != 'All' ? ', \$lineId: uuid' : ''}) {
-        customers(where: {is_active: {_eq: true}$lineFilter, _not: {collections: {date: {_gte: \$start, _lte: \$end}}}}) {
+        customers(where: {${line != null && line != 'All' ? 'line_id: {_eq: \$lineId}, ' : ''}_not: {collections: {date: {_gte: \$start, _lte: \$end}}}}) {
           name phone
           line { name }
           area { name }
@@ -598,7 +598,7 @@ class HasuraReportRemoteDataSourceImpl implements ReportRemoteDataSource {
       query GetSiteDashboard(\$start: timestamp!, \$end: timestamp!, \$userId: uuid!) {
         collections_aggregate(where: {date: {_gte: \$start, _lte: \$end}, status: {_eq: "Paid"}}) { aggregate { count sum { amount } } }
         loans_aggregate(where: {status: {_eq: "Active"}}) { aggregate { count sum { outstanding_balance principal_amount } } }
-        customers_aggregate(where: {is_active: {_eq: true}}) { aggregate { count } }
+        customers_aggregate { aggregate { count } }
         expenses_aggregate(where: {date: {_gte: \$start, _lte: \$end}, user_id: {_eq: \$userId}}) { aggregate { sum { amount } } }
       }
     ''';

@@ -76,7 +76,7 @@ class _ImportLinePageState extends State<ImportLinePage> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('Line', style: TextStyle(fontSize: 16, color: _isLineOpen ? Colors.redAccent : Colors.black87)),
+                          Text('Line', style: TextStyle(fontSize: 16, color: _isLineOpen ? Colors.redAccent : Theme.of(context).colorScheme.onSurface)),
                           Icon(
                             _isLineOpen ? Icons.arrow_drop_up : Icons.arrow_drop_down,
                             color: _isLineOpen ? Colors.redAccent : Colors.grey,
@@ -95,7 +95,7 @@ class _ImportLinePageState extends State<ImportLinePage> {
                           color: Colors.grey.shade200,
                           borderRadius: BorderRadius.circular(2),
                         ),
-                        child: const Text('Choose file', style: TextStyle(color: Colors.black87)),
+                        child: Text('Choose file', style: TextStyle(color: Theme.of(context).colorScheme.onSurface)),
                       ),
                       const SizedBox(width: 8),
                       const Text('No file chosen', style: TextStyle(fontSize: 16)),
@@ -105,7 +105,7 @@ class _ImportLinePageState extends State<ImportLinePage> {
                   ElevatedButton(
                     onPressed: () {},
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.lightBlue.shade200,
+                      backgroundColor: Theme.of(context).colorScheme.primaryContainer,
                       foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(4),
@@ -118,7 +118,7 @@ class _ImportLinePageState extends State<ImportLinePage> {
                   ElevatedButton(
                     onPressed: () {},
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.lightBlue.shade600,
+                      backgroundColor: Theme.of(context).colorScheme.primaryContainer,
                       foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(4),
@@ -134,7 +134,7 @@ class _ImportLinePageState extends State<ImportLinePage> {
             Container(
               color: Colors.grey.shade50,
               child: ExpansionTile(
-                title: const Text('Help', style: TextStyle(color: Colors.black87, fontWeight: FontWeight.w500)),
+                title: Text('Help', style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.w500)),
                 iconColor: Colors.black,
                 collapsedIconColor: Colors.black,
                 children: [
@@ -169,7 +169,7 @@ class _ImportLinePageState extends State<ImportLinePage> {
             Container(
               color: Colors.grey.shade50,
               child: ExpansionTile(
-                title: const Text('History', style: TextStyle(color: Colors.black87, fontWeight: FontWeight.w500)),
+                title: Text('History', style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.w500)),
                 iconColor: Colors.black,
                 collapsedIconColor: Colors.black,
                 children: [

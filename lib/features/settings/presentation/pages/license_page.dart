@@ -28,11 +28,11 @@ class _AppLicensePageState extends State<AppLicensePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('License'),
+        title: Text('License'),
         elevation: 2,
         shadowColor: Colors.black26,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, size: 20),
+          icon: Icon(Icons.arrow_back_ios_new, size: 20),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
@@ -41,14 +41,14 @@ class _AppLicensePageState extends State<AppLicensePage> {
         child: Column(
           children: [
             const SizedBox(height: 16),
-            const Text(
+            Text(
               'Device ID : ccbfffa62',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
             ),
             const SizedBox(height: 12),
             Text(
               'User Name : $_userName',
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
             ),
             const SizedBox(height: 24),
             
@@ -64,15 +64,15 @@ class _AppLicensePageState extends State<AppLicensePage> {
                   children: [
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      children: const [
+                      children: [
                         Text(
                           '₹ 2000 / year',
-                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black54),
+                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface.withAlpha(153)),
                         ),
                       ],
                     ),
                     const SizedBox(height: 8),
-                    const Text(
+                    Text(
                       '30 Days Free Trail',
                       style: TextStyle(fontSize: 14, color: Colors.grey),
                     ),
@@ -97,15 +97,15 @@ class _AppLicensePageState extends State<AppLicensePage> {
                       children: [
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          children: const [
+                          children: [
                             Text(
                               'CUSTOMER SUPPORT',
-                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black54),
+                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface.withAlpha(153)),
                             ),
                             SizedBox(height: 4),
                             Text(
                               '9876543211',
-                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black54),
+                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface.withAlpha(153)),
                             ),
                           ],
                         ),
@@ -118,14 +118,14 @@ class _AppLicensePageState extends State<AppLicensePage> {
                               borderRadius: BorderRadius.circular(4),
                             ),
                           ),
-                          child: const Text('CALL'),
+                          child: Text('CALL'),
                         ),
                       ],
                     ),
                     const SizedBox(height: 16),
                     const Divider(height: 1, thickness: 0.5),
                     const SizedBox(height: 8),
-                    const Text(
+                    Text(
                       'Timing: 8 AM to 9 PM',
                       style: TextStyle(fontSize: 14, color: Colors.grey),
                     ),
@@ -148,9 +148,9 @@ class _AppLicensePageState extends State<AppLicensePage> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text(
+                        Text(
                           'vasooldrive@icici',
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: Colors.black54),
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: Theme.of(context).colorScheme.onSurface.withAlpha(153)),
                         ),
                         ElevatedButton(
                           onPressed: () {},
@@ -161,7 +161,7 @@ class _AppLicensePageState extends State<AppLicensePage> {
                               borderRadius: BorderRadius.circular(4),
                             ),
                           ),
-                          child: const Text('PAY'),
+                          child: Text('PAY'),
                         ),
                       ],
                     ),
@@ -178,7 +178,7 @@ class _AppLicensePageState extends State<AppLicensePage> {
                           width: 200,
                           color: Colors.grey.shade200,
                           alignment: Alignment.center,
-                          child: const Text('QR Code Here\n(assets/images/qr_code.png)', textAlign: TextAlign.center),
+                          child: Text('QR Code Here\n(assets/images/qr_code.png)', textAlign: TextAlign.center),
                         );
                       },
                     ),
@@ -189,7 +189,7 @@ class _AppLicensePageState extends State<AppLicensePage> {
             ),
             const SizedBox(height: 32),
             
-            const Text(
+            Text(
               'License Expiry Date : 16/07/2026',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.green),
             ),

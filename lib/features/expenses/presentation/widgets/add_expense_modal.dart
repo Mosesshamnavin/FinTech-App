@@ -173,7 +173,7 @@ class _AddExpenseModalState extends State<AddExpenseModal> {
                   Switch(
                     value: _isOnline,
                     onChanged: (val) => setState(() => _isOnline = val),
-                    activeColor: Colors.blue,
+                    activeColor: Theme.of(context).colorScheme.primary,
                   ),
                   Text(_isOnline ? 'Online' : 'Cash', style: const TextStyle(fontSize: 12)),
                 ],

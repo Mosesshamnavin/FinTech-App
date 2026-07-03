@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/di/injection_container.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../domain/entities/customer_entity.dart';
 import '../../../loans/presentation/bloc/loans_bloc.dart';
 import '../../../loans/presentation/bloc/loans_event.dart';
@@ -120,7 +121,7 @@ class _CustomerDetailView extends StatelessWidget {
         if (state is LoansLoading) {
           return const Center(child: CircularProgressIndicator());
         } else if (state is LoansError) {
-          return Center(child: Text(state.message, style: const TextStyle(color: Colors.red)));
+          return Center(child: Text(state.message, style: TextStyle(color: context.danger)));
         } else if (state is LoansLoaded) {
           if (state.loans.isEmpty) {
             return const Center(child: Text('No active loans found.'));
@@ -157,13 +158,13 @@ class _CustomerDetailView extends StatelessWidget {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                             decoration: BoxDecoration(
-                              color: loan.status == 'Active' ? Colors.green.withOpacity(0.1) : Colors.grey.withOpacity(0.1),
+                              color: loan.status == 'Active' ? context.successLight : context.surfaceVariant,
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Text(
                               loan.status,
                               style: TextStyle(
-                                color: loan.status == 'Active' ? Colors.green : Colors.grey,
+                                color: loan.status == 'Active' ? context.success : context.textMuted,
                                 fontWeight: FontWeight.bold,
                                 fontSize: 12,
                               ),
@@ -210,9 +211,9 @@ class _CustomerDetailView extends StatelessWidget {
                       const SizedBox(height: 8),
                       Row(
                         children: [
-                          Expanded(child: Text('Paid: ${formatter.format(loan.totalAmount - loan.outstandingBalance)}', style: const TextStyle(fontSize: 12, color: Colors.green))),
+                          Expanded(child: Text('Paid: ${formatter.format(loan.totalAmount - loan.outstandingBalance)}', style: TextStyle(fontSize: 12, color: context.success))),
                           const SizedBox(width: 8),
-                          Expanded(child: Text('Balance: ${formatter.format(loan.outstandingBalance)}', style: const TextStyle(fontSize: 12, color: Colors.orange), textAlign: TextAlign.right)),
+                          Expanded(child: Text('Balance: ${formatter.format(loan.outstandingBalance)}', style: TextStyle(fontSize: 12, color: context.warning), textAlign: TextAlign.right)),
                         ],
                       ),
                     ],

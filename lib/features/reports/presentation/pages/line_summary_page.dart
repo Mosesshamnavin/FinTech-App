@@ -1,6 +1,7 @@
 import 'package:vasooldrive/features/settings/presentation/bloc/settings_state.dart';
 import 'package:vasooldrive/features/settings/presentation/bloc/settings_bloc.dart';
 import 'package:flutter/material.dart';
+import '../../../../core/theme/app_colors.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 
@@ -99,9 +100,9 @@ class _LineSummaryViewState extends State<_LineSummaryView> {
       onTap: () => _selectDate(context, controller),
       decoration: InputDecoration(
         labelText: label,
-        labelStyle: const TextStyle(color: Colors.black54),
+        labelStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface.withAlpha(153)),
         floatingLabelBehavior: FloatingLabelBehavior.always,
-        suffixIcon: const Icon(Icons.calendar_today, color: Colors.lightBlue, size: 20),
+        suffixIcon: Icon(Icons.calendar_today, color: Theme.of(context).colorScheme.primary, size: 20),
         border: const UnderlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
         enabledBorder: const UnderlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
         focusedBorder: const UnderlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
@@ -135,8 +136,8 @@ class _LineSummaryViewState extends State<_LineSummaryView> {
         children: [
           if (!_isFiltersExpanded)
             ListTile(
-              title: const Text('Edit Filters', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.lightBlue)),
-              trailing: const Icon(Icons.edit, color: Colors.lightBlue, size: 20),
+              title: Text('Edit Filters', style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary)),
+              trailing: Icon(Icons.edit, color: Theme.of(context).colorScheme.primary, size: 20),
               onTap: () => setState(() => _isFiltersExpanded = true),
             ),
           if (_isFiltersExpanded)
@@ -173,7 +174,7 @@ class _LineSummaryViewState extends State<_LineSummaryView> {
                       children: [
                         Checkbox(
                           value: _lineAll,
-                          activeColor: Colors.lightBlue,
+                          activeColor: Theme.of(context).colorScheme.primary,
                           onChanged: (val) => setState(() => _lineAll = val ?? false),
                         ),
                         const Text('All'),
@@ -204,7 +205,7 @@ class _LineSummaryViewState extends State<_LineSummaryView> {
                 } else if (state is ReportLoading) {
                   return const Center(child: CircularProgressIndicator());
                 } else if (state is ReportError) {
-                  return Center(child: Text(state.message, style: const TextStyle(color: Colors.red)));
+                  return Center(child: Text(state.message, style: TextStyle(color: Theme.of(context).colorScheme.error)));
                 } else if (state is ReportLoaded) {
                   return ReportResultWidget(report: state.report);
                 }

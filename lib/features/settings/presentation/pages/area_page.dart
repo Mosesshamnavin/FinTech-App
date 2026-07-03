@@ -32,7 +32,7 @@ class AreaPage extends StatelessWidget {
           if (state is SettingsLoading) {
             return const Center(child: CircularProgressIndicator());
           } else if (state is SettingsError) {
-            return Center(child: Text(state.message, style: const TextStyle(color: Colors.red)));
+            return Center(child: Text(state.message, style: TextStyle(color: Theme.of(context).colorScheme.error)));
           } else if (state is SettingsLoaded) {
             if (state.areas.isEmpty) {
               return const Center(child: Text('No Areas found.'));

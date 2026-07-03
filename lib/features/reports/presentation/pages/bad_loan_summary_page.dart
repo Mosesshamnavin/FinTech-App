@@ -2,6 +2,7 @@ import 'package:vasooldrive/features/settings/presentation/bloc/settings_state.d
 import 'package:vasooldrive/features/settings/presentation/bloc/settings_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../../../core/di/injection_container.dart';
 import '../../../../core/widgets/custom_dropdown.dart';
 import '../bloc/report_bloc.dart';
@@ -35,7 +36,7 @@ class _BadLoanSummaryPageState extends State<BadLoanSummaryPage> {
 
   Widget _radio(String title) => Column(children: [
     Row(children: [
-      Radio<String>(value: title, groupValue: _selectedBadLoanDays, activeColor: Colors.lightBlue, onChanged: (v) { if (v != null) setState(() => _selectedBadLoanDays = v); }),
+      Radio<String>(value: title, groupValue: _selectedBadLoanDays, activeColor: Theme.of(context).colorScheme.primary, onChanged: (v) { if (v != null) setState(() => _selectedBadLoanDays = v); }),
       Text(title, style: const TextStyle(fontSize: 16)),
     ]),
     if (title != 'Custom') const Padding(padding: EdgeInsets.only(left: 48), child: Divider(height: 1, color: Colors.grey)),
@@ -56,10 +57,10 @@ class _BadLoanSummaryPageState extends State<BadLoanSummaryPage> {
               Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
                 Expanded(child: CustomDropdownFormField<String>(label: 'Line', value: _line, items: lines.map((v) => DropdownMenuItem(value: v, child: Text(v))).toList(), onChanged: (v) => setState(() { _line = v; _lineAll = false; }))),
                 const SizedBox(width: 16),
-                Row(children: [Checkbox(value: _lineAll, activeColor: Colors.lightBlue, onChanged: (v) => setState(() { _lineAll = v ?? true; if (_lineAll) _line = null; })), const Text('All')]),
+                Row(children: [Checkbox(value: _lineAll, activeColor: Theme.of(context).colorScheme.primary, onChanged: (v) => setState(() { _lineAll = v ?? true; if (_lineAll) _line = null; })), Text('All')]),
               ]),
               const SizedBox(height: 32),
-              const Text('Bad Loan Days', style: TextStyle(fontSize: 16, color: Colors.black87)),
+              Text('Bad Loan Days', style: TextStyle(fontSize: 16, color: Theme.of(context).colorScheme.onSurface)),
               const SizedBox(height: 8),
               _radio('Above 100 Days'), _radio('Above 150 Days'), _radio('Between 150 to 200Days'), _radio('Above 200 Days'), _radio('Custom'),
               const Padding(padding: EdgeInsets.only(left: 48), child: Divider(height: 1, color: Colors.grey)),
@@ -72,10 +73,10 @@ class _BadLoanSummaryPageState extends State<BadLoanSummaryPage> {
               const SizedBox(height: 32),
               Center(child: state is ReportLoading ? const CircularProgressIndicator() : ElevatedButton(
                 onPressed: () { final (min, max) = _getRange(); ctx.read<ReportBloc>().add(LoadBadLoanSummaryRequested(minDays: min, maxDays: max, line: _lineAll ? null : _line)); },
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.lightBlue[300], padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12)),
+                style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.primary, padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12)),
                 child: const Text('SUBMIT', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
               )),
-              if (state is ReportError) Padding(padding: const EdgeInsets.only(top: 16), child: Text(state.message, style: const TextStyle(color: Colors.red))),
+              if (state is ReportError) Padding(padding: EdgeInsets.only(top: 16), child: Text(state.message, style: TextStyle(color: Theme.of(context).colorScheme.error))),
             ])),
           );
         }),

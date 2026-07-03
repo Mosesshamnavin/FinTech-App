@@ -2,6 +2,7 @@ import 'package:vasooldrive/features/settings/presentation/bloc/settings_state.d
 import 'package:vasooldrive/features/settings/presentation/bloc/settings_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../../../core/di/injection_container.dart';
 import '../../../../core/widgets/custom_dropdown.dart';
 import '../bloc/report_bloc.dart';
@@ -63,8 +64,8 @@ class _PlanReportViewState extends State<_PlanReportView> {
             children: [
               if (!_isFiltersExpanded)
                 ListTile(
-                  title: const Text('Edit Filters', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.lightBlue)),
-                  trailing: const Icon(Icons.edit, color: Colors.lightBlue, size: 20),
+                  title: Text('Edit Filters', style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary)),
+                  trailing: Icon(Icons.edit, color: Theme.of(context).colorScheme.primary, size: 20),
                   onTap: () => setState(() => _isFiltersExpanded = true),
                 ),
               if (_isFiltersExpanded)
@@ -97,7 +98,7 @@ class _PlanReportViewState extends State<_PlanReportView> {
                             children: [
                               Checkbox(
                                 value: _lineAll,
-                                activeColor: Colors.lightBlue,
+                                activeColor: Theme.of(context).colorScheme.primary,
                                 onChanged: (val) {
                                   setState(() {
                                     _lineAll = val ?? false;
@@ -115,7 +116,7 @@ class _PlanReportViewState extends State<_PlanReportView> {
                         child: ElevatedButton(
                           onPressed: _onSubmit,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.lightBlue[300],
+                            backgroundColor: Theme.of(context).colorScheme.primary,
                             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                           ),
                           child: const Text(
@@ -136,7 +137,7 @@ class _PlanReportViewState extends State<_PlanReportView> {
                     } else if (state is ReportLoading) {
                       return const Center(child: CircularProgressIndicator());
                     } else if (state is ReportError) {
-                      return Center(child: Text(state.message, style: const TextStyle(color: Colors.red)));
+                      return Center(child: Text(state.message, style: TextStyle(color: Theme.of(context).colorScheme.error)));
                     } else if (state is ReportLoaded) {
                       return ReportResultWidget(report: state.report);
                     }
