@@ -35,9 +35,9 @@ This document tracks completed achievements and pending todo tasks for the proje
 - [x] **Send Trigger**: Automatically open WhatsApp/SMS with template text when saving payments in `add_collection_modal.dart`.
 
 ### 📥 Export & Import Line Data
-- [ ] **Line Export (CSV)**: Export customer balances and loan records to CSV sheets in `export_line_page.dart`.
-- [ ] **Line Import (CSV)**: Scan Documents folder and batch import CSV lists in `import_line_page.dart`.
-- [ ] **Download Sample CSV**: Generate sample CSV file structure for user guide in `import_line_page.dart`.
+- [x] **Line Export (CSV)**: Export customer balances and loan records to CSV sheets in `export_line_page.dart`.
+- [x] **Line Import (CSV)**: Scan Documents folder and batch import CSV lists in `import_line_page.dart`.
+- [x] **Download Sample CSV**: Generate sample CSV file structure for user guide in `import_line_page.dart`.
 
 ### 🔒 Security & Auth Settings
 - [x] **Change Password**: Connect old/new password update mutation in `change_password_page.dart`.
