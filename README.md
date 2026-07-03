@@ -1,40 +1,61 @@
-# PayTrack 🚀
+# Vasool Drive (PayTrack) 🚀
 
-PayTrack is a comprehensive Flutter application designed to streamline daily collections, expense management, and customer tracking. Built with modern clean architecture principles, it provides a robust and scalable solution for field agents and collection businesses.
+Vasool Drive is a premium, comprehensive microfinance and daily collection management system built with Flutter. It streamlines daily collections (vasool), loan histories, customer tracking, expense logging, and line accounting for field agents and lenders.
+
+---
 
 ## ✨ Features
 
-- **🔒 Authentication**: Secure user login and session management.
-- **🏠 Dashboard/Home**: Overview of daily metrics and quick actions.
-- **👥 Customer Management**: Add, view, and manage customer details.
-- **💰 Collections (Vasool)**: Record and track daily payments efficiently.
-- **💸 Expense Tracking**: Log daily expenses to maintain accurate ledgers.
-- **📊 Reports**: Generate and view detailed collection and expense reports.
-- **⚙️ Settings & Support**: Manage app preferences, user profile, and access support.
+- **🔒 Auth & Security**:
+  - Secure login/registration flows.
+  - In-app **Change Password** directly linked to Hasura.
+  - Custom preference toggles for **Fingerprint Auth** and **OTP Security Alerts** verified against your credentials.
+- **💰 Collections & Loan Management (Vasool)**:
+  - Record daily payments, assign new loans, and view active/completed loan progress.
+  - Interactive calculator modal to compute loan schedules on the fly.
+  - Timeline-Polish daily summaries and card metrics on the main dashboard.
+- **💬 SMS & WhatsApp Template Integration**:
+  - Persists English and Tamil templates locally using SharedPreferences.
+  - Standalone `SmsService` formats customized collection templates replacing tags like `{CustomerName}` and `{AmountPaidToday}` dynamically.
+  - Automatically triggers intent prompts (WhatsApp/SMS link launchers) when collections are saved as paid.
+  - Features an inline mobile number editor inside the confirmation prompt to correct numbers before sending.
+- **📥 CSV Export & Import**:
+  - **Line Export**: Query active lines from Hasura and export customer balances, transactions, and installments to standard CSV sheets.
+  - **Line Import**: Parse selected CSV templates placed in the device's Documents/Downloads directory to batch insert customer details, active loans, and collections.
+  - **Sample Template**: Generates sample import templates to guide bulk data entry.
+- **📊 19 Dynamic Reports**:
+  - Comprehensive reporting engines mapped to the live GraphQL backend, including Ledger Reports, Daily Summaries, Online Collections, Bad Loans, and Non-Performing Loans.
+- **🎨 Theme & Color Theory Integration**:
+  - Theming engine dynamically adjusts colors (Blue, Green, Orange, etc.) matching user preferences.
+  - Complete dark mode support with tailored contrast variables.
 
-## 🏗️ Architecture
+---
 
-This project follows **Clean Architecture** principles to ensure separation of concerns, testability, and scalability. The codebase is organized into `core` and feature-based modules:
+## 🛠️ Tech Stack
 
-- `lib/core/`: Contains shared utilities, network configurations, and common widgets.
-- `lib/features/`: Contains independent, fully-encapsulated feature modules (`auth`, `collections`, `customers`, `expenses`, `home`, `reports`, `settings`).
+- **Framework**: Flutter (Dart)
+- **Architecture**: Clean Architecture (Feature-based: Auth, Collections, Customers, Expenses, Home, Reports, Settings)
+- **Backend API**: Hasura GraphQL Engine (PostgreSQL)
+- **State Management**: flutter_bloc (BLoC Pattern)
+- **Dependency Injection**: GetIt (Service Locator)
+- **Local Storage**: SharedPreferences & SQLite (Local cache services)
+- **File Processing**: path_provider & local CSV serialization helpers
+
+---
 
 ## 🚀 Getting Started
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
-
 ### Prerequisites
 
-- [Flutter SDK](https://docs.flutter.dev/get-started/install) (latest stable version recommended)
-- Dart SDK (comes with Flutter)
-- Android Studio / VS Code with Flutter plugins
+- [Flutter SDK](https://docs.flutter.dev/get-started/install) (latest stable version)
+- Hasura GraphQL Server (with the schema tables tracked)
 
 ### Installation
 
 1. **Clone the repository**
    ```bash
    git clone <repository-url>
-   cd paytrack
+   cd vasooldrive
    ```
 
 2. **Install dependencies**
@@ -42,22 +63,15 @@ These instructions will get you a copy of the project up and running on your loc
    flutter pub get
    ```
 
-3. **Run the app**
+3. **Configure Environment**
+   Update your API configurations and JWT Secret strings in `injection_container.dart` and `auth_remote_datasource.dart` to match your Hasura endpoint.
+
+4. **Run the app**
    ```bash
    flutter run
    ```
 
-## 🛠️ Tech Stack
+---
 
-- **Framework**: Flutter
-- **Language**: Dart
-- **Architecture**: Clean Architecture (Feature-based)
-
-## 📚 Flutter Resources
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the [online documentation](https://docs.flutter.dev/), which offers tutorials, samples, guidance on mobile development, and a full API reference.
+## 🔒 Database Real-time Triggers
+To ensure automated real-time loan progress and status changes (e.g. updating outstanding balance when a collection is added/updated/deleted), make sure the PostgreSQL trigger function in `database_triggers.md` is registered in your Hasura Console's SQL tab.
