@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/di/injection_container.dart';
+import '../../../../core/services/storage_service.dart';
+import '../../../../core/services/sms_service.dart';
 import '../bloc/collections_bloc.dart';
 import '../bloc/collections_event.dart';
 import '../bloc/collections_state.dart';
@@ -7,12 +10,14 @@ import '../bloc/collections_state.dart';
 class AddCollectionModal extends StatefulWidget {
   final String customerId;
   final String customerName;
+  final String customerPhone;
   final String date;
 
   const AddCollectionModal({
     super.key,
     required this.customerId,
     required this.customerName,
+    required this.customerPhone,
     required this.date,
   });
 
@@ -51,7 +56,86 @@ class _AddCollectionModalState extends State<AddCollectionModal> {
     return BlocListener<CollectionsBloc, CollectionsState>(
       listener: (context, state) {
         if (state is AddCollectionActionSuccess) {
-          Navigator.of(context).pop(true); // Signal success
+          final storage = sl<StorageService>();
+          final sendSmsEnabled = storage.getBool('my_settings_send_sms');
+          if (sendSmsEnabled && _status == 'paid') {
+            showDialog(
+              context: context,
+              barrierDismissible: false,
+              builder: (dialogCtx) {
+                final phoneController = TextEditingController(text: widget.customerPhone);
+                return StatefulBuilder(
+                  builder: (context, setState) {
+                    final hasPhone = phoneController.text.trim().isNotEmpty;
+                    return AlertDialog(
+                      title: const Text('Send Receipt'),
+                      content: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Text('Send collection receipt to ${widget.customerName}?'),
+                          const SizedBox(height: 16),
+                          TextField(
+                            controller: phoneController,
+                            decoration: const InputDecoration(
+                              labelText: 'Customer Mobile Number',
+                              hintText: 'Enter 10-digit number',
+                              prefixText: '+91 ',
+                            ),
+                            keyboardType: TextInputType.phone,
+                            onChanged: (_) => setState(() {}),
+                          ),
+                        ],
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pop(dialogCtx);
+                            Navigator.pop(context, true);
+                          },
+                          child: const Text('CANCEL'),
+                        ),
+                        TextButton(
+                          onPressed: !hasPhone ? null : () async {
+                            Navigator.pop(dialogCtx);
+                            final text = await sl<SmsService>().composeMessage(
+                              flow: 'Collection',
+                              language: 'en',
+                              customerName: widget.customerName,
+                              amountPaidToday: double.tryParse(_amountController.text) ?? 0.0,
+                              date: widget.date,
+                              customerId: widget.customerId,
+                            );
+                            await sl<SmsService>().sendWhatsApp(phone: phoneController.text, text: text);
+                            if (context.mounted) Navigator.pop(context, true);
+                          },
+                          child: const Text('WHATSAPP'),
+                        ),
+                        TextButton(
+                          onPressed: !hasPhone ? null : () async {
+                            Navigator.pop(dialogCtx);
+                            final text = await sl<SmsService>().composeMessage(
+                              flow: 'Collection',
+                              language: 'en',
+                              customerName: widget.customerName,
+                              amountPaidToday: double.tryParse(_amountController.text) ?? 0.0,
+                              date: widget.date,
+                              customerId: widget.customerId,
+                            );
+                            await sl<SmsService>().sendSMS(phone: phoneController.text, text: text);
+                            if (context.mounted) Navigator.pop(context, true);
+                          },
+                          child: const Text('SMS'),
+                        ),
+                      ],
+                    );
+                  }
+                );
+              }
+            );
+          } else {
+            Navigator.of(context).pop(true);
+          }
         } else if (state is AddCollectionActionError) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(

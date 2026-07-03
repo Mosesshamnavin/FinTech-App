@@ -78,11 +78,11 @@ class _ReportDetailPageState extends State<ReportDetailPage> {
                   child: SingleChildScrollView(
                     child: DataTable(
                       headingRowColor: WidgetStateProperty.all(Theme.of(context).colorScheme.primaryContainer),
-                      columnSpacing: 20,
+                      columnSpacing: 38,
                       dataRowMinHeight: 44,
                       dataRowMaxHeight: 56,
                       columns: report.columns.map((col) => DataColumn(
-                        label: Text(col, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                        label: Text(col, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Theme.of(context).colorScheme.onPrimaryContainer)),
                       )).toList(),
                       rows: filteredRows.map((row) => DataRow(
                         cells: report.columns.map((col) => DataCell(

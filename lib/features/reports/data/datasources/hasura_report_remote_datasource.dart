@@ -120,7 +120,7 @@ class HasuraReportRemoteDataSourceImpl implements ReportRemoteDataSource {
         lines${line != null && line != 'All' ? '(where: {id: {_eq: \$lineId}})' : ''} { id name }
         loans(where: { start_date: {_gte: \$start, _lte: \$end} }) { principal_amount customer { line { id } } }
         collections(where: { date: {_gte: \$start, _lte: \$end}, status: {_eq: "Paid"} }) { amount customer { line { id } } }
-        customers(where: { is_active: {_eq: true} }) { line_id }
+        customers { line_id }
       }
     ''';
     final result = await client.query(QueryOptions(document: gql(query), variables: vars, fetchPolicy: FetchPolicy.networkOnly));
@@ -204,20 +204,25 @@ class HasuraReportRemoteDataSourceImpl implements ReportRemoteDataSource {
     final query = '''
       query GetExpenseSummary(\$start: timestamp!, \$end: timestamp!, \$userId: uuid!) {
         expenses(where: {date: {_gte: \$start, _lte: \$end}, user_id: {_eq: \$userId}}, order_by: {date: desc}) {
-          amount comments date
-          expense_type { name }
+          amount comments date type_id
+        }
+        expense_types {
+          id name
         }
       }
     ''';
     final result = await client.query(QueryOptions(document: gql(query), variables: vars, fetchPolicy: FetchPolicy.networkOnly));
     if (result.hasException) throw ServerException(result.exception.toString());
     final List expData = result.data?['expenses'] ?? [];
+    final List typesData = result.data?['expense_types'] ?? [];
+    final typesMap = {for (var t in typesData) t['id']?.toString(): t['name']?.toString()};
     double total = 0;
     final rows = <Map<String, String>>[];
     for (var e in expData) {
       final amount = double.tryParse(e['amount']?.toString() ?? '0') ?? 0;
       total += amount;
-      rows.add({'Type': e['expense_type']?['name']?.toString() ?? 'Other', 'Note': e['comments']?.toString() ?? '', 'Amount': _fmt(amount), 'Date': _fmtDate(e['date'])});
+      final typeName = typesMap[e['type_id']?.toString()] ?? 'Other';
+      rows.add({'Type': typeName, 'Note': e['comments']?.toString() ?? '', 'Amount': _fmt(amount), 'Date': _fmtDate(e['date'])});
     }
     return ReportEntity(title: 'Expense Summary — $fromDate to $toDate', summaryFields: {'Total Expenses': expData.length.toString(), 'Total Amount': _fmt(total)}, columns: ['Type', 'Note', 'Amount', 'Date'], rows: rows);
   }
@@ -227,11 +232,16 @@ class HasuraReportRemoteDataSourceImpl implements ReportRemoteDataSource {
   Future<ReportEntity> getCompletedLoanSummary({required String fromDate, required String toDate, String? line}) async {
     final userId = await storageService.getUserId();
     if (userId == null) throw const ServerException('User not authenticated');
-    final vars = _dateRange(fromDate, toDate);
+    final fromP = DateFormat('dd/MM/yyyy').parse(fromDate);
+    final toP = DateFormat('dd/MM/yyyy').parse(toDate);
+    final vars = {
+      'start': DateFormat('yyyy-MM-dd').format(fromP),
+      'end': DateFormat('yyyy-MM-dd').format(toP),
+    };
     String lineFilter = '';
     if (line != null && line != 'All') { lineFilter = ', customer: {line_id: {_eq: \$lineId}}'; vars['lineId'] = line; }
     final query = '''
-      query GetCompletedLoans(\$start: timestamp!, \$end: timestamp!${line != null && line != 'All' ? ', \$lineId: uuid' : ''}) {
+      query GetCompletedLoans(\$start: date!, \$end: date!${line != null && line != 'All' ? ', \$lineId: uuid' : ''}) {
         loans(where: {status: {_eq: "Completed"}, end_date: {_gte: \$start, _lte: \$end}$lineFilter}, order_by: {end_date: desc}) {
           id principal_amount total_amount start_date end_date
           customer { name line { name } }
@@ -252,39 +262,64 @@ class HasuraReportRemoteDataSourceImpl implements ReportRemoteDataSource {
     return ReportEntity(title: 'Completed Loans — $fromDate to $toDate', summaryFields: {'Total Completed': loansData.length.toString(), 'Principal Recovered': _fmt(totalPrincipal), 'Total Amount Collected': _fmt(totalAmount)}, columns: ['Customer', 'Line', 'Principal', 'Total Paid', 'Start Date', 'Closed On'], rows: rows);
   }
 
-  // ─── 7. Bad Loan Summary ──────────────────────────────────────────────────────
   @override
   Future<ReportEntity> getBadLoanSummary({int minDays = 150, int maxDays = 999999, String? line}) async {
     final userId = await storageService.getUserId();
     if (userId == null) throw const ServerException('User not authenticated');
-    final vars = <String, dynamic>{'minDays': minDays, 'maxDays': maxDays};
-    String lineFilter = '';
-    if (line != null && line != 'All') { lineFilter = ', customer: {line_id: {_eq: \$lineId}}'; vars['lineId'] = line; }
-    final cutoff = DateTime.now().subtract(Duration(days: minDays));
-    final cutoffMax = DateTime.now().subtract(Duration(days: maxDays));
-    vars['cutoffMin'] = cutoffMax.toIso8601String();
-    vars['cutoffMax'] = cutoff.toIso8601String();
+    final vars = <String, dynamic>{};
+    if (line != null && line != 'All') { vars['lineId'] = line; }
     final query = '''
-      query GetBadLoans(\$cutoffMin: timestamp!, \$cutoffMax: timestamp!${line != null && line != 'All' ? ', \$lineId: uuid' : ''}) {
-        loans(where: {status: {_eq: "Active"}, last_payment_date: {_lte: \$cutoffMax, _gte: \$cutoffMin}$lineFilter}, order_by: {last_payment_date: asc}) {
-          id outstanding_balance last_payment_date start_date
+      query GetBadLoans${line != null && line != 'All' ? '(\$lineId: uuid)' : ''} {
+        loans(where: {status: {_eq: "Active"}${line != null && line != 'All' ? ', customer: {line_id: {_eq: \$lineId}}' : ''}}) {
+          id outstanding_balance start_date customer_id
           customer { name phone line { name } }
+        }
+        collections(where: {status: {_eq: "paid"}}) {
+          customer_id date
         }
       }
     ''';
     final result = await client.query(QueryOptions(document: gql(query), variables: vars, fetchPolicy: FetchPolicy.networkOnly));
     if (result.hasException) throw ServerException(result.exception.toString());
     final List loansData = result.data?['loans'] ?? [];
+    final List collectionsData = result.data?['collections'] ?? [];
+    final latestPaymentMap = <String, DateTime>{};
+    for (var c in collectionsData) {
+      final custId = c['customer_id']?.toString();
+      final dateStr = c['date']?.toString();
+      if (custId != null && dateStr != null) {
+        final date = DateTime.parse(dateStr);
+        final currentLatest = latestPaymentMap[custId];
+        if (currentLatest == null || date.isAfter(currentLatest)) {
+          latestPaymentMap[custId] = date;
+        }
+      }
+    }
+    final now = DateTime.now();
     double totalOutstanding = 0;
     final rows = <Map<String, String>>[];
     for (var l in loansData) {
-      final outstanding = double.tryParse(l['outstanding_balance']?.toString() ?? '0') ?? 0;
-      totalOutstanding += outstanding;
-      final lastPay = l['last_payment_date'] != null ? _fmtDate(l['last_payment_date']) : 'Never';
-      final daysSince = l['last_payment_date'] != null ? DateTime.now().difference(DateTime.parse(l['last_payment_date'])).inDays : DateTime.now().difference(DateTime.parse(l['start_date'])).inDays;
-      rows.add({'Customer': l['customer']?['name']?.toString() ?? '', 'Phone': l['customer']?['phone']?.toString() ?? '', 'Line': l['customer']?['line']?['name']?.toString() ?? '', 'Outstanding': _fmt(outstanding), 'Last Payment': lastPay, 'Days': daysSince.toString()});
+      final custId = l['customer_id']?.toString() ?? '';
+      final startDate = l['start_date'] != null ? DateTime.parse(l['start_date'].toString()) : now;
+      final lastPaymentDate = latestPaymentMap[custId];
+      final daysSince = lastPaymentDate != null 
+          ? now.difference(lastPaymentDate).inDays 
+          : now.difference(startDate).inDays;
+      if (daysSince >= minDays && daysSince <= maxDays) {
+        final outstanding = double.tryParse(l['outstanding_balance']?.toString() ?? '0') ?? 0;
+        totalOutstanding += outstanding;
+        final lastPay = lastPaymentDate != null ? _fmtDate(lastPaymentDate.toIso8601String()) : 'Never';
+        rows.add({
+          'Customer': l['customer']?['name']?.toString() ?? '',
+          'Phone': l['customer']?['phone']?.toString() ?? '',
+          'Line': l['customer']?['line']?['name']?.toString() ?? '',
+          'Outstanding': _fmt(outstanding),
+          'Last Payment': lastPay,
+          'Days': daysSince.toString()
+        });
+      }
     }
-    return ReportEntity(title: 'Bad Loan Summary (>${minDays}d)', summaryFields: {'Total Bad Loans': loansData.length.toString(), 'Total Outstanding': _fmt(totalOutstanding)}, columns: ['Customer', 'Phone', 'Line', 'Outstanding', 'Last Payment', 'Days'], rows: rows);
+    return ReportEntity(title: 'Bad Loan Summary (>${minDays}d)', summaryFields: {'Total Bad Loans': rows.length.toString(), 'Total Outstanding': _fmt(totalOutstanding)}, columns: ['Customer', 'Phone', 'Line', 'Outstanding', 'Last Payment', 'Days'], rows: rows);
   }
 
   // ─── 8. Missing Customer Summary ─────────────────────────────────────────────
@@ -300,18 +335,24 @@ class HasuraReportRemoteDataSourceImpl implements ReportRemoteDataSource {
     if (line != null && line != 'All') { lineFilter = ', line_id: {_eq: \$lineId}'; vars['lineId'] = line; }
     final query = '''
       query GetMissingCustomers(\$start: timestamp!, \$end: timestamp!${line != null && line != 'All' ? ', \$lineId: uuid' : ''}) {
-        customers(where: {${line != null && line != 'All' ? 'line_id: {_eq: \$lineId}, ' : ''}_not: {collections: {date: {_gte: \$start, _lte: \$end}}}}) {
-          name phone
+        customers${line != null && line != 'All' ? '(where: {line_id: {_eq: \$lineId}})' : ''} {
+          id name phone
           line { name }
           area { name }
+        }
+        collections(where: {date: {_gte: \$start, _lte: \$end}}) {
+          customer_id
         }
       }
     ''';
     final result = await client.query(QueryOptions(document: gql(query), variables: vars, fetchPolicy: FetchPolicy.networkOnly));
     if (result.hasException) throw ServerException(result.exception.toString());
     final List custsData = result.data?['customers'] ?? [];
-    final rows = custsData.map<Map<String, String>>((c) => {'Name': c['name']?.toString() ?? '', 'Phone': c['phone']?.toString() ?? '', 'Line': c['line']?['name']?.toString() ?? '', 'Area': c['area']?['name']?.toString() ?? ''}).toList();
-    return ReportEntity(title: 'Missing Customers — $date', summaryFields: {'Missing Count': custsData.length.toString()}, columns: ['Name', 'Phone', 'Line', 'Area'], rows: rows);
+    final List colsData = result.data?['collections'] ?? [];
+    final paidCustomerIds = colsData.map((c) => c['customer_id']?.toString()).toSet();
+    final missingCusts = custsData.where((c) => !paidCustomerIds.contains(c['id']?.toString())).toList();
+    final rows = missingCusts.map<Map<String, String>>((c) => {'Name': c['name']?.toString() ?? '', 'Phone': c['phone']?.toString() ?? '', 'Line': c['line']?['name']?.toString() ?? '', 'Area': c['area']?['name']?.toString() ?? ''}).toList();
+    return ReportEntity(title: 'Missing Customers — $date', summaryFields: {'Missing Count': missingCusts.length.toString()}, columns: ['Name', 'Phone', 'Line', 'Area'], rows: rows);
   }
 
   // ─── 9. Investment Summary ────────────────────────────────────────────────────
@@ -324,20 +365,25 @@ class HasuraReportRemoteDataSourceImpl implements ReportRemoteDataSource {
     final query = '''
       query GetInvestmentSummary(\$start: timestamp!, \$end: timestamp!, \$userId: uuid!) {
         investments(where: {date: {_gte: \$start, _lte: \$end}, user_id: {_eq: \$userId}}, order_by: {date: desc}) {
-          amount comments date
-          investment_type { name }
+          amount comments date type_id
+        }
+        investment_types {
+          id name
         }
       }
     ''';
     final result = await client.query(QueryOptions(document: gql(query), variables: vars, fetchPolicy: FetchPolicy.networkOnly));
     if (result.hasException) throw ServerException(result.exception.toString());
     final List invData = result.data?['investments'] ?? [];
+    final List typesData = result.data?['investment_types'] ?? [];
+    final typesMap = {for (var t in typesData) t['id']?.toString(): t['name']?.toString()};
     double total = 0;
     final rows = <Map<String, String>>[];
     for (var inv in invData) {
       final amount = double.tryParse(inv['amount']?.toString() ?? '0') ?? 0;
       total += amount;
-      rows.add({'Type': inv['investment_type']?['name']?.toString() ?? '', 'Note': inv['comments']?.toString() ?? '', 'Amount': _fmt(amount), 'Date': _fmtDate(inv['date'])});
+      final typeName = typesMap[inv['type_id']?.toString()] ?? 'Other';
+      rows.add({'Type': typeName, 'Note': inv['comments']?.toString() ?? '', 'Amount': _fmt(amount), 'Date': _fmtDate(inv['date'])});
     }
     return ReportEntity(title: 'Investment Summary — $fromDate to $toDate', summaryFields: {'Total Investments': invData.length.toString(), 'Total Amount': _fmt(total)}, columns: ['Type', 'Note', 'Amount', 'Date'], rows: rows);
   }
@@ -352,10 +398,10 @@ class HasuraReportRemoteDataSourceImpl implements ReportRemoteDataSource {
     final query = '''
       query GetInvestExpenseSummary(\$start: timestamp!, \$end: timestamp!, \$userId: uuid!) {
         investments(where: {date: {_gte: \$start, _lte: \$end}, user_id: {_eq: \$userId}}) {
-          amount investment_type { name }
+          amount
         }
         expenses(where: {date: {_gte: \$start, _lte: \$end}, user_id: {_eq: \$userId}}) {
-          amount expense_type { name }
+          amount
         }
       }
     ''';
@@ -457,80 +503,142 @@ class HasuraReportRemoteDataSourceImpl implements ReportRemoteDataSource {
     return ReportEntity(title: 'Monthly Interest Pending — ${DateFormat('MMMM yyyy').format(start)}', summaryFields: {'Pending Entries': colsData.length.toString()}, columns: ['Customer', 'Phone', 'Line', 'Status', 'Date'], rows: rows);
   }
 
-  // ─── 14. Non-Performance Loan ─────────────────────────────────────────────────
   @override
   Future<ReportEntity> getNonPerformanceLoanSummary({int minDays = 90, String? line}) async {
     final userId = await storageService.getUserId();
     if (userId == null) throw const ServerException('User not authenticated');
-    final cutoff = DateTime.now().subtract(Duration(days: minDays));
-    final vars = <String, dynamic>{'cutoff': cutoff.toIso8601String()};
-    String lineFilter = '';
-    if (line != null && line != 'All') { lineFilter = ', customer: {line_id: {_eq: \$lineId}}'; vars['lineId'] = line; }
+    final vars = <String, dynamic>{};
+    if (line != null && line != 'All') { vars['lineId'] = line; }
     final query = '''
-      query GetNonPerformance(\$cutoff: timestamp!${line != null && line != 'All' ? ', \$lineId: uuid' : ''}) {
-        loans(where: {status: {_eq: "Active"}, last_payment_date: {_lte: \$cutoff}$lineFilter}, order_by: {last_payment_date: asc}) {
-          outstanding_balance last_payment_date
+      query GetNonPerformance${line != null && line != 'All' ? '(\$lineId: uuid)' : ''} {
+        loans(where: {status: {_eq: "Active"}${line != null && line != 'All' ? ', customer: {line_id: {_eq: \$lineId}}' : ''}}) {
+          outstanding_balance start_date customer_id
           customer { name phone line { name } }
+        }
+        collections(where: {status: {_eq: "paid"}}) {
+          customer_id date
         }
       }
     ''';
     final result = await client.query(QueryOptions(document: gql(query), variables: vars, fetchPolicy: FetchPolicy.networkOnly));
     if (result.hasException) throw ServerException(result.exception.toString());
     final List loansData = result.data?['loans'] ?? [];
+    final List collectionsData = result.data?['collections'] ?? [];
+    final latestPaymentMap = <String, DateTime>{};
+    for (var c in collectionsData) {
+      final custId = c['customer_id']?.toString();
+      final dateStr = c['date']?.toString();
+      if (custId != null && dateStr != null) {
+        final date = DateTime.parse(dateStr);
+        final currentLatest = latestPaymentMap[custId];
+        if (currentLatest == null || date.isAfter(currentLatest)) {
+          latestPaymentMap[custId] = date;
+        }
+      }
+    }
+    final now = DateTime.now();
     double totalOutstanding = 0;
     final rows = <Map<String, String>>[];
     for (var l in loansData) {
-      final outstanding = double.tryParse(l['outstanding_balance']?.toString() ?? '0') ?? 0;
-      totalOutstanding += outstanding;
-      final lastPay = l['last_payment_date'] != null ? _fmtDate(l['last_payment_date']) : 'Never';
-      final days = l['last_payment_date'] != null ? DateTime.now().difference(DateTime.parse(l['last_payment_date'])).inDays : minDays;
-      rows.add({'Customer': l['customer']?['name']?.toString() ?? '', 'Phone': l['customer']?['phone']?.toString() ?? '', 'Line': l['customer']?['line']?['name']?.toString() ?? '', 'Outstanding': _fmt(outstanding), 'Last Payment': lastPay, 'Days Idle': days.toString()});
+      final custId = l['customer_id']?.toString() ?? '';
+      final startDate = l['start_date'] != null ? DateTime.parse(l['start_date'].toString()) : now;
+      final lastPaymentDate = latestPaymentMap[custId];
+      final days = lastPaymentDate != null 
+          ? now.difference(lastPaymentDate).inDays 
+          : now.difference(startDate).inDays;
+      if (days >= minDays) {
+        final outstanding = double.tryParse(l['outstanding_balance']?.toString() ?? '0') ?? 0;
+        totalOutstanding += outstanding;
+        final lastPay = lastPaymentDate != null ? _fmtDate(lastPaymentDate.toIso8601String()) : 'Never';
+        rows.add({
+          'Customer': l['customer']?['name']?.toString() ?? '',
+          'Phone': l['customer']?['phone']?.toString() ?? '',
+          'Line': l['customer']?['line']?['name']?.toString() ?? '',
+          'Outstanding': _fmt(outstanding),
+          'Last Payment': lastPay,
+          'Days Idle': days.toString()
+        });
+      }
     }
-    return ReportEntity(title: 'Non-Performance Loans (>${minDays}d idle)', summaryFields: {'Total NPA Loans': loansData.length.toString(), 'Total Outstanding': _fmt(totalOutstanding)}, columns: ['Customer', 'Phone', 'Line', 'Outstanding', 'Last Payment', 'Days Idle'], rows: rows);
+    return ReportEntity(title: 'Non-Performance Loans (>${minDays}d idle)', summaryFields: {'Total NPA Loans': rows.length.toString(), 'Total Outstanding': _fmt(totalOutstanding)}, columns: ['Customer', 'Phone', 'Line', 'Outstanding', 'Last Payment', 'Days Idle'], rows: rows);
   }
 
-  // ─── 15. New Bad Loan by Date ─────────────────────────────────────────────────
   @override
   Future<ReportEntity> getNewBadLoanByDateSummary({required String fromDate, required String toDate, String? line}) async {
     final userId = await storageService.getUserId();
     if (userId == null) throw const ServerException('User not authenticated');
-    final vars = _dateRange(fromDate, toDate);
-    String lineFilter = '';
-    if (line != null && line != 'All') { lineFilter = ', customer: {line_id: {_eq: \$lineId}}'; vars['lineId'] = line; }
+    final parsedFrom = DateFormat('dd/MM/yyyy').parse(fromDate);
+    final parsedTo = DateFormat('dd/MM/yyyy').parse(toDate);
+    final rangeStart = DateTime(parsedFrom.year, parsedFrom.month, parsedFrom.day);
+    final rangeEnd = DateTime(parsedTo.year, parsedTo.month, parsedTo.day, 23, 59, 59);
+    final vars = <String, dynamic>{};
+    if (line != null && line != 'All') { vars['lineId'] = line; }
     final query = '''
-      query GetNewBadLoans(\$start: timestamp!, \$end: timestamp!${line != null && line != 'All' ? ', \$lineId: uuid' : ''}) {
-        loans(where: {status: {_eq: "Active"}, last_payment_date: {_gte: \$start, _lte: \$end}$lineFilter}, order_by: {last_payment_date: desc}) {
-          outstanding_balance last_payment_date start_date
+      query GetNewBadLoans${line != null && line != 'All' ? '(\$lineId: uuid)' : ''} {
+        loans(where: {status: {_eq: "Active"}${line != null && line != 'All' ? ', customer: {line_id: {_eq: \$lineId}}' : ''}}) {
+          outstanding_balance start_date customer_id
           customer { name phone line { name } }
+        }
+        collections(where: {status: {_eq: "paid"}}) {
+          customer_id date
         }
       }
     ''';
     final result = await client.query(QueryOptions(document: gql(query), variables: vars, fetchPolicy: FetchPolicy.networkOnly));
     if (result.hasException) throw ServerException(result.exception.toString());
     final List loansData = result.data?['loans'] ?? [];
+    final List collectionsData = result.data?['collections'] ?? [];
+    final latestPaymentMap = <String, DateTime>{};
+    for (var c in collectionsData) {
+      final custId = c['customer_id']?.toString();
+      final dateStr = c['date']?.toString();
+      if (custId != null && dateStr != null) {
+        final date = DateTime.parse(dateStr);
+        final currentLatest = latestPaymentMap[custId];
+        if (currentLatest == null || date.isAfter(currentLatest)) {
+          latestPaymentMap[custId] = date;
+        }
+      }
+    }
     double totalOutstanding = 0;
     final rows = <Map<String, String>>[];
     for (var l in loansData) {
-      final outstanding = double.tryParse(l['outstanding_balance']?.toString() ?? '0') ?? 0;
-      totalOutstanding += outstanding;
-      rows.add({'Customer': l['customer']?['name']?.toString() ?? '', 'Phone': l['customer']?['phone']?.toString() ?? '', 'Line': l['customer']?['line']?['name']?.toString() ?? '', 'Outstanding': _fmt(outstanding), 'Last Payment': l['last_payment_date'] != null ? _fmtDate(l['last_payment_date']) : 'Never'});
+      final custId = l['customer_id']?.toString() ?? '';
+      final lastPaymentDate = latestPaymentMap[custId];
+      if (lastPaymentDate != null && lastPaymentDate.isAfter(rangeStart) && lastPaymentDate.isBefore(rangeEnd)) {
+        final outstanding = double.tryParse(l['outstanding_balance']?.toString() ?? '0') ?? 0;
+        totalOutstanding += outstanding;
+        rows.add({
+          'Customer': l['customer']?['name']?.toString() ?? '',
+          'Phone': l['customer']?['phone']?.toString() ?? '',
+          'Line': l['customer']?['line']?['name']?.toString() ?? '',
+          'Outstanding': _fmt(outstanding),
+          'Last Payment': _fmtDate(lastPaymentDate.toIso8601String())
+        });
+      }
     }
-    return ReportEntity(title: 'New Bad Loans — $fromDate to $toDate', summaryFields: {'Count': loansData.length.toString(), 'Total Outstanding': _fmt(totalOutstanding)}, columns: ['Customer', 'Phone', 'Line', 'Outstanding', 'Last Payment'], rows: rows);
+    return ReportEntity(title: 'New Bad Loans — $fromDate to $toDate', summaryFields: {'Count': rows.length.toString(), 'Total Outstanding': _fmt(totalOutstanding)}, columns: ['Customer', 'Phone', 'Line', 'Outstanding', 'Last Payment'], rows: rows);
   }
 
-  // ─── 16. Loan Analysis ────────────────────────────────────────────────────────
   @override
   Future<ReportEntity> getLoanAnalysis({required String fromDate, required String toDate, String? line}) async {
     final userId = await storageService.getUserId();
     if (userId == null) throw const ServerException('User not authenticated');
-    final vars = _dateRange(fromDate, toDate);
+    final fromP = DateFormat('dd/MM/yyyy').parse(fromDate);
+    final toP = DateFormat('dd/MM/yyyy').parse(toDate);
+    final vars = {
+      'start_date': DateFormat('yyyy-MM-dd').format(fromP),
+      'end_date': DateFormat('yyyy-MM-dd').format(toP),
+      'start_timestamp': fromP.toIso8601String(),
+      'end_timestamp': DateTime(toP.year, toP.month, toP.day, 23, 59, 59).toIso8601String(),
+    };
     String lineFilter = '';
     if (line != null && line != 'All') { lineFilter = ', customer: {line_id: {_eq: \$lineId}}'; vars['lineId'] = line; }
     final query = '''
-      query GetLoanAnalysis(\$start: timestamp!, \$end: timestamp!${line != null && line != 'All' ? ', \$lineId: uuid' : ''}) {
+      query GetLoanAnalysis(\$start_date: date!, \$end_date: date!, \$start_timestamp: timestamp!, \$end_timestamp: timestamp!${line != null && line != 'All' ? ', \$lineId: uuid' : ''}) {
         active: loans_aggregate(where: {status: {_eq: "Active"}$lineFilter}) { aggregate { count sum { principal_amount outstanding_balance } } }
-        completed: loans_aggregate(where: {status: {_eq: "Completed"}, updated_at: {_gte: \$start, _lte: \$end}$lineFilter}) { aggregate { count sum { total_amount } } }
-        new_loans: loans_aggregate(where: {start_date: {_gte: \$start, _lte: \$end}$lineFilter}) { aggregate { count sum { principal_amount } } }
+        completed: loans_aggregate(where: {status: {_eq: "Completed"}, end_date: {_gte: \$start_date, _lte: \$end_date}$lineFilter}) { aggregate { count sum { total_amount } } }
+        new_loans: loans_aggregate(where: {start_date: {_gte: \$start_timestamp, _lte: \$end_timestamp}$lineFilter}) { aggregate { count sum { principal_amount } } }
       }
     ''';
     final result = await client.query(QueryOptions(document: gql(query), variables: vars, fetchPolicy: FetchPolicy.networkOnly));

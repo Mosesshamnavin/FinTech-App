@@ -85,7 +85,7 @@ class _CollectionsViewState extends State<_CollectionsView> {
     );
   }
 
-  void _showAddCollectionModal(BuildContext context, String customerId, String customerName) async {
+  void _showAddCollectionModal(BuildContext context, String customerId, String customerName, String customerPhone) async {
     // Provide the existing bloc to the modal so it can fire events
     final bloc = context.read<CollectionsBloc>();
     
@@ -100,6 +100,7 @@ class _CollectionsViewState extends State<_CollectionsView> {
         child: AddCollectionModal(
           customerId: customerId,
           customerName: customerName,
+          customerPhone: customerPhone,
           date: _dateController.text,
         ),
       ),
@@ -315,7 +316,7 @@ class _CollectionsViewState extends State<_CollectionsView> {
                           ),
                         ),
                         child: ListTile(
-                          onTap: () => _showAddCollectionModal(context, customer.id, customer.name),
+                          onTap: () => _showAddCollectionModal(context, customer.id, customer.name, customer.phone),
                           leading: CircleAvatar(
                             backgroundColor: item.hasPaid ? context.successLight : context.primaryContainer,
                             child: Icon(

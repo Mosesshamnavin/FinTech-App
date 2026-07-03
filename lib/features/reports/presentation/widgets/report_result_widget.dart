@@ -71,14 +71,17 @@ class ReportResultWidget extends StatelessWidget {
               child: SingleChildScrollView(
                 child: DataTable(
                   headingRowColor: WidgetStateColor.resolveWith(
-                    (states) => Colors.blue.shade50,
+                    (states) => Theme.of(context).colorScheme.primaryContainer,
                   ),
-                  columnSpacing: 24,
+                  columnSpacing: 38,
                   columns: report.columns.map((col) {
                     return DataColumn(
                       label: Text(
                         col,
-                        style: const TextStyle(fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).colorScheme.onPrimaryContainer,
+                        ),
                       ),
                     );
                   }).toList(),
