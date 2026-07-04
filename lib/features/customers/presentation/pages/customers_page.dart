@@ -4,6 +4,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/widgets/custom_dropdown.dart';
 import '../../../../core/theme/app_colors.dart';
+import 'package:vasooldrive/core/services/app_localization.dart';
 
 import '../../../../core/di/injection_container.dart';
 import '../bloc/customers_bloc.dart';
@@ -43,161 +44,166 @@ class _CustomersViewState extends State<_CustomersView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Customers'),
-        actions: [
-          IconButton(
-            icon: const FaIcon(FontAwesomeIcons.userPlus, size: 20),
-            onPressed: () async {
-              // Wait for the AddCustomerPage to pop, and if true, reload customers
-              final shouldReload = await context.push('/customers/add');
-              if (shouldReload == true && context.mounted) {
-                context.read<CustomersBloc>().add(const LoadCustomersRequested());
-              }
-            },
+    return ValueListenableBuilder<String>(
+      valueListenable: AppLocalization.languageNotifier,
+      builder: (context, language, child) {
+        return Scaffold(
+          appBar: AppBar(
+            title: Text('Customers'.tr()),
+            actions: [
+              IconButton(
+                icon: const FaIcon(FontAwesomeIcons.userPlus, size: 20),
+                onPressed: () async {
+                  // Wait for the AddCustomerPage to pop, and if true, reload customers
+                  final shouldReload = await context.push('/customers/add');
+                  if (shouldReload == true && context.mounted) {
+                    context.read<CustomersBloc>().add(const LoadCustomersRequested());
+                  }
+                },
+              ),
+            ],
           ),
-        ],
-      ),
-      body: Column(
-        children: [
-          // Filter Section
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              children: [
-                Column(
+          body: Column(
+            children: [
+              // Filter Section
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
                   children: [
-                    CustomDropdownFormField<String>(
-                      label: 'Select Line',
-                      value: _selectedLine,
-                      items: const [],
-                      onChanged: (val) => setState(() => _selectedLine = val),
+                    Column(
+                      children: [
+                        CustomDropdownFormField<String>(
+                          label: 'Select Line'.tr(),
+                          value: _selectedLine,
+                          items: const [],
+                          onChanged: (val) => setState(() => _selectedLine = val),
+                        ),
+                        const SizedBox(height: 16),
+                        CustomDropdownFormField<String>(
+                          label: 'Select Area'.tr(),
+                          value: _selectedArea,
+                          items: const [],
+                          onChanged: (val) => setState(() => _selectedArea = val),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 16),
-                    CustomDropdownFormField<String>(
-                      label: 'Select Area',
-                      value: _selectedArea,
-                      items: const [],
-                      onChanged: (val) => setState(() => _selectedArea = val),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () {
+                              setState(() {
+                                _selectedLine = null;
+                                _selectedArea = null;
+                              });
+                              // Fetch all customers when cleared
+                              context.read<CustomersBloc>().add(const LoadCustomersRequested());
+                            },
+                            style: OutlinedButton.styleFrom(
+                              side: BorderSide(color: context.danger),
+                              foregroundColor: context.danger,
+                            ),
+                            child: Text('CLEAR'.tr()),
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: () {
+                              context.read<CustomersBloc>().add(LoadCustomersRequested(
+                                    lineId: _selectedLine,
+                                    areaId: _selectedArea,
+                                  ));
+                            },
+                            child: Text('SUBMIT'.tr()),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () {
-                          setState(() {
-                            _selectedLine = null;
-                            _selectedArea = null;
-                          });
-                          // Fetch all customers when cleared
-                          context.read<CustomersBloc>().add(const LoadCustomersRequested());
-                        },
-                        style: OutlinedButton.styleFrom(
-                          side: BorderSide(color: context.danger),
-                          foregroundColor: context.danger,
-                        ),
-                        child: const Text('CLEAR'),
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () {
-                          context.read<CustomersBloc>().add(LoadCustomersRequested(
-                                lineId: _selectedLine,
-                                areaId: _selectedArea,
-                              ));
-                        },
-                        child: const Text('SUBMIT'),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          const Divider(),
-          // List Section
-          Expanded(
-            child: BlocBuilder<CustomersBloc, CustomersState>(
-              builder: (context, state) {
-                if (state is CustomersLoading) {
-                  return const Center(child: CircularProgressIndicator());
-                } else if (state is CustomersError) {
-                  return Center(
-                    child: Text(
-                      state.message,
-                      style: TextStyle(color: context.danger),
-                    ),
-                  );
-                } else if (state is CustomersLoaded) {
-                  if (state.customers.isEmpty) {
-                    return const Center(
-                      child: Text('No customers found.'),
-                    );
-                  }
-                  return ListView.separated(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    itemCount: state.customers.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 8),
-                    itemBuilder: (context, index) {
-                      final customer = state.customers[index];
-                      String lineName = 'Unknown Line';
-                      String areaName = 'Unknown Area';
-                      final settingsState = context.read<SettingsBloc>().state;
-                      if (settingsState is SettingsLoaded) {
-                        final line = settingsState.lines.where((l) => l.id == customer.lineId).firstOrNull;
-                        if (line != null) lineName = line.name;
-                        
-                        final area = settingsState.areas.where((a) => a.id == customer.areaId).firstOrNull;
-                        if (area != null) areaName = area.name;
-                      }
-
-                      return Card(
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          side: BorderSide(color: context.surfaceVariant),
-                        ),
-                        child: ListTile(
-                          leading: CircleAvatar(
-                            backgroundColor: context.primaryContainer,
-                            child: Icon(Icons.person, color: context.primary),
-                          ),
-                          title: Text(
-                            customer.name,
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(customer.phone),
-                              Text(
-                                '$lineName - $areaName',
-                                style: TextStyle(color: context.textSecondary, fontSize: 12),
-                              ),
-                            ],
-                          ),
-                          isThreeLine: true,
-                          trailing: const Icon(Icons.chevron_right),
-                          onTap: () {
-                            context.push('/customers/\${customer.id}', extra: customer);
-                          },
+              ),
+              const Divider(),
+              // List Section
+              Expanded(
+                child: BlocBuilder<CustomersBloc, CustomersState>(
+                  builder: (context, state) {
+                    if (state is CustomersLoading) {
+                      return const Center(child: CircularProgressIndicator());
+                    } else if (state is CustomersError) {
+                      return Center(
+                        child: Text(
+                          state.message,
+                          style: TextStyle(color: context.danger),
                         ),
                       );
-                    },
-                  );
-                }
-                return const SizedBox.shrink();
-              },
-            ),
+                    } else if (state is CustomersLoaded) {
+                      if (state.customers.isEmpty) {
+                        return const Center(
+                          child: Text('No customers found.'),
+                        );
+                      }
+                      return ListView.separated(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        itemCount: state.customers.length,
+                        separatorBuilder: (_, __) => const SizedBox(height: 8),
+                        itemBuilder: (context, index) {
+                          final customer = state.customers[index];
+                          String lineName = 'Unknown Line';
+                          String areaName = 'Unknown Area';
+                          final settingsState = context.read<SettingsBloc>().state;
+                          if (settingsState is SettingsLoaded) {
+                            final line = settingsState.lines.where((l) => l.id == customer.lineId).firstOrNull;
+                            if (line != null) lineName = line.name;
+                            
+                            final area = settingsState.areas.where((a) => a.id == customer.areaId).firstOrNull;
+                            if (area != null) areaName = area.name;
+                          }
+
+                          return Card(
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              side: BorderSide(color: context.surfaceVariant),
+                            ),
+                            child: ListTile(
+                              leading: CircleAvatar(
+                                backgroundColor: context.primaryContainer,
+                                child: Icon(Icons.person, color: context.primary),
+                              ),
+                              title: Text(
+                                customer.name,
+                                style: const TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              subtitle: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(customer.phone),
+                                  Text(
+                                    '$lineName - $areaName',
+                                    style: TextStyle(color: context.textSecondary, fontSize: 12),
+                                  ),
+                                ],
+                              ),
+                              isThreeLine: true,
+                              trailing: const Icon(Icons.chevron_right),
+                              onTap: () {
+                                context.push('/customers/${customer.id}', extra: customer);
+                              },
+                            ),
+                          );
+                        },
+                      );
+                    }
+                    return const SizedBox.shrink();
+                  },
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

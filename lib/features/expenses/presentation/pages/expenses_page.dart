@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/theme/app_colors.dart';
+import 'package:vasooldrive/core/services/app_localization.dart';
 import '../bloc/expenses_bloc.dart';
 import '../bloc/expenses_event.dart';
 import '../bloc/expenses_state.dart';
@@ -103,36 +104,41 @@ class _ExpensesPageState extends State<ExpensesPage> with SingleTickerProviderSt
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        titleSpacing: 0,
-        title: TabBar(
-          controller: _tabController,
-          labelColor: context.accent,
-          unselectedLabelColor: Colors.grey,
-          indicatorColor: context.accent,
-          indicatorSize: TabBarIndicatorSize.tab,
-          tabs: const [
-            Tab(text: 'EXPENSE'),
-            Tab(text: 'INVESTMENT'),
-          ],
-        ),
-        actions: [
-          Builder(
-            builder: (ctx) => IconButton(
-              icon: const FaIcon(FontAwesomeIcons.plus, size: 20),
-              onPressed: () => _showAddModal(ctx),
+    return ValueListenableBuilder<String>(
+      valueListenable: AppLocalization.languageNotifier,
+      builder: (context, language, child) {
+        return Scaffold(
+          appBar: AppBar(
+            titleSpacing: 0,
+            title: TabBar(
+              controller: _tabController,
+              labelColor: context.accent,
+              unselectedLabelColor: Colors.grey,
+              indicatorColor: context.accent,
+              indicatorSize: TabBarIndicatorSize.tab,
+              tabs: [
+                Tab(text: 'EXPENSE'.tr()),
+                Tab(text: 'INVESTMENT'.tr()),
+              ],
             ),
+            actions: [
+              Builder(
+                builder: (ctx) => IconButton(
+                  icon: const FaIcon(FontAwesomeIcons.plus, size: 20),
+                  onPressed: () => _showAddModal(ctx),
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          _buildExpenseView(false),
-          _buildExpenseView(true),
-        ],
-      ),
+          body: TabBarView(
+            controller: _tabController,
+            children: [
+              _buildExpenseView(false),
+              _buildExpenseView(true),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -150,7 +156,7 @@ class _ExpensesPageState extends State<ExpensesPage> with SingleTickerProviderSt
                   child: FaIcon(FontAwesomeIcons.magnifyingGlass, size: 18, color: Colors.grey),
                 ),
                 prefixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),
-                hintText: 'Search',
+                hintText: 'Search'.tr(),
                 hintStyle: const TextStyle(color: Colors.grey),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(4),
@@ -173,7 +179,7 @@ class _ExpensesPageState extends State<ExpensesPage> with SingleTickerProviderSt
           Theme(
             data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
             child: ExpansionTile(
-              title: const Text('Search By Date', style: TextStyle(fontWeight: FontWeight.bold)),
+              title: Text('Search By Date'.tr(), style: const TextStyle(fontWeight: FontWeight.bold)),
               childrenPadding: const EdgeInsets.symmetric(horizontal: 16.0),
               children: [
                 Container(
@@ -188,7 +194,7 @@ class _ExpensesPageState extends State<ExpensesPage> with SingleTickerProviderSt
                         readOnly: true,
                         onTap: () => _selectDate(context, _fromDateController),
                         decoration: InputDecoration(
-                          labelText: 'From Date',
+                          labelText: 'From Date'.tr(),
                           floatingLabelBehavior: FloatingLabelBehavior.always,
                           suffixIcon: Padding(
                             padding: const EdgeInsets.only(top: 14.0, bottom: 14.0),
@@ -205,7 +211,7 @@ class _ExpensesPageState extends State<ExpensesPage> with SingleTickerProviderSt
                         readOnly: true,
                         onTap: () => _selectDate(context, _toDateController),
                         decoration: InputDecoration(
-                          labelText: 'To Date',
+                          labelText: 'To Date'.tr(),
                           floatingLabelBehavior: FloatingLabelBehavior.always,
                           suffixIcon: Padding(
                             padding: const EdgeInsets.only(top: 14.0, bottom: 14.0),
@@ -224,20 +230,20 @@ class _ExpensesPageState extends State<ExpensesPage> with SingleTickerProviderSt
                             lines.addAll(state.lines.map((e) => e.name));
                           }
                           return DropdownButtonFormField<String>(
-                            decoration: const InputDecoration(
-                              labelText: 'Line',
+                            decoration: InputDecoration(
+                              labelText: 'Line'.tr(),
                               floatingLabelBehavior: FloatingLabelBehavior.always,
                               border: InputBorder.none,
                               enabledBorder: InputBorder.none,
                               focusedBorder: InputBorder.none,
-                              contentPadding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                             ),
                             isExpanded: true,
                             value: _selectedLine,
                             items: lines.map((String value) {
                               return DropdownMenuItem<String>(
                                 value: value,
-                                child: Text(value),
+                                child: Text(value == 'All' ? 'All'.tr() : value),
                               );
                             }).toList(),
                             onChanged: (val) {
@@ -258,7 +264,7 @@ class _ExpensesPageState extends State<ExpensesPage> with SingleTickerProviderSt
             ),
           ),
           CheckboxListTile(
-            title: const Text('Online'),
+            title: Text('Online'.tr()),
             value: _isOnlineChecked,
             onChanged: (val) {
               if (val != null) {
@@ -285,7 +291,7 @@ class _ExpensesPageState extends State<ExpensesPage> with SingleTickerProviderSt
                 final totalCash = filtered.where((e) => !e.isOnline).fold(0.0, (sum, e) => sum + e.amount);
                 final totalOnline = filtered.where((e) => e.isOnline).fold(0.0, (sum, e) => sum + e.amount);
                 final total = totalCash + totalOnline;
-
+ 
                 return Column(
                   children: [
                     Card(
@@ -297,17 +303,17 @@ class _ExpensesPageState extends State<ExpensesPage> with SingleTickerProviderSt
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            Text('Date : ${_fromDateController.text} - ${_toDateController.text}', style: const TextStyle(fontWeight: FontWeight.bold)),
+                            Text('${'Date'.tr()} : ${_fromDateController.text} - ${_toDateController.text}', style: const TextStyle(fontWeight: FontWeight.bold)),
                             const SizedBox(height: 8),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text('Online: ₹$totalOnline'),
-                                Text('Cash: ₹$totalCash'),
+                                Text('${'Online'.tr()}: ₹$totalOnline'),
+                                Text('${'Cash'.tr()}: ₹$totalCash'),
                               ],
                             ),
                             const SizedBox(height: 8),
-                            Text('Total: ₹$total', style: const TextStyle(fontWeight: FontWeight.bold)),
+                            Text('${'Total'.tr()}: ₹$total', style: const TextStyle(fontWeight: FontWeight.bold)),
                           ],
                         ),
                       ),
@@ -338,7 +344,7 @@ class _ExpensesPageState extends State<ExpensesPage> with SingleTickerProviderSt
                                   if (match.isNotEmpty) categoryName = match.first.name;
                                 }
                               }
-                              return Text(categoryName, style: const TextStyle(fontWeight: FontWeight.bold));
+                              return Text(categoryName.tr(), style: const TextStyle(fontWeight: FontWeight.bold));
                             },
                           ),
                           subtitle: Text('${DateFormat('dd MMM yyyy').format(expense.date)} - ${expense.description}'),

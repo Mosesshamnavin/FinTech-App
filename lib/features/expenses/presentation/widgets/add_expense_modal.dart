@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import '../../domain/entities/expense_entity.dart';
+import 'package:vasooldrive/core/services/app_localization.dart';
 import '../bloc/expenses_bloc.dart';
 import '../bloc/expenses_event.dart';
 import '../../../settings/presentation/bloc/settings_bloc.dart';
@@ -83,114 +84,119 @@ class _AddExpenseModalState extends State<AddExpenseModal> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      // Padding to account for keyboard
-      padding: EdgeInsets.only(
-        left: 16,
-        right: 16,
-        top: 16,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 16,
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            widget.isInvestment ? 'Add Investment' : 'Add Expense',
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            textAlign: TextAlign.center,
+    return ValueListenableBuilder<String>(
+      valueListenable: AppLocalization.languageNotifier,
+      builder: (context, language, child) {
+        return Padding(
+          // Padding to account for keyboard
+          padding: EdgeInsets.only(
+            left: 16,
+            right: 16,
+            top: 16,
+            bottom: MediaQuery.of(context).viewInsets.bottom + 16,
           ),
-          const SizedBox(height: 16),
-          TextField(
-            controller: _amountController,
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            decoration: const InputDecoration(
-              labelText: 'Amount',
-              prefixText: '₹ ',
-              border: OutlineInputBorder(),
-            ),
-          ),
-          const SizedBox(height: 16),
-          BlocBuilder<SettingsBloc, SettingsState>(
-            builder: (context, state) {
-              List<String> categories = ['Other'];
-              if (state is SettingsLoaded) {
-                if (widget.isInvestment) {
-                  if (state.investmentTypes.isNotEmpty) {
-                    categories = state.investmentTypes.map((e) => e.name).toList();
-                  }
-                } else {
-                  if (state.expenseTypes.isNotEmpty) {
-                    categories = state.expenseTypes.map((e) => e.name).toList();
-                  }
-                }
-              }
-              // Make sure _selectedCategory is valid
-              if (!categories.contains(_selectedCategory)) {
-                _selectedCategory = categories.first;
-              }
-
-              return DropdownButtonFormField<String>(
-                value: _selectedCategory,
-                decoration: const InputDecoration(
-                  labelText: 'Category',
-                  border: OutlineInputBorder(),
-                ),
-                items: categories.map((c) => DropdownMenuItem(value: c, child: Text(c))).toList(),
-                onChanged: (val) {
-                  if (val != null) setState(() => _selectedCategory = val);
-                },
-              );
-            },
-          ),
-          const SizedBox(height: 16),
-          TextField(
-            controller: _descController,
-            decoration: const InputDecoration(
-              labelText: 'Description (Optional)',
-              border: OutlineInputBorder(),
-            ),
-          ),
-          const SizedBox(height: 16),
-          Row(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Expanded(
-                child: InkWell(
-                  onTap: _pickDate,
-                  child: InputDecorator(
-                    decoration: const InputDecoration(
-                      labelText: 'Date',
-                      border: OutlineInputBorder(),
-                    ),
-                    child: Text(DateFormat('dd/MM/yyyy').format(_selectedDate)),
-                  ),
+              Text(
+                widget.isInvestment ? 'Add Investment'.tr() : 'Add Expense'.tr(),
+                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _amountController,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                decoration: InputDecoration(
+                  labelText: 'Amount'.tr(),
+                  prefixText: '₹ ',
+                  border: const OutlineInputBorder(),
                 ),
               ),
-              const SizedBox(width: 16),
-              Column(
+              const SizedBox(height: 16),
+              BlocBuilder<SettingsBloc, SettingsState>(
+                builder: (context, state) {
+                  List<String> categories = ['Other'];
+                  if (state is SettingsLoaded) {
+                    if (widget.isInvestment) {
+                      if (state.investmentTypes.isNotEmpty) {
+                        categories = state.investmentTypes.map((e) => e.name).toList();
+                      }
+                    } else {
+                      if (state.expenseTypes.isNotEmpty) {
+                        categories = state.expenseTypes.map((e) => e.name).toList();
+                      }
+                    }
+                  }
+                  // Make sure _selectedCategory is valid
+                  if (!categories.contains(_selectedCategory)) {
+                    _selectedCategory = categories.first;
+                  }
+        
+                  return DropdownButtonFormField<String>(
+                    value: _selectedCategory,
+                    decoration: InputDecoration(
+                      labelText: 'Category'.tr(),
+                      border: const OutlineInputBorder(),
+                    ),
+                    items: categories.map((c) => DropdownMenuItem(value: c, child: Text(c))).toList(),
+                    onChanged: (val) {
+                      if (val != null) setState(() => _selectedCategory = val);
+                    },
+                  );
+                },
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _descController,
+                decoration: InputDecoration(
+                  labelText: 'Description (Optional)'.tr(),
+                  border: const OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Row(
                 children: [
-                  const Text('Payment Mode'),
-                  Switch(
-                    value: _isOnline,
-                    onChanged: (val) => setState(() => _isOnline = val),
-                    activeColor: Theme.of(context).colorScheme.primary,
+                  Expanded(
+                    child: InkWell(
+                      onTap: _pickDate,
+                      child: InputDecorator(
+                        decoration: InputDecoration(
+                          labelText: 'Date'.tr(),
+                          border: const OutlineInputBorder(),
+                        ),
+                        child: Text(DateFormat('dd/MM/yyyy').format(_selectedDate)),
+                      ),
+                    ),
                   ),
-                  Text(_isOnline ? 'Online' : 'Cash', style: const TextStyle(fontSize: 12)),
+                  const SizedBox(width: 16),
+                  Column(
+                    children: [
+                      Text('Payment Mode'.tr()),
+                      Switch(
+                        value: _isOnline,
+                        onChanged: (val) => setState(() => _isOnline = val),
+                        activeColor: Theme.of(context).colorScheme.primary,
+                      ),
+                      Text(_isOnline ? 'Online'.tr() : 'Cash'.tr(), style: const TextStyle(fontSize: 12)),
+                    ],
+                  ),
                 ],
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: _submit,
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                ),
+                child: Text('SAVE'.tr(), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
               ),
             ],
           ),
-          const SizedBox(height: 24),
-          ElevatedButton(
-            onPressed: _submit,
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              backgroundColor: Theme.of(context).colorScheme.primary,
-            ),
-            child: const Text('SAVE', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/di/injection_container.dart';
 import '../../../../core/theme/app_colors.dart';
+import 'package:vasooldrive/core/services/app_localization.dart';
 import '../bloc/customers_bloc.dart';
 import '../bloc/customers_event.dart';
 import '../bloc/customers_state.dart';
@@ -58,110 +59,115 @@ class _AddCustomerViewState extends State<_AddCustomerView> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<CustomersBloc, CustomersState>(
-      listener: (context, state) {
-        if (state is AddCustomerSuccess) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: const Text('Customer added successfully!'),
-              backgroundColor: context.success,
-              behavior: SnackBarBehavior.floating,
+    return ValueListenableBuilder<String>(
+      valueListenable: AppLocalization.languageNotifier,
+      builder: (context, language, child) {
+        return BlocListener<CustomersBloc, CustomersState>(
+          listener: (context, state) {
+            if (state is AddCustomerSuccess) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Customer added successfully!'.tr()),
+                  backgroundColor: context.success,
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
+              context.pop(true); // Return true to signal a refresh is needed
+            } else if (state is AddCustomerError) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(state.message),
+                  backgroundColor: context.danger,
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
+            }
+          },
+          child: Scaffold(
+            appBar: AppBar(
+              title: Text('Add Customer'.tr()),
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back_ios_new, size: 20),
+                onPressed: () => context.pop(),
+              ),
             ),
-          );
-          context.pop(true); // Return true to signal a refresh is needed
-        } else if (state is AddCustomerError) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.message),
-              backgroundColor: context.danger,
-              behavior: SnackBarBehavior.floating,
+            body: SingleChildScrollView(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  TextField(
+                    controller: _nameController,
+                    decoration: InputDecoration(labelText: 'Customer Name'.tr()),
+                    textInputAction: TextInputAction.next,
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: _phoneController,
+                    decoration: InputDecoration(labelText: 'Mobile Number'.tr()),
+                    keyboardType: TextInputType.phone,
+                    textInputAction: TextInputAction.next,
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: _addressController,
+                    decoration: InputDecoration(labelText: 'Address'.tr()),
+                    maxLines: 2,
+                    textInputAction: TextInputAction.next,
+                  ),
+                  const SizedBox(height: 16),
+                  BlocBuilder<SettingsBloc, SettingsState>(
+                    builder: (context, state) {
+                      if (state is SettingsLoaded) {
+                        final lines = state.lines;
+                        final areas = state.areas;
+                        return Column(
+                          children: [
+                            DropdownButtonFormField<String>(
+                              decoration: InputDecoration(labelText: 'Line'.tr()),
+                              value: _selectedLine,
+                              items: lines.map((line) {
+                                return DropdownMenuItem(value: line.id, child: Text(line.name));
+                              }).toList(),
+                              onChanged: (val) => setState(() => _selectedLine = val),
+                            ),
+                            const SizedBox(height: 16),
+                            DropdownButtonFormField<String>(
+                              decoration: InputDecoration(labelText: 'Area'.tr()),
+                              value: _selectedArea,
+                              items: areas.map((area) {
+                                return DropdownMenuItem(value: area.id, child: Text(area.name));
+                              }).toList(),
+                              onChanged: (val) => setState(() => _selectedArea = val),
+                            ),
+                          ],
+                        );
+                      }
+                      return const Center(child: CircularProgressIndicator());
+                    },
+                  ),
+                  const SizedBox(height: 32),
+                  BlocBuilder<CustomersBloc, CustomersState>(
+                    builder: (context, state) {
+                      final isLoading = state is AddCustomerLoading;
+                      return ElevatedButton(
+                        onPressed: isLoading ? null : _onSubmit,
+                        child: isLoading
+                            ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                              )
+                            : Text('SUBMIT'.tr()),
+                      );
+                    },
+                  ),
+                ],
+              ),
             ),
-          );
-        }
+          ),
+        );
       },
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Add Customer'),
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back_ios_new, size: 20),
-            onPressed: () => context.pop(),
-          ),
-        ),
-        body: SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              TextField(
-                controller: _nameController,
-                decoration: const InputDecoration(labelText: 'Customer Name'),
-                textInputAction: TextInputAction.next,
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: _phoneController,
-                decoration: const InputDecoration(labelText: 'Mobile Number'),
-                keyboardType: TextInputType.phone,
-                textInputAction: TextInputAction.next,
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: _addressController,
-                decoration: const InputDecoration(labelText: 'Address'),
-                maxLines: 2,
-                textInputAction: TextInputAction.next,
-              ),
-              const SizedBox(height: 16),
-              BlocBuilder<SettingsBloc, SettingsState>(
-                builder: (context, state) {
-                  if (state is SettingsLoaded) {
-                    final lines = state.lines;
-                    final areas = state.areas;
-                    return Column(
-                      children: [
-                        DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(labelText: 'Line'),
-                          value: _selectedLine,
-                          items: lines.map((line) {
-                            return DropdownMenuItem(value: line.id, child: Text(line.name));
-                          }).toList(),
-                          onChanged: (val) => setState(() => _selectedLine = val),
-                        ),
-                        const SizedBox(height: 16),
-                        DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(labelText: 'Area'),
-                          value: _selectedArea,
-                          items: areas.map((area) {
-                            return DropdownMenuItem(value: area.id, child: Text(area.name));
-                          }).toList(),
-                          onChanged: (val) => setState(() => _selectedArea = val),
-                        ),
-                      ],
-                    );
-                  }
-                  return const Center(child: CircularProgressIndicator());
-                },
-              ),
-              const SizedBox(height: 32),
-              BlocBuilder<CustomersBloc, CustomersState>(
-                builder: (context, state) {
-                  final isLoading = state is AddCustomerLoading;
-                  return ElevatedButton(
-                    onPressed: isLoading ? null : _onSubmit,
-                    child: isLoading
-                        ? const SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                          )
-                        : const Text('SUBMIT'),
-                  );
-                },
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }
