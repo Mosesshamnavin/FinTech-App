@@ -1,4 +1,6 @@
 import 'package:vasooldrive/features/settings/presentation/bloc/settings_state.dart';
+import 'package:vasooldrive/core/services/app_localization.dart';
+
 import 'package:vasooldrive/features/settings/presentation/bloc/settings_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
@@ -89,7 +91,7 @@ class _MonthlyInterestPendingSummaryViewState extends State<_MonthlyInterestPend
 
         return Scaffold(
           appBar: AppBar(
-            title: const Text('Monthly Interest Pending Summary'),
+            title: Text('Monthly Interest Pending Summary'.tr()),
             leading: IconButton(
               icon: const Icon(Icons.arrow_back_ios_new, size: 20),
               onPressed: () => Navigator.of(context).pop(),
@@ -141,7 +143,7 @@ class _MonthlyInterestPendingSummaryViewState extends State<_MonthlyInterestPend
                                   });
                                 },
                               ),
-                              const Text('All'),
+                              Text('All'.tr()),
                             ],
                           ),
                         ],
@@ -152,7 +154,7 @@ class _MonthlyInterestPendingSummaryViewState extends State<_MonthlyInterestPend
                         readOnly: true,
                         onTap: () => _selectDate(context),
                         decoration: InputDecoration(
-                          labelText: 'Select Month & Year (from Date)',
+                          labelText: 'Select Month & Year (from Date)'.tr(),
                           floatingLabelBehavior: FloatingLabelBehavior.always,
                           suffixIcon: Icon(Icons.calendar_today, color: Theme.of(context).colorScheme.primary, size: 20),
                           border: UnderlineInputBorder(),
@@ -180,7 +182,7 @@ class _MonthlyInterestPendingSummaryViewState extends State<_MonthlyInterestPend
                 child: BlocBuilder<ReportBloc, ReportState>(
                   builder: (context, state) {
                     if (state is ReportInitial) {
-                      return const Center(child: Text('Select filters and tap SUBMIT.'));
+                      return const Center(child: Text('Select filters and tap SUBMIT.'.tr()));
                     } else if (state is ReportLoading) {
                       return const Center(child: CircularProgressIndicator());
                     } else if (state is ReportError) {

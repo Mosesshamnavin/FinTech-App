@@ -1,4 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:vasooldrive/core/services/app_localization.dart';
+
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/di/injection_container.dart';
@@ -25,7 +27,7 @@ class _InvestmentExpenseSummaryPageState extends State<InvestmentExpenseSummaryP
       child: BlocConsumer<ReportBloc, ReportState>(
         listener: (ctx, state) { if (state is ReportLoaded) Navigator.push(ctx, MaterialPageRoute(builder: (_) => ReportDetailPage(report: state.report))); },
         builder: (ctx, state) => Scaffold(
-          appBar: AppBar(title: const Text('Investment/Expense Summary'), leading: IconButton(icon: const Icon(Icons.arrow_back_ios_new, size: 20), onPressed: () => Navigator.pop(context))),
+          appBar: AppBar(title: Text('Investment/Expense Summary'.tr()), leading: IconButton(icon: const Icon(Icons.arrow_back_ios_new, size: 20), onPressed: () => Navigator.pop(context))),
           body: SingleChildScrollView(padding: const EdgeInsets.all(16), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             const SizedBox(height: 16),
             _dp('From Date', _from), const SizedBox(height: 16), _dp('To Date', _to),

@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import '../../../../core/di/injection_container.dart';
+import '../../../../core/services/storage_service.dart';
+import 'package:vasooldrive/core/services/app_localization.dart';
 
 class LanguageSettingsPage extends StatefulWidget {
   const LanguageSettingsPage({super.key});
@@ -8,6 +11,7 @@ class LanguageSettingsPage extends StatefulWidget {
 }
 
 class _LanguageSettingsPageState extends State<LanguageSettingsPage> {
+  final StorageService _storageService = sl<StorageService>();
   String selectedLanguage = 'English'; // App Language
   
   // English SMS
@@ -43,6 +47,42 @@ class _LanguageSettingsPageState extends State<LanguageSettingsPage> {
     'TotalAmountPaid': 'வரவு',
   };
 
+  @override
+  void initState() {
+    super.initState();
+    _loadSettings();
+  }
+
+  void _loadSettings() {
+    selectedLanguage = _storageService.getString('app_language', defaultValue: 'English');
+    
+    // Load English custom labels
+    for (final key in _englishSms.keys) {
+      final val = _storageService.getString('sms_label_en_$key');
+      if (val.isNotEmpty) {
+        _englishSms[key] = val;
+      }
+    }
+    
+    // Load Hindi custom labels
+    for (final key in _hindiSms.keys) {
+      final val = _storageService.getString('sms_label_hi_$key');
+      if (val.isNotEmpty) {
+        _hindiSms[key] = val;
+      }
+    }
+    
+    // Load Tamil custom labels
+    for (final key in _tamilSms.keys) {
+      final val = _storageService.getString('sms_label_ta_$key');
+      if (val.isNotEmpty) {
+        _tamilSms[key] = val;
+      }
+    }
+    
+    setState(() {});
+  }
+
   Widget _buildLanguageAccordion() {
     return ExpansionTile(
       title: const Text('Language', style: TextStyle(fontWeight: FontWeight.bold)),
@@ -71,10 +111,14 @@ class _LanguageSettingsPageState extends State<LanguageSettingsPage> {
         ),
         const SizedBox(height: 16),
         ElevatedButton(
-          onPressed: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Language saved!'), behavior: SnackBarBehavior.floating),
-            );
+          onPressed: () async {
+            await _storageService.setString('app_language', selectedLanguage);
+            AppLocalization.languageNotifier.value = selectedLanguage;
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Language saved!'), behavior: SnackBarBehavior.floating),
+              );
+            }
           },
           child: const Text('SUBMIT'),
         ),
@@ -92,10 +136,24 @@ class _LanguageSettingsPageState extends State<LanguageSettingsPage> {
         _buildSmsSection('Tamil', _tamilSms),
         const SizedBox(height: 16),
         ElevatedButton(
-          onPressed: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('SMS Language settings saved!'), behavior: SnackBarBehavior.floating),
-            );
+          onPressed: () async {
+            // Save English
+            for (var entry in _englishSms.entries) {
+              await _storageService.setString('sms_label_en_${entry.key}', entry.value);
+            }
+            // Save Hindi
+            for (var entry in _hindiSms.entries) {
+              await _storageService.setString('sms_label_hi_${entry.key}', entry.value);
+            }
+            // Save Tamil
+            for (var entry in _tamilSms.entries) {
+              await _storageService.setString('sms_label_ta_${entry.key}', entry.value);
+            }
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('SMS Language settings saved!'), behavior: SnackBarBehavior.floating),
+              );
+            }
           },
           child: const Text('SUBMIT'),
         ),
@@ -123,6 +181,7 @@ class _LanguageSettingsPageState extends State<LanguageSettingsPage> {
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
             child: TextFormField(
+              key: ValueKey('${language}_${entry.key}_${entry.value}'),
               initialValue: entry.value,
               decoration: InputDecoration(
                 labelText: entry.key,
@@ -133,9 +192,7 @@ class _LanguageSettingsPageState extends State<LanguageSettingsPage> {
                 ),
               ),
               onChanged: (v) {
-                setState(() {
-                  fields[entry.key] = v;
-                });
+                fields[entry.key] = v;
               },
             ),
           );

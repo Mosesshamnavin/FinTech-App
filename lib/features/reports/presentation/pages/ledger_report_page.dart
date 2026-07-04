@@ -1,4 +1,6 @@
 import 'package:vasooldrive/features/settings/presentation/bloc/settings_state.dart';
+import 'package:vasooldrive/core/services/app_localization.dart';
+
 import 'package:vasooldrive/features/settings/presentation/bloc/settings_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
@@ -37,7 +39,7 @@ class _LedgerReportPageState extends State<LedgerReportPage> {
           List<String> lineNames = ss is SettingsLoaded ? ['All', ...ss.lines.map((e) => e.name).toList()] : ['All'];
           
           return Scaffold(
-            appBar: AppBar(title: const Text('Ledger Report'), leading: IconButton(icon: const Icon(Icons.arrow_back_ios_new, size: 20), onPressed: () => Navigator.pop(context))),
+            appBar: AppBar(title: Text('Ledger Report'.tr()), leading: IconButton(icon: const Icon(Icons.arrow_back_ios_new, size: 20), onPressed: () => Navigator.pop(context))),
             body: SingleChildScrollView(padding: const EdgeInsets.all(16), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               const SizedBox(height: 16),
               CustomDropdownFormField<String>(

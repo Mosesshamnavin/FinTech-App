@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:vasooldrive/core/services/app_localization.dart';
 
 import '../../../../core/di/injection_container.dart';
 import '../../../customers/domain/entities/customer_entity.dart';
@@ -90,140 +91,145 @@ class _AddLoanFormState extends State<_AddLoanForm> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Assign Loan to ${widget.customer.name}'),
-      ),
-      body: BlocConsumer<LoansBloc, LoansState>(
-        listener: (context, state) {
-          if (state is LoansLoaded) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Loan assigned successfully!', style: TextStyle(color: Colors.white)), backgroundColor: Colors.green),
-            );
-            context.pop(true); // Return true to trigger reload
-          } else if (state is LoansError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message, style: const TextStyle(color: Colors.white)), backgroundColor: Colors.red),
-            );
-          }
-        },
-        builder: (context, state) {
-          final isLoading = state is LoansLoading;
-
-          return Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Form(
-              key: _formKey,
-              child: ListView(
-                children: [
-                  TextFormField(
-                    controller: _principalController,
-                    decoration: const InputDecoration(
-                      labelText: 'Principal Amount (₹)',
-                      border: OutlineInputBorder(),
-                    ),
-                    keyboardType: TextInputType.number,
-                    validator: (v) => (v == null || v.isEmpty) ? 'Required' : null,
-                  ),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    controller: _interestController,
-                    decoration: const InputDecoration(
-                      labelText: 'Interest Amount (₹)',
-                      border: OutlineInputBorder(),
-                    ),
-                    keyboardType: TextInputType.number,
-                    validator: (v) => (v == null || v.isEmpty) ? 'Required' : null,
-                  ),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    controller: _daysController,
-                    decoration: const InputDecoration(
-                      labelText: 'Duration (Days)',
-                      border: OutlineInputBorder(),
-                    ),
-                    keyboardType: TextInputType.number,
-                    validator: (v) => (v == null || v.isEmpty) ? 'Required' : null,
-                  ),
-                  const SizedBox(height: 32),
-                  
-                  // Math Preview Card
-                  Card(
-                    color: Theme.of(context).colorScheme.primaryContainer,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      side: BorderSide(color: Theme.of(context).colorScheme.primary.withOpacity(0.2)),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Loan Summary',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Theme.of(context).colorScheme.primary,
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                'Total Amount:',
-                                style: TextStyle(color: Theme.of(context).colorScheme.onPrimaryContainer),
-                              ),
-                              Text(
-                                '₹${_totalAmount.toStringAsFixed(0)}',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 18,
-                                  color: Theme.of(context).colorScheme.onPrimaryContainer,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                'Daily Due Amount:',
-                                style: TextStyle(color: Theme.of(context).colorScheme.onPrimaryContainer),
-                              ),
-                              Text(
-                                '₹${_dailyDueAmount.toStringAsFixed(0)}',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 18,
-                                  color: Theme.of(context).colorScheme.onPrimaryContainer,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
+    return ValueListenableBuilder<String>(
+      valueListenable: AppLocalization.languageNotifier,
+      builder: (context, language, child) {
+        return Scaffold(
+          appBar: AppBar(
+            title: Text('${'Assign Loan to'.tr()} ${widget.customer.name}'),
+          ),
+          body: BlocConsumer<LoansBloc, LoansState>(
+            listener: (context, state) {
+              if (state is LoansLoaded) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Loan assigned successfully!'.tr(), style: const TextStyle(color: Colors.white)), backgroundColor: Colors.green),
+                );
+                context.pop(true); // Return true to trigger reload
+              } else if (state is LoansError) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(state.message, style: const TextStyle(color: Colors.white)), backgroundColor: Colors.red),
+                );
+              }
+            },
+            builder: (context, state) {
+              final isLoading = state is LoansLoading;
+    
+              return Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Form(
+                  key: _formKey,
+                  child: ListView(
+                    children: [
+                      TextFormField(
+                        controller: _principalController,
+                        decoration: InputDecoration(
+                          labelText: 'Principal Amount (₹)'.tr(),
+                          border: const OutlineInputBorder(),
+                        ),
+                        keyboardType: TextInputType.number,
+                        validator: (v) => (v == null || v.isEmpty) ? 'Required'.tr() : null,
                       ),
-                    ),
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        controller: _interestController,
+                        decoration: InputDecoration(
+                          labelText: 'Interest Amount (₹)'.tr(),
+                          border: const OutlineInputBorder(),
+                        ),
+                        keyboardType: TextInputType.number,
+                        validator: (v) => (v == null || v.isEmpty) ? 'Required'.tr() : null,
+                      ),
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        controller: _daysController,
+                        decoration: InputDecoration(
+                          labelText: 'Duration (Days)'.tr(),
+                          border: const OutlineInputBorder(),
+                        ),
+                        keyboardType: TextInputType.number,
+                        validator: (v) => (v == null || v.isEmpty) ? 'Required'.tr() : null,
+                      ),
+                      const SizedBox(height: 32),
+                      
+                      // Math Preview Card
+                      Card(
+                        color: Theme.of(context).colorScheme.primaryContainer,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          side: BorderSide(color: Theme.of(context).colorScheme.primary.withOpacity(0.2)),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Loan Summary'.tr(),
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Theme.of(context).colorScheme.primary,
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    'Total Amount:'.tr(),
+                                    style: TextStyle(color: Theme.of(context).colorScheme.onPrimaryContainer),
+                                  ),
+                                  Text(
+                                    '₹${_totalAmount.toStringAsFixed(0)}',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 18,
+                                      color: Theme.of(context).colorScheme.onPrimaryContainer,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    'Daily Due Amount:'.tr(),
+                                    style: TextStyle(color: Theme.of(context).colorScheme.onPrimaryContainer),
+                                  ),
+                                  Text(
+                                    '₹${_dailyDueAmount.toStringAsFixed(0)}',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 18,
+                                      color: Theme.of(context).colorScheme.onPrimaryContainer,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+    
+                      const SizedBox(height: 32),
+                      SizedBox(
+                        height: 50,
+                        child: ElevatedButton(
+                          onPressed: isLoading ? null : _submit,
+                          child: isLoading
+                              ? const CircularProgressIndicator(color: Colors.white)
+                              : Text('ASSIGN LOAN'.tr()),
+                        ),
+                      ),
+                    ],
                   ),
-
-                  const SizedBox(height: 32),
-                  SizedBox(
-                    height: 50,
-                    child: ElevatedButton(
-                      onPressed: isLoading ? null : _submit,
-                      child: isLoading
-                          ? const CircularProgressIndicator(color: Colors.white)
-                          : const Text('ASSIGN LOAN'),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
-      ),
+                ),
+              );
+            },
+          ),
+        );
+      },
     );
   }
 }

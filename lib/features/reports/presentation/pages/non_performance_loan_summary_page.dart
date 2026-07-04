@@ -1,4 +1,6 @@
 import 'package:vasooldrive/features/settings/presentation/bloc/settings_state.dart';
+import 'package:vasooldrive/core/services/app_localization.dart';
+
 import 'package:vasooldrive/features/settings/presentation/bloc/settings_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
@@ -63,7 +65,7 @@ class _NonPerformanceLoanSummaryViewState extends State<_NonPerformanceLoanSumma
 
         return Scaffold(
           appBar: AppBar(
-            title: const Text('Non Performance Loan Summary'),
+            title: Text('Non Performance Loan Summary'.tr()),
             leading: IconButton(
               icon: const Icon(Icons.arrow_back_ios_new, size: 20),
               onPressed: () => Navigator.of(context).pop(),
@@ -115,7 +117,7 @@ class _NonPerformanceLoanSummaryViewState extends State<_NonPerformanceLoanSumma
                                   });
                                 },
                               ),
-                              const Text('All'),
+                              Text('All'.tr()),
                             ],
                           ),
                         ],
@@ -125,7 +127,7 @@ class _NonPerformanceLoanSummaryViewState extends State<_NonPerformanceLoanSumma
                         controller: _daysController,
                         keyboardType: TextInputType.number,
                         decoration: const InputDecoration(
-                          labelText: 'Minimum Idle Days (NPA)',
+                          labelText: 'Minimum Idle Days (NPA)'.tr(),
                           floatingLabelBehavior: FloatingLabelBehavior.always,
                           border: UnderlineInputBorder(),
                         ),
@@ -152,7 +154,7 @@ class _NonPerformanceLoanSummaryViewState extends State<_NonPerformanceLoanSumma
                 child: BlocBuilder<ReportBloc, ReportState>(
                   builder: (context, state) {
                     if (state is ReportInitial) {
-                      return const Center(child: Text('Select filters and tap SUBMIT.'));
+                      return const Center(child: Text('Select filters and tap SUBMIT.'.tr()));
                     } else if (state is ReportLoading) {
                       return const Center(child: CircularProgressIndicator());
                     } else if (state is ReportError) {

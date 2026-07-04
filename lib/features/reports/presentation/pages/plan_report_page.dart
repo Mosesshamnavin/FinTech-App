@@ -1,4 +1,6 @@
 import 'package:vasooldrive/features/settings/presentation/bloc/settings_state.dart';
+import 'package:vasooldrive/core/services/app_localization.dart';
+
 import 'package:vasooldrive/features/settings/presentation/bloc/settings_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
@@ -54,7 +56,7 @@ class _PlanReportViewState extends State<_PlanReportView> {
 
         return Scaffold(
           appBar: AppBar(
-            title: const Text('Collection Plan'),
+            title: Text('Collection Plan'.tr()),
             leading: IconButton(
               icon: const Icon(Icons.arrow_back_ios_new, size: 20),
               onPressed: () => Navigator.of(context).pop(),
@@ -106,7 +108,7 @@ class _PlanReportViewState extends State<_PlanReportView> {
                                   });
                                 },
                               ),
-                              const Text('All'),
+                              Text('All'.tr()),
                             ],
                           ),
                         ],
@@ -133,7 +135,7 @@ class _PlanReportViewState extends State<_PlanReportView> {
                 child: BlocBuilder<ReportBloc, ReportState>(
                   builder: (context, state) {
                     if (state is ReportInitial) {
-                      return const Center(child: Text('Select filters and tap SUBMIT.'));
+                      return const Center(child: Text('Select filters and tap SUBMIT.'.tr()));
                     } else if (state is ReportLoading) {
                       return const Center(child: CircularProgressIndicator());
                     } else if (state is ReportError) {

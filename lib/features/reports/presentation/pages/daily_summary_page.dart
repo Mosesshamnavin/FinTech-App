@@ -1,4 +1,6 @@
 import 'package:vasooldrive/features/settings/presentation/bloc/settings_state.dart';
+import 'package:vasooldrive/core/services/app_localization.dart';
+
 import 'package:vasooldrive/features/settings/presentation/bloc/settings_bloc.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -124,7 +126,7 @@ class _DailySummaryViewState extends State<_DailySummaryView> {
         
         return Scaffold(
       appBar: AppBar(
-        title: const Text('Daily Summary'),
+        title: Text('Daily Summary'.tr()),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new, size: 20),
           onPressed: () => Navigator.of(context).pop(),
@@ -162,7 +164,7 @@ class _DailySummaryViewState extends State<_DailySummaryView> {
                 Center(
                   child: ElevatedButton(
                     onPressed: _onSubmit,
-                    child: const Text('SUBMIT'),
+                    child: Text('SUBMIT'.tr()),
                   ),
                 ),
               ],
@@ -174,7 +176,7 @@ class _DailySummaryViewState extends State<_DailySummaryView> {
             child: BlocBuilder<ReportBloc, ReportState>(
               builder: (context, state) {
                 if (state is ReportInitial) {
-                  return const Center(child: Text('Select filters and tap SUBMIT.'));
+                  return const Center(child: Text('Select filters and tap SUBMIT.'.tr()));
                 } else if (state is ReportLoading) {
                   return const Center(child: CircularProgressIndicator());
                 } else if (state is ReportError) {

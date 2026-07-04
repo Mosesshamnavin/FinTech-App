@@ -1,4 +1,6 @@
 import 'package:vasooldrive/features/settings/presentation/bloc/settings_state.dart';
+import 'package:vasooldrive/core/services/app_localization.dart';
+
 import 'package:vasooldrive/features/settings/presentation/bloc/settings_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
@@ -30,16 +32,16 @@ class _MissingCustomerSummaryPageState extends State<MissingCustomerSummaryPage>
         builder: (ctx, state) => BlocBuilder<SettingsBloc, SettingsState>(builder: (context, ss) {
           List<String> lines = ss is SettingsLoaded ? ss.lines.map((e) => e.name).toList() : [];
           return Scaffold(
-            appBar: AppBar(title: const Text('Missing Customer Summary'), leading: IconButton(icon: const Icon(Icons.arrow_back_ios_new, size: 20), onPressed: () => Navigator.pop(context))),
+            appBar: AppBar(title: Text('Missing Customer Summary'.tr()), leading: IconButton(icon: const Icon(Icons.arrow_back_ios_new, size: 20), onPressed: () => Navigator.pop(context))),
             body: SingleChildScrollView(padding: const EdgeInsets.all(16), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               const SizedBox(height: 16),
               Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
                 Expanded(child: CustomDropdownFormField<String>(label: 'Line', value: _line, items: lines.map((v) => DropdownMenuItem(value: v, child: Text(v))).toList(), onChanged: (v) => setState(() { _line = v; _lineAll = false; }))),
                 const SizedBox(width: 16),
-                Row(children: [Checkbox(value: _lineAll, activeColor: Theme.of(context).colorScheme.primary, onChanged: (v) => setState(() { _lineAll = v ?? true; if (_lineAll) _line = null; })), Text('All')]),
+                Row(children: [Checkbox(value: _lineAll, activeColor: Theme.of(context).colorScheme.primary, onChanged: (v) => setState(() { _lineAll = v ?? true; if (_lineAll) _line = null; })), Text('All'.tr())]),
               ]),
               const SizedBox(height: 16),
-              TextField(controller: _date, readOnly: true, onTap: _pick, decoration: InputDecoration(labelText: 'Date', labelStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface.withAlpha(153)), floatingLabelBehavior: FloatingLabelBehavior.always, suffixIcon: Icon(Icons.calendar_today, color: Theme.of(context).colorScheme.primary, size: 20), border: UnderlineInputBorder(), enabledBorder: UnderlineInputBorder(), focusedBorder: UnderlineInputBorder())),
+              TextField(controller: _date, readOnly: true, onTap: _pick, decoration: InputDecoration(labelText: 'Date'.tr(), labelStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface.withAlpha(153)), floatingLabelBehavior: FloatingLabelBehavior.always, suffixIcon: Icon(Icons.calendar_today, color: Theme.of(context).colorScheme.primary, size: 20), border: UnderlineInputBorder(), enabledBorder: UnderlineInputBorder(), focusedBorder: UnderlineInputBorder())),
               const SizedBox(height: 32),
               Center(child: state is ReportLoading ? CircularProgressIndicator() : ElevatedButton(onPressed: () => ctx.read<ReportBloc>().add(LoadMissingCustomerSummaryRequested(date: _date.text, line: _lineAll ? null : _line)), style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.primary, padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12)), child: Text('SUBMIT', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)))),
               if (state is ReportError) Padding(padding: EdgeInsets.only(top: 16), child: Text(state.message, style: TextStyle(color: Theme.of(context).colorScheme.error))),

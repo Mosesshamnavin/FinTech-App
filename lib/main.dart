@@ -1,5 +1,6 @@
 import 'core/theme/app_theme.dart';
 import 'core/services/storage_service.dart';
+import 'core/services/app_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -78,6 +79,7 @@ void main() async {
   // Restore saved theme before widget tree builds
   final savedTheme = di.sl<StorageService>().getString('app_theme', defaultValue: 'Blue');
   AppTheme.themeNotifier.value = savedTheme;
+  AppLocalization.init(di.sl<StorageService>());
   runApp(const MyApp());
 }
 
@@ -395,24 +397,29 @@ class MyApp extends StatelessWidget {
         ),
       ],
       child: ValueListenableBuilder<String>(
-        valueListenable: AppTheme.themeNotifier,
-        builder: (context, themeName, _) {
-          return BlocListener<AuthBloc, AuthState>(
-            listener: (context, state) {
-              // Handle session expiry or logout from anywhere in the app
-              if (state is AuthUnauthenticated) {
-                // Do not interrupt SplashPage
-                if (_router.routerDelegate.currentConfiguration.uri.toString() != '/') {
-                  _router.go('/login');
-                }
-              }
+        valueListenable: AppLocalization.languageNotifier,
+        builder: (context, languageName, _) {
+          return ValueListenableBuilder<String>(
+            valueListenable: AppTheme.themeNotifier,
+            builder: (context, themeName, _) {
+              return BlocListener<AuthBloc, AuthState>(
+                listener: (context, state) {
+                  // Handle session expiry or logout from anywhere in the app
+                  if (state is AuthUnauthenticated) {
+                    // Do not interrupt SplashPage
+                    if (_router.routerDelegate.currentConfiguration.uri.toString() != '/') {
+                      _router.go('/login');
+                    }
+                  }
+                },
+                child: MaterialApp.router(
+                  title: 'Sri Vinayaga Finance',
+                  theme: AppTheme.getTheme(themeName),
+                  routerConfig: _router,
+                  debugShowCheckedModeBanner: false,
+                ),
+              );
             },
-            child: MaterialApp.router(
-              title: 'Sri Vinayaga Finance',
-              theme: AppTheme.getTheme(themeName),
-              routerConfig: _router,
-              debugShowCheckedModeBanner: false,
-            ),
           );
         },
       ),

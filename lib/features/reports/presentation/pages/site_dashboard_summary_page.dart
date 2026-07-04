@@ -1,4 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:vasooldrive/core/services/app_localization.dart';
+
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/di/injection_container.dart';
@@ -72,7 +74,7 @@ class _SiteDashboardSummaryViewState extends State<_SiteDashboardSummaryView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Site Dashboard Summary'),
+        title: Text('Site Dashboard Summary'.tr()),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new, size: 20),
           onPressed: () => Navigator.of(context).pop(),
@@ -98,7 +100,7 @@ class _SiteDashboardSummaryViewState extends State<_SiteDashboardSummaryView> {
                     readOnly: true,
                     onTap: () => _selectDate(context),
                     decoration: InputDecoration(
-                      labelText: 'Select Date',
+                      labelText: 'Select Date'.tr(),
                       floatingLabelBehavior: FloatingLabelBehavior.always,
                       suffixIcon: Icon(Icons.calendar_today, color: Theme.of(context).colorScheme.primary, size: 20),
                       border: UnderlineInputBorder(),
