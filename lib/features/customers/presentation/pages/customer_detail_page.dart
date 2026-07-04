@@ -414,11 +414,11 @@ class _CustomerDetailViewState extends State<_CustomerDetailView> with SingleTic
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      IconButton(
-                        icon: const FaIcon(FontAwesomeIcons.whatsapp, color: Colors.green, size: 20),
-                        onPressed: () => _shareReceipt(context, collection),
-                        tooltip: 'Share Receipt',
-                      ),
+                      // IconButton(
+                      //   icon: const FaIcon(FontAwesomeIcons.whatsapp, color: Colors.green, size: 20),
+                      //   onPressed: () => _shareReceipt(context, collection),
+                      //   tooltip: 'Share Receipt',
+                      // ),
                       IconButton(
                         icon: const FaIcon(FontAwesomeIcons.trash, color: Colors.red, size: 16),
                         onPressed: () => _voidCollection(context, collection.id),

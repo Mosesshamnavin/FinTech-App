@@ -13,7 +13,8 @@ Vasool Drive is a premium, comprehensive microfinance and daily collection manag
 - **💰 Collections & Loan Management (Vasool)**:
   - Record daily payments, assign new loans, and view active/completed loan progress.
   - Interactive calculator modal to compute loan schedules on the fly.
-  - Timeline-Polish daily summaries and card metrics on the main dashboard.
+  - Timeline-style daily summaries and card metrics on the main dashboard.
+  - Features robust **Soft Delete architecture** on Hasura, hiding deleted payments from the UI while keeping ledger integrity intact.
 - **💬 SMS & WhatsApp Template Integration**:
   - Persists English and Tamil templates locally using SharedPreferences.
   - Standalone `SmsService` formats customized collection templates replacing tags like `{CustomerName}` and `{AmountPaidToday}` dynamically.
@@ -25,7 +26,8 @@ Vasool Drive is a premium, comprehensive microfinance and daily collection manag
   - **Sample Template**: Generates sample import templates to guide bulk data entry.
 - **📊 19 Dynamic Reports**:
   - Comprehensive reporting engines mapped to the live GraphQL backend, including Ledger Reports, Daily Summaries, Online Collections, Bad Loans, and Non-Performing Loans.
-- **🎨 Theme & Color Theory Integration**:
+- **🎨 Theme, Localization & UI Integration**:
+  - Multi-language localization (English, Tamil, Hindi) dynamically updates entire app interface instantly.
   - Theming engine dynamically adjusts colors (Blue, Green, Orange, etc.) matching user preferences.
   - Complete dark mode support with tailored contrast variables.
 

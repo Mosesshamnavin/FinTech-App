@@ -27,12 +27,10 @@ This document tracks completed achievements and pending todo tasks for the proje
 
 ---
 
-## 📋 Pending Tasks (Todo)
-
-### 💳 Customer Profile & Payment History (Option 2)
+### 💳 Customer Profile & Payment History
 - [x] **Payment Timeline**: Render a timeline listing all collections for a customer in `customer_detail_page.dart`.
 - [x] **Share Receipt**: Format and send payment receipts directly to customers via WhatsApp in `customer_detail_page.dart`.
-- [x] **Delete Payment**: Implement delete mutation in Hasura to remove invalid payment records and automatically recalculate loan balances.
+- [x] **Delete Payment**: Implement delete mutation in Hasura to remove invalid payment records (Soft delete) and automatically recalculate loan balances.
 
 ### 💬 SMS & WhatsApp Templates
 - [x] **Templates Persistence**: Save English and Tamil templates to storage in `sms_template_page.dart`.
