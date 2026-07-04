@@ -42,7 +42,7 @@ class HasuraCollectionRemoteDataSourceImpl implements CollectionRemoteDataSource
 
     const String query = """
       query getCollectionsByDate(\$date: timestamp!, \$userId: uuid!) {
-        collections(where: {date: {_eq: \$date}, user_id: {_eq: \$userId}}) {
+        collections(where: {date: {_eq: \$date}, user_id: {_eq: \$userId}, is_deleted: {_eq: false}}) {
           id
           customer_id
           loan_id
@@ -303,5 +303,75 @@ class HasuraCollectionRemoteDataSourceImpl implements CollectionRemoteDataSource
         createdAt: json['created_at'],
       );
     }).toList();
+  }
+
+  @override
+  Future<List<CollectionModel>> getCollectionsByCustomer(String customerId) async {
+    final userId = await storageService.getUserId();
+    if (userId == null) throw const ServerException('User not authenticated');
+
+    const String query = """
+      query getCollectionsByCustomer(\$customerId: uuid!, \$userId: uuid!) {
+        collections(where: {customer_id: {_eq: \$customerId}, user_id: {_eq: \$userId}, is_deleted: {_eq: false}}, order_by: {date: desc}) {
+          id
+          customer_id
+          loan_id
+          amount
+          date
+          notes
+          status
+        }
+      }
+    """;
+
+    final QueryOptions options = QueryOptions(
+      document: gql(query),
+      variables: {'customerId': customerId, 'userId': userId},
+      fetchPolicy: FetchPolicy.networkOnly,
+    );
+
+    final QueryResult result = await client.query(options);
+
+    if (result.hasException) {
+      throw ServerException(result.exception.toString());
+    }
+
+    final List data = result.data?['collections'] ?? [];
+    return data.map((json) {
+      return CollectionModel(
+        id: json['id'],
+        customerId: json['customer_id'],
+        loanId: json['loan_id'],
+        amount: (json['amount'] as num).toDouble(),
+        date: _formatDateFromHasura(json['date']),
+        notes: json['notes'],
+        status: json['status'],
+      );
+    }).toList();
+  }
+
+  @override
+  Future<void> deleteCollection(String id) async {
+    final userId = await storageService.getUserId();
+    if (userId == null) throw const ServerException('User not authenticated');
+
+    const String mutation = """
+      mutation deleteCollection(\$id: uuid!) {
+        update_collections_by_pk(pk_columns: {id: \$id}, _set: {is_deleted: true}) {
+          id
+        }
+      }
+    """;
+
+    final MutationOptions options = MutationOptions(
+      document: gql(mutation),
+      variables: {'id': id},
+    );
+
+    final QueryResult result = await client.mutate(options);
+
+    if (result.hasException) {
+      throw ServerException(result.exception.toString());
+    }
   }
 }

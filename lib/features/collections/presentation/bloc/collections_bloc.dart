@@ -6,6 +6,7 @@ import '../../domain/usecases/get_reminders_usecase.dart';
 import '../../domain/usecases/add_note_usecase.dart';
 import '../../domain/usecases/get_notes_usecase.dart';
 import '../../../../core/usecases/usecase.dart';
+import '../../domain/repositories/collection_repository.dart';
 import 'collections_event.dart';
 import 'collections_state.dart';
 
@@ -14,9 +15,9 @@ class CollectionsBloc extends Bloc<CollectionsEvent, CollectionsState> {
   final AddCollectionUseCase addCollectionUseCase;
   final AddReminderUseCase addReminderUseCase;
   final GetRemindersUseCase getRemindersUseCase;
-
   final AddNoteUseCase addNoteUseCase;
   final GetNotesUseCase getNotesUseCase;
+  final CollectionRepository collectionRepository;
 
   CollectionsBloc({
     required this.getDailyCollectionsUseCase,
@@ -25,6 +26,7 @@ class CollectionsBloc extends Bloc<CollectionsEvent, CollectionsState> {
     required this.getRemindersUseCase,
     required this.addNoteUseCase,
     required this.getNotesUseCase,
+    required this.collectionRepository,
   }) : super(const CollectionsInitial()) {
     on<LoadDailyCollectionsRequested>(_onLoadDailyCollectionsRequested);
     on<AddCollectionRecordSubmitted>(_onAddCollectionRecordSubmitted);
@@ -32,6 +34,8 @@ class CollectionsBloc extends Bloc<CollectionsEvent, CollectionsState> {
     on<LoadRemindersRequested>(_onLoadRemindersRequested);
     on<LoadNotesRequested>(_onLoadNotesRequested);
     on<AddNoteSubmitted>(_onAddNoteSubmitted);
+    on<LoadCustomerCollectionsRequested>(_onLoadCustomerCollectionsRequested);
+    on<VoidCollectionRecordSubmitted>(_onVoidCollectionRecordSubmitted);
   }
 
   Future<void> _onLoadDailyCollectionsRequested(
@@ -137,6 +141,34 @@ class CollectionsBloc extends Bloc<CollectionsEvent, CollectionsState> {
     result.fold(
       (failure) => emit(AddNoteActionError(failure.message)),
       (_) => emit(const AddNoteActionSuccess()),
+    );
+  }
+
+  Future<void> _onLoadCustomerCollectionsRequested(
+    LoadCustomerCollectionsRequested event,
+    Emitter<CollectionsState> emit,
+  ) async {
+    emit(const CustomerCollectionsLoading());
+    
+    final result = await collectionRepository.getCollectionsByCustomer(event.customerId);
+
+    result.fold(
+      (failure) => emit(CustomerCollectionsError(failure.message)),
+      (collections) => emit(CustomerCollectionsLoaded(collections)),
+    );
+  }
+
+  Future<void> _onVoidCollectionRecordSubmitted(
+    VoidCollectionRecordSubmitted event,
+    Emitter<CollectionsState> emit,
+  ) async {
+    emit(const VoidCollectionActionLoading());
+    
+    final result = await collectionRepository.deleteCollection(event.collectionId);
+
+    result.fold(
+      (failure) => emit(VoidCollectionActionError(failure.message)),
+      (_) => emit(const VoidCollectionActionSuccess()),
     );
   }
 }

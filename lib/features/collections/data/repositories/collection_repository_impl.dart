@@ -129,4 +129,32 @@ class CollectionRepositoryImpl implements CollectionRepository {
       return Left(ServerFailure(e.toString()));
     }
   }
+
+  @override
+  Future<Either<Failure, List<CollectionEntity>>> getCollectionsByCustomer(String customerId) async {
+    try {
+      final collections = await collectionRemoteDataSource.getCollectionsByCustomer(customerId);
+      return Right(collections);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } on NetworkException catch (e) {
+      return Left(NetworkFailure(e.message));
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> deleteCollection(String id) async {
+    try {
+      await collectionRemoteDataSource.deleteCollection(id);
+      return const Right(null);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } on NetworkException catch (e) {
+      return Left(NetworkFailure(e.message));
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
 }

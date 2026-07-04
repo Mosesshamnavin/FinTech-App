@@ -124,3 +124,39 @@ class AddNoteActionError extends CollectionsState {
   @override
   List<Object> get props => [message];
 }
+
+class CustomerCollectionsLoading extends CollectionsState {
+  const CustomerCollectionsLoading();
+}
+
+class CustomerCollectionsLoaded extends CollectionsState {
+  final List<CollectionEntity> collections;
+  const CustomerCollectionsLoaded(this.collections);
+
+  @override
+  List<Object> get props => [collections];
+}
+
+class CustomerCollectionsError extends CollectionsState {
+  final String message;
+  const CustomerCollectionsError(this.message);
+
+  @override
+  List<Object> get props => [message];
+}
+
+class VoidCollectionActionLoading extends CollectionsState {
+  const VoidCollectionActionLoading();
+}
+
+class VoidCollectionActionSuccess extends CollectionsState {
+  const VoidCollectionActionSuccess();
+}
+
+class VoidCollectionActionError extends CollectionsState {
+  final String message;
+  const VoidCollectionActionError(this.message);
+
+  @override
+  List<Object> get props => [message];
+}

@@ -34,4 +34,10 @@ abstract class CollectionRepository {
   
   /// Fetches notes
   Future<Either<Failure, List<NoteEntity>>> getNotes();
+
+  /// Fetches all collections for a specific customer
+  Future<Either<Failure, List<CollectionEntity>>> getCollectionsByCustomer(String customerId);
+
+  /// Deletes/Voids a collection record
+  Future<Either<Failure, void>> deleteCollection(String id);
 }

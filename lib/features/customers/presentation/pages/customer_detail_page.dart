@@ -12,6 +12,12 @@ import '../../../loans/presentation/bloc/loans_event.dart';
 import '../../../loans/presentation/bloc/loans_state.dart';
 import '../../../settings/presentation/bloc/settings_bloc.dart';
 import '../../../settings/presentation/bloc/settings_state.dart';
+import '../../../collections/presentation/bloc/collections_bloc.dart';
+import '../../../collections/presentation/bloc/collections_event.dart';
+import '../../../collections/presentation/bloc/collections_state.dart';
+import '../../../collections/domain/entities/collection_entity.dart';
+import '../../../../core/services/sms_service.dart';
+import '../../../../core/services/app_localization.dart';
 
 class CustomerDetailPage extends StatelessWidget {
   final CustomerEntity customer;
@@ -20,55 +26,164 @@ class CustomerDetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => sl<LoansBloc>()..add(LoadCustomerLoansRequested(customer.id)),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (_) => sl<LoansBloc>()..add(LoadCustomerLoansRequested(customer.id)),
+        ),
+        BlocProvider(
+          create: (_) => sl<CollectionsBloc>()..add(LoadCustomerCollectionsRequested(customerId: customer.id)),
+        ),
+      ],
       child: _CustomerDetailView(customer: customer),
     );
   }
 }
 
-class _CustomerDetailView extends StatelessWidget {
+class _CustomerDetailView extends StatefulWidget {
   final CustomerEntity customer;
 
   const _CustomerDetailView({required this.customer});
 
   @override
+  State<_CustomerDetailView> createState() => _CustomerDetailViewState();
+}
+
+class _CustomerDetailViewState extends State<_CustomerDetailView> with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  void _voidCollection(BuildContext context, String collectionId) {
+    showDialog(
+      context: context,
+      builder: (dialogCtx) {
+        return AlertDialog(
+          title: Text('Delete Payment'.tr()),
+          content: Text('Are you sure you want to delete this payment?'.tr()),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogCtx),
+              child: Text('CANCEL'.tr()),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+              onPressed: () {
+                Navigator.pop(dialogCtx);
+                context.read<CollectionsBloc>().add(VoidCollectionRecordSubmitted(collectionId: collectionId));
+              },
+              child: Text('DELETE'.tr(), style: const TextStyle(color: Colors.white)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _shareReceipt(BuildContext context, CollectionEntity collection) async {
+    final smsService = sl<SmsService>();
+    final lang = AppLocalization.languageNotifier.value == 'தமிழ்' ? 'ta' : 'en';
+    final msg = await smsService.composeMessage(
+      flow: 'Collection',
+      language: lang,
+      customerName: widget.customer.name,
+      amountPaidToday: collection.amount,
+      date: collection.date,
+      customerId: widget.customer.id,
+    );
+    await smsService.sendWhatsApp(phone: widget.customer.phone, text: msg);
+  }
+
+  @override
   Widget build(BuildContext context) {
-    String lineName = customer.lineId;
-    String areaName = customer.areaId;
+    String lineName = widget.customer.lineId;
+    String areaName = widget.customer.areaId;
     
     final settingsState = context.read<SettingsBloc>().state;
     if (settingsState is SettingsLoaded) {
-      final line = settingsState.lines.where((l) => l.id == customer.lineId).firstOrNull;
+      final line = settingsState.lines.where((l) => l.id == widget.customer.lineId).firstOrNull;
       if (line != null) lineName = line.name;
       
-      final area = settingsState.areas.where((a) => a.id == customer.areaId).firstOrNull;
+      final area = settingsState.areas.where((a) => a.id == widget.customer.areaId).firstOrNull;
       if (area != null) areaName = area.name;
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Customer Profile'),
-      ),
-      body: Column(
-        children: [
-          _buildProfileHeader(context, lineName, areaName),
-          const Divider(),
-          Expanded(
-            child: _buildLoansList(),
+    return ValueListenableBuilder<String>(
+      valueListenable: AppLocalization.languageNotifier,
+      builder: (context, language, child) {
+        return BlocListener<CollectionsBloc, CollectionsState>(
+          listener: (context, state) {
+            if (state is VoidCollectionActionSuccess) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Payment deleted successfully!'.tr()),
+                  backgroundColor: Colors.green,
+                ),
+              );
+              // Reload both Blocs to update UI and balances
+              context.read<LoansBloc>().add(LoadCustomerLoansRequested(widget.customer.id));
+              context.read<CollectionsBloc>().add(LoadCustomerCollectionsRequested(customerId: widget.customer.id));
+            } else if (state is VoidCollectionActionError) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(state.message),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            }
+          },
+          child: Scaffold(
+            appBar: AppBar(
+              title: Text('Customer Profile'.tr()),
+              bottom: TabBar(
+                controller: _tabController,
+                indicatorColor: Theme.of(context).colorScheme.primary,
+                labelColor: Theme.of(context).colorScheme.primary,
+                unselectedLabelColor: Colors.grey,
+                tabs: [
+                  Tab(text: 'Loans'.tr()),
+                  Tab(text: 'Payments'.tr()),
+                ],
+              ),
+            ),
+            body: Column(
+              children: [
+                _buildProfileHeader(context, lineName, areaName),
+                const Divider(height: 1),
+                Expanded(
+                  child: TabBarView(
+                    controller: _tabController,
+                    children: [
+                      _buildLoansList(),
+                      _buildPaymentsList(context),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            floatingActionButton: FloatingActionButton.extended(
+              onPressed: () async {
+                final result = await context.push('/customers/${widget.customer.id}/add-loan', extra: widget.customer);
+                if (result == true && context.mounted) {
+                  context.read<LoansBloc>().add(LoadCustomerLoansRequested(widget.customer.id));
+                }
+              },
+              icon: const Icon(Icons.add),
+              label: Text('Assign Loan'.tr()),
+            ),
           ),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () async {
-          final result = await context.push('/customers/${customer.id}/add-loan', extra: customer);
-          if (result == true && context.mounted) {
-            context.read<LoansBloc>().add(LoadCustomerLoansRequested(customer.id));
-          }
-        },
-        icon: const Icon(Icons.add),
-        label: const Text('Assign Loan'),
-      ),
+        );
+      },
     );
   }
 
@@ -88,7 +203,7 @@ class _CustomerDetailView extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  customer.name,
+                  widget.customer.name,
                   style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 4),
@@ -96,7 +211,7 @@ class _CustomerDetailView extends StatelessWidget {
                   children: [
                     const FaIcon(FontAwesomeIcons.phone, size: 14, color: Colors.grey),
                     const SizedBox(width: 8),
-                    Text(customer.phone, style: const TextStyle(color: Colors.grey)),
+                    Text(widget.customer.phone, style: const TextStyle(color: Colors.grey)),
                   ],
                 ),
                 const SizedBox(height: 4),
@@ -121,10 +236,10 @@ class _CustomerDetailView extends StatelessWidget {
         if (state is LoansLoading) {
           return const Center(child: CircularProgressIndicator());
         } else if (state is LoansError) {
-          return Center(child: Text(state.message, style: TextStyle(color: context.danger)));
+          return Center(child: Text(state.message.tr(), style: TextStyle(color: context.danger)));
         } else if (state is LoansLoaded) {
           if (state.loans.isEmpty) {
-            return const Center(child: Text('No active loans found.'));
+            return Center(child: Text('No active loans found.'.tr(), style: const TextStyle(color: Colors.grey)));
           }
 
           final formatter = NumberFormat.currency(symbol: '₹', decimalDigits: 0);
@@ -150,7 +265,7 @@ class _CustomerDetailView extends StatelessWidget {
                         children: [
                           Expanded(
                             child: Text(
-                              'Total: ${formatter.format(loan.totalAmount)}',
+                              '${'Total'.tr()}: ${formatter.format(loan.totalAmount)}',
                               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -162,7 +277,7 @@ class _CustomerDetailView extends StatelessWidget {
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Text(
-                              loan.status,
+                              loan.status.tr(),
                               style: TextStyle(
                                 color: loan.status == 'Active' ? context.success : context.textMuted,
                                 fontWeight: FontWeight.bold,
@@ -179,28 +294,28 @@ class _CustomerDetailView extends StatelessWidget {
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text('Principal', style: TextStyle(color: Colors.grey, fontSize: 12)),
+                              Text('Principal'.tr(), style: const TextStyle(color: Colors.grey, fontSize: 12)),
                               Text(formatter.format(loan.principalAmount), style: const TextStyle(fontWeight: FontWeight.w600)),
                             ],
                           ),
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text('Interest', style: TextStyle(color: Colors.grey, fontSize: 12)),
+                              Text('Interest'.tr(), style: const TextStyle(color: Colors.grey, fontSize: 12)),
                               Text(formatter.format(loan.interestAmount), style: const TextStyle(fontWeight: FontWeight.w600)),
                             ],
                           ),
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text('Daily Due', style: TextStyle(color: Colors.grey, fontSize: 12)),
+                              Text('Daily Due'.tr(), style: const TextStyle(color: Colors.grey, fontSize: 12)),
                               Text(formatter.format(loan.dailyDueAmount), style: const TextStyle(fontWeight: FontWeight.w600)),
                             ],
                           ),
                         ],
                       ),
                       const SizedBox(height: 16),
-                      Text('Progress (${(progress * 100).toInt()}%)', style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                      Text('${'Progress'.tr()} (${(progress * 100).toInt()}%)', style: const TextStyle(fontSize: 12, color: Colors.grey)),
                       const SizedBox(height: 4),
                       LinearProgressIndicator(
                         value: progress,
@@ -211,10 +326,103 @@ class _CustomerDetailView extends StatelessWidget {
                       const SizedBox(height: 8),
                       Row(
                         children: [
-                          Expanded(child: Text('Paid: ${formatter.format(loan.totalAmount - loan.outstandingBalance)}', style: TextStyle(fontSize: 12, color: context.success))),
+                          Expanded(child: Text('${'Paid'.tr()}: ${formatter.format(loan.totalAmount - loan.outstandingBalance)}', style: TextStyle(fontSize: 12, color: context.success))),
                           const SizedBox(width: 8),
-                          Expanded(child: Text('Balance: ${formatter.format(loan.outstandingBalance)}', style: TextStyle(fontSize: 12, color: context.warning), textAlign: TextAlign.right)),
+                          Expanded(child: Text('${'Balance'.tr()}: ${formatter.format(loan.outstandingBalance)}', style: TextStyle(fontSize: 12, color: context.warning), textAlign: TextAlign.right)),
                         ],
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          );
+        }
+        return const SizedBox.shrink();
+      },
+    );
+  }
+
+  Widget _buildPaymentsList(BuildContext context) {
+    return BlocBuilder<CollectionsBloc, CollectionsState>(
+      builder: (context, state) {
+        if (state is CustomerCollectionsLoading || state is VoidCollectionActionLoading) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (state is CustomerCollectionsError) {
+          return Center(child: Text(state.message.tr(), style: TextStyle(color: context.danger)));
+        } else if (state is CustomerCollectionsLoaded) {
+          if (state.collections.isEmpty) {
+            return Center(child: Text('No payments found.'.tr(), style: const TextStyle(color: Colors.grey)));
+          }
+
+          final formatter = NumberFormat.currency(symbol: '₹', decimalDigits: 0);
+
+          return ListView.builder(
+            padding: const EdgeInsets.all(16.0),
+            itemCount: state.collections.length,
+            itemBuilder: (context, index) {
+              final collection = state.collections[index];
+              return Card(
+                elevation: 1,
+                margin: const EdgeInsets.only(bottom: 12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                child: ListTile(
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                  leading: CircleAvatar(
+                    backgroundColor: collection.status == 'paid' ? context.successLight : context.surfaceVariant,
+                    child: FaIcon(
+                      collection.status == 'paid' ? FontAwesomeIcons.check : FontAwesomeIcons.clock,
+                      color: collection.status == 'paid' ? context.success : context.textMuted,
+                      size: 16,
+                    ),
+                  ),
+                  title: Row(
+                    children: [
+                      Text(
+                        formatter.format(collection.amount),
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                      ),
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: collection.status == 'paid' ? context.successLight : context.surfaceVariant,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          collection.status.toUpperCase().tr(),
+                          style: TextStyle(
+                            color: collection.status == 'paid' ? context.success : context.textMuted,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 4),
+                      Text(collection.date, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                      if (collection.notes != null && collection.notes!.isNotEmpty) ...[
+                        const SizedBox(height: 4),
+                        Text(collection.notes!, style: const TextStyle(fontSize: 12, fontStyle: FontStyle.italic)),
+                      ]
+                    ],
+                  ),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: const FaIcon(FontAwesomeIcons.whatsapp, color: Colors.green, size: 20),
+                        onPressed: () => _shareReceipt(context, collection),
+                        tooltip: 'Share Receipt',
+                      ),
+                      IconButton(
+                        icon: const FaIcon(FontAwesomeIcons.trash, color: Colors.red, size: 16),
+                        onPressed: () => _voidCollection(context, collection.id),
+                        tooltip: 'Delete Payment',
                       ),
                     ],
                   ),

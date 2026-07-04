@@ -234,6 +234,7 @@ Future<void> initDependencies() async {
       getRemindersUseCase: sl(),
       addNoteUseCase: sl(),
       getNotesUseCase: sl(),
+      collectionRepository: sl(),
     ),
   );
 

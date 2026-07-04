@@ -72,3 +72,21 @@ class AddNoteSubmitted extends CollectionsEvent {
   @override
   List<Object?> get props => [text];
 }
+
+class LoadCustomerCollectionsRequested extends CollectionsEvent {
+  final String customerId;
+
+  const LoadCustomerCollectionsRequested({required this.customerId});
+
+  @override
+  List<Object?> get props => [customerId];
+}
+
+class VoidCollectionRecordSubmitted extends CollectionsEvent {
+  final String collectionId;
+
+  const VoidCollectionRecordSubmitted({required this.collectionId});
+
+  @override
+  List<Object?> get props => [collectionId];
+}
