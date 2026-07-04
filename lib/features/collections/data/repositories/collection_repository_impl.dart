@@ -57,6 +57,7 @@ class CollectionRepositoryImpl implements CollectionRepository {
   @override
   Future<Either<Failure, CollectionEntity>> addCollection({
     required String customerId,
+    String? loanId,
     required double amount,
     required String date,
     String? notes,
@@ -65,6 +66,7 @@ class CollectionRepositoryImpl implements CollectionRepository {
     try {
       final collection = await collectionRemoteDataSource.addCollection(
         customerId: customerId,
+        loanId: loanId,
         amount: amount,
         date: date,
         notes: notes,

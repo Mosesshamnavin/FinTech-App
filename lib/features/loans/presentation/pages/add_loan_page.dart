@@ -92,7 +92,7 @@ class _AddLoanFormState extends State<_AddLoanForm> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Assign Loan to \${widget.customer.name}'),
+        title: Text('Assign Loan to ${widget.customer.name}'),
       ),
       body: BlocConsumer<LoansBloc, LoansState>(
         listener: (context, state) {
@@ -149,29 +149,58 @@ class _AddLoanFormState extends State<_AddLoanForm> {
                   
                   // Math Preview Card
                   Card(
-                    color: Colors.blue.shade50,
+                    color: Theme.of(context).colorScheme.primaryContainer,
                     elevation: 0,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: BorderSide(color: Colors.blue.shade200)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      side: BorderSide(color: Theme.of(context).colorScheme.primary.withOpacity(0.2)),
+                    ),
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text('Loan Summary', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
+                          Text(
+                            'Loan Summary',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                          ),
                           const SizedBox(height: 16),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const Text('Total Amount:'),
-                              Text('₹\${_totalAmount.toStringAsFixed(0)}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                              Text(
+                                'Total Amount:',
+                                style: TextStyle(color: Theme.of(context).colorScheme.onPrimaryContainer),
+                              ),
+                              Text(
+                                '₹${_totalAmount.toStringAsFixed(0)}',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 18,
+                                  color: Theme.of(context).colorScheme.onPrimaryContainer,
+                                ),
+                              ),
                             ],
                           ),
                           const SizedBox(height: 8),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const Text('Daily Due Amount:'),
-                              Text('₹\${_dailyDueAmount.toStringAsFixed(0)}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                              Text(
+                                'Daily Due Amount:',
+                                style: TextStyle(color: Theme.of(context).colorScheme.onPrimaryContainer),
+                              ),
+                              Text(
+                                '₹${_dailyDueAmount.toStringAsFixed(0)}',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 18,
+                                  color: Theme.of(context).colorScheme.onPrimaryContainer,
+                                ),
+                              ),
                             ],
                           ),
                         ],

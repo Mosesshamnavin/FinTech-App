@@ -49,3 +49,10 @@ This document tracks completed achievements and pending todo tasks for the proje
 - [x] **Fingerprint Toggles**: Save settings state to preferences in `enable_fingerprint_page.dart`.
 - [x] **Security Alert**: Save OTP trigger flag locally in `enable_security_alert_page.dart`.
 
+### ⚙️ Language & License Settings
+- [ ] **Wire Language & Custom SMS Labels**: Persist app language selection and customized SMS label fields in `language_settings_page.dart`.
+- [ ] **Functional License Intents & Trial Expiration**: Wire CALL/PAY buttons and compute 30-day dynamic trial expiry in `license_page.dart`.
+
+### 💳 Collection & Loan Payments Selector
+- [x] **Loan Selection Dropdown**: Render a selector for target active loans during collection payments in `add_collection_modal.dart`.
+

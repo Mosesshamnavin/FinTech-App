@@ -24,6 +24,7 @@ class LoadDailyCollectionsRequested extends CollectionsEvent {
 
 class AddCollectionRecordSubmitted extends CollectionsEvent {
   final String customerId;
+  final String? loanId;
   final double amount;
   final String date;
   final String? notes;
@@ -31,6 +32,7 @@ class AddCollectionRecordSubmitted extends CollectionsEvent {
 
   const AddCollectionRecordSubmitted({
     required this.customerId,
+    this.loanId,
     required this.amount,
     required this.date,
     this.notes,
@@ -38,7 +40,7 @@ class AddCollectionRecordSubmitted extends CollectionsEvent {
   });
 
   @override
-  List<Object?> get props => [customerId, amount, date, notes, status];
+  List<Object?> get props => [customerId, loanId, amount, date, notes, status];
 }
 
 class AddReminderSubmitted extends CollectionsEvent {

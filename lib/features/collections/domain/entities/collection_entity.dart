@@ -6,12 +6,14 @@ class CollectionEntity extends Equatable {
   final String customerId;
   final double amount;
   final String date; // YYYY-MM-DD format
+  final String? loanId;
   final String? notes;
   final String status; // e.g., 'paid', 'pending', 'skipped'
 
   const CollectionEntity({
     required this.id,
     required this.customerId,
+    this.loanId,
     required this.amount,
     required this.date,
     this.notes,
@@ -19,7 +21,7 @@ class CollectionEntity extends Equatable {
   });
 
   @override
-  List<Object?> get props => [id, customerId, amount, date, notes, status];
+  List<Object?> get props => [id, customerId, loanId, amount, date, notes, status];
 }
 
 /// A combined entity for the UI that holds a customer and their collection for a specific date.

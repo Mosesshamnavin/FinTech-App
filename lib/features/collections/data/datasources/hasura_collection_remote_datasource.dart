@@ -45,6 +45,7 @@ class HasuraCollectionRemoteDataSourceImpl implements CollectionRemoteDataSource
         collections(where: {date: {_eq: \$date}, user_id: {_eq: \$userId}}) {
           id
           customer_id
+          loan_id
           amount
           date
           notes
@@ -72,6 +73,7 @@ class HasuraCollectionRemoteDataSourceImpl implements CollectionRemoteDataSource
       return CollectionModel(
         id: json['id'],
         customerId: json['customer_id'],
+        loanId: json['loan_id'],
         amount: (json['amount'] as num).toDouble(),
         date: _formatDateFromHasura(json['date']),
         notes: json['notes'],
@@ -83,6 +85,7 @@ class HasuraCollectionRemoteDataSourceImpl implements CollectionRemoteDataSource
   @override
   Future<CollectionModel> addCollection({
     required String customerId,
+    String? loanId,
     required double amount,
     required String date,
     String? notes,
@@ -94,6 +97,7 @@ class HasuraCollectionRemoteDataSourceImpl implements CollectionRemoteDataSource
     const String mutation = """
       mutation addCollection(
         \$customer_id: uuid!,
+        \$loan_id: uuid,
         \$amount: numeric!,
         \$date: timestamp!,
         \$notes: String,
@@ -102,6 +106,7 @@ class HasuraCollectionRemoteDataSourceImpl implements CollectionRemoteDataSource
       ) {
         insert_collections_one(object: {
           customer_id: \$customer_id,
+          loan_id: \$loan_id,
           amount: \$amount,
           date: \$date,
           notes: \$notes,
@@ -110,6 +115,7 @@ class HasuraCollectionRemoteDataSourceImpl implements CollectionRemoteDataSource
         }) {
           id
           customer_id
+          loan_id
           amount
           date
           notes
@@ -124,6 +130,7 @@ class HasuraCollectionRemoteDataSourceImpl implements CollectionRemoteDataSource
       document: gql(mutation),
       variables: {
         'customer_id': customerId,
+        'loan_id': loanId,
         'amount': amount,
         'date': hasuraDate,
         'notes': notes,
@@ -146,6 +153,7 @@ class HasuraCollectionRemoteDataSourceImpl implements CollectionRemoteDataSource
     return CollectionModel(
       id: data['id'],
       customerId: data['customer_id'],
+      loanId: data['loan_id'],
       amount: (data['amount'] as num).toDouble(),
       date: _formatDateFromHasura(data['date']),
       notes: data['notes'],

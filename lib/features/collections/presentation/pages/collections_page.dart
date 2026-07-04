@@ -15,6 +15,8 @@ import '../bloc/collections_state.dart';
 import '../../../settings/presentation/bloc/settings_bloc.dart';
 import '../../../settings/presentation/bloc/settings_state.dart';
 import '../../../settings/domain/entities/settings_entities.dart';
+import '../../../loans/presentation/bloc/loans_bloc.dart';
+import '../../../loans/presentation/bloc/loans_event.dart';
 
 class CollectionsPage extends StatelessWidget {
   const CollectionsPage({super.key});
@@ -95,8 +97,13 @@ class _CollectionsViewState extends State<_CollectionsView> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
-      builder: (_) => BlocProvider.value(
-        value: bloc,
+      builder: (_) => MultiBlocProvider(
+        providers: [
+          BlocProvider.value(value: bloc),
+          BlocProvider(
+            create: (_) => sl<LoansBloc>()..add(LoadCustomerLoansRequested(customerId)),
+          ),
+        ],
         child: AddCollectionModal(
           customerId: customerId,
           customerName: customerName,

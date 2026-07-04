@@ -24,6 +24,7 @@ class AddCollectionUseCase extends UseCase<CollectionEntity, AddCollectionParams
 
     return repository.addCollection(
       customerId: params.customerId.trim(),
+      loanId: params.loanId,
       amount: params.amount,
       date: params.date.trim(),
       notes: params.notes?.trim(),
@@ -34,6 +35,7 @@ class AddCollectionUseCase extends UseCase<CollectionEntity, AddCollectionParams
 
 class AddCollectionParams extends Equatable {
   final String customerId;
+  final String? loanId;
   final double amount;
   final String date;
   final String? notes;
@@ -41,6 +43,7 @@ class AddCollectionParams extends Equatable {
 
   const AddCollectionParams({
     required this.customerId,
+    this.loanId,
     required this.amount,
     required this.date,
     this.notes,
@@ -48,5 +51,5 @@ class AddCollectionParams extends Equatable {
   });
 
   @override
-  List<Object?> get props => [customerId, amount, date, notes, status];
+  List<Object?> get props => [customerId, loanId, amount, date, notes, status];
 }

@@ -16,6 +16,7 @@ abstract class CollectionRepository {
   /// Records a payment or status update for a customer on a specific date.
   Future<Either<Failure, CollectionEntity>> addCollection({
     required String customerId,
+    String? loanId,
     required double amount,
     required String date,
     String? notes,

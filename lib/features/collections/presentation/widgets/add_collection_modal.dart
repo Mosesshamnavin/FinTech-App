@@ -6,6 +6,9 @@ import '../../../../core/services/sms_service.dart';
 import '../bloc/collections_bloc.dart';
 import '../bloc/collections_event.dart';
 import '../bloc/collections_state.dart';
+import '../../../loans/presentation/bloc/loans_bloc.dart';
+import '../../../loans/presentation/bloc/loans_state.dart';
+import '../../../loans/domain/entities/loan_entity.dart';
 
 class AddCollectionModal extends StatefulWidget {
   final String customerId;
@@ -29,6 +32,7 @@ class _AddCollectionModalState extends State<AddCollectionModal> {
   final _amountController = TextEditingController();
   final _notesController = TextEditingController();
   String _status = 'paid'; // 'paid', 'pending', 'skipped'
+  LoanEntity? _selectedLoan;
 
   @override
   void dispose() {
@@ -40,9 +44,21 @@ class _AddCollectionModalState extends State<AddCollectionModal> {
   void _submit() {
     final amount = double.tryParse(_amountController.text) ?? 0.0;
     
+    String? selectedLoanId = _selectedLoan?.id;
+    if (selectedLoanId == null && _status == 'paid') {
+      final loansState = context.read<LoansBloc>().state;
+      if (loansState is LoansLoaded) {
+        final activeLoans = loansState.loans.where((l) => l.status == 'Active').toList();
+        if (activeLoans.isNotEmpty) {
+          selectedLoanId = activeLoans.first.id;
+        }
+      }
+    }
+    
     context.read<CollectionsBloc>().add(
       AddCollectionRecordSubmitted(
         customerId: widget.customerId,
+        loanId: selectedLoanId,
         amount: amount,
         date: widget.date,
         notes: _notesController.text,
@@ -184,6 +200,58 @@ class _AddCollectionModalState extends State<AddCollectionModal> {
             const SizedBox(height: 16),
             
             if (_status == 'paid') ...[
+              BlocBuilder<LoansBloc, LoansState>(
+                builder: (context, loansState) {
+                  if (loansState is LoansLoading) {
+                    return const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 8.0),
+                      child: Center(child: CircularProgressIndicator()),
+                    );
+                  } else if (loansState is LoansLoaded) {
+                    final activeLoans = loansState.loans.where((l) => l.status == 'Active').toList();
+                    if (activeLoans.isEmpty) {
+                      return const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 8.0),
+                        child: Text(
+                          'No active loans found for this customer.',
+                          style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+                        ),
+                      );
+                    }
+
+                    final selectedValue = (activeLoans.any((l) => l.id == _selectedLoan?.id))
+                        ? activeLoans.firstWhere((l) => l.id == _selectedLoan?.id)
+                        : activeLoans.first;
+
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 16.0),
+                      child: DropdownButtonFormField<LoanEntity>(
+                        value: selectedValue,
+                        isExpanded: true,
+                        decoration: const InputDecoration(
+                          labelText: 'Select Loan for Payment',
+                          border: OutlineInputBorder(),
+                        ),
+                        items: activeLoans.map((loan) {
+                          return DropdownMenuItem<LoanEntity>(
+                            value: loan,
+                            child: Text(
+                              'Total: ₹${loan.totalAmount.toStringAsFixed(0)} (Due: ₹${loan.dailyDueAmount.toStringAsFixed(0)}/day)',
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          );
+                        }).toList(),
+                        onChanged: (loan) {
+                          setState(() {
+                            _selectedLoan = loan;
+                          });
+                        },
+                      ),
+                    );
+                  }
+                  return const SizedBox.shrink();
+                },
+              ),
               TextField(
                 controller: _amountController,
                 decoration: const InputDecoration(

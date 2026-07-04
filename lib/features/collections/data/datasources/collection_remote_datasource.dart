@@ -9,6 +9,7 @@ abstract class CollectionRemoteDataSource {
   
   Future<CollectionModel> addCollection({
     required String customerId,
+    String? loanId,
     required double amount,
     required String date,
     String? notes,
@@ -45,6 +46,7 @@ class MockCollectionRemoteDataSourceImpl implements CollectionRemoteDataSource {
   @override
   Future<CollectionModel> addCollection({
     required String customerId,
+    String? loanId,
     required double amount,
     required String date,
     String? notes,
@@ -59,6 +61,7 @@ class MockCollectionRemoteDataSourceImpl implements CollectionRemoteDataSource {
       final updatedCollection = CollectionModel(
         id: _mockCollections[existingIndex].id,
         customerId: customerId,
+        loanId: loanId,
         amount: amount,
         date: date,
         notes: notes,
@@ -72,6 +75,7 @@ class MockCollectionRemoteDataSourceImpl implements CollectionRemoteDataSource {
     final newCollection = CollectionModel(
       id: 'coll-${Random().nextInt(999999)}',
       customerId: customerId,
+      loanId: loanId,
       amount: amount,
       date: date,
       notes: notes,

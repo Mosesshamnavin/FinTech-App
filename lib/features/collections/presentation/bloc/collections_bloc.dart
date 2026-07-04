@@ -63,6 +63,7 @@ class CollectionsBloc extends Bloc<CollectionsEvent, CollectionsState> {
     final result = await addCollectionUseCase(
       AddCollectionParams(
         customerId: event.customerId,
+        loanId: event.loanId,
         amount: event.amount,
         date: event.date,
         notes: event.notes,
