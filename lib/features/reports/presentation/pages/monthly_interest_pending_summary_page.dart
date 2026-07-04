@@ -182,7 +182,7 @@ class _MonthlyInterestPendingSummaryViewState extends State<_MonthlyInterestPend
                 child: BlocBuilder<ReportBloc, ReportState>(
                   builder: (context, state) {
                     if (state is ReportInitial) {
-                      return const Center(child: Text('Select filters and tap SUBMIT.'.tr()));
+                      return Center(child: Text('Select filters and tap SUBMIT.'.tr()));
                     } else if (state is ReportLoading) {
                       return const Center(child: CircularProgressIndicator());
                     } else if (state is ReportError) {

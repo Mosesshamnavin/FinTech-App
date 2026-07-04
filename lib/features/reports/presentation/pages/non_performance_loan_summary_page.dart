@@ -126,7 +126,7 @@ class _NonPerformanceLoanSummaryViewState extends State<_NonPerformanceLoanSumma
                       TextField(
                         controller: _daysController,
                         keyboardType: TextInputType.number,
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           labelText: 'Minimum Idle Days (NPA)'.tr(),
                           floatingLabelBehavior: FloatingLabelBehavior.always,
                           border: UnderlineInputBorder(),
@@ -154,7 +154,7 @@ class _NonPerformanceLoanSummaryViewState extends State<_NonPerformanceLoanSumma
                 child: BlocBuilder<ReportBloc, ReportState>(
                   builder: (context, state) {
                     if (state is ReportInitial) {
-                      return const Center(child: Text('Select filters and tap SUBMIT.'.tr()));
+                      return Center(child: Text('Select filters and tap SUBMIT.'.tr()));
                     } else if (state is ReportLoading) {
                       return const Center(child: CircularProgressIndicator());
                     } else if (state is ReportError) {

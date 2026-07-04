@@ -68,9 +68,9 @@ class _BadLoanSummaryPageState extends State<BadLoanSummaryPage> {
               const Padding(padding: EdgeInsets.only(left: 48), child: Divider(height: 1, color: Colors.grey)),
               if (_selectedBadLoanDays == 'Custom') ...[
                 const SizedBox(height: 16),
-                TextField(controller: _fromDaysController, decoration: const InputDecoration(labelText: 'From Days'.tr(), border: UnderlineInputBorder()), keyboardType: TextInputType.number),
+                TextField(controller: _fromDaysController, decoration: InputDecoration(labelText: 'From Days'.tr(), border: UnderlineInputBorder()), keyboardType: TextInputType.number),
                 const SizedBox(height: 16),
-                TextField(controller: _toDaysController, decoration: const InputDecoration(labelText: 'To Days'.tr(), border: UnderlineInputBorder()), keyboardType: TextInputType.number),
+                TextField(controller: _toDaysController, decoration: InputDecoration(labelText: 'To Days'.tr(), border: UnderlineInputBorder()), keyboardType: TextInputType.number),
               ],
               const SizedBox(height: 32),
               Center(child: state is ReportLoading ? const CircularProgressIndicator() : ElevatedButton(
