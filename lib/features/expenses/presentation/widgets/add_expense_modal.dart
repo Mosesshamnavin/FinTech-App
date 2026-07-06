@@ -10,10 +10,12 @@ import '../../../settings/presentation/bloc/settings_state.dart';
 
 class AddExpenseModal extends StatefulWidget {
   final bool isInvestment;
+  final ExpenseEntity? expense;
 
   const AddExpenseModal({
     super.key,
     required this.isInvestment,
+    this.expense,
   });
 
   @override
@@ -23,9 +25,27 @@ class AddExpenseModal extends StatefulWidget {
 class _AddExpenseModalState extends State<AddExpenseModal> {
   final _amountController = TextEditingController();
   final _descController = TextEditingController();
-  DateTime _selectedDate = DateTime.now();
-  String _selectedCategory = 'Food';
-  bool _isOnline = false;
+  late DateTime _selectedDate;
+  late String _selectedCategory;
+  late bool _isOnline;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.expense != null) {
+      _amountController.text = widget.expense!.amount.toStringAsFixed(0);
+      _descController.text = widget.expense!.description;
+      _selectedDate = widget.expense!.date;
+      _isOnline = widget.expense!.isOnline;
+      // We need to resolve UUID to Name for the dropdown
+      // This will be done in the build method below
+      _selectedCategory = widget.expense!.category; 
+    } else {
+      _selectedDate = DateTime.now();
+      _selectedCategory = 'Food'; // Default, will be overridden
+      _isOnline = false;
+    }
+  }
 
   @override
   void dispose() {
@@ -68,18 +88,57 @@ class _AddExpenseModalState extends State<AddExpenseModal> {
       }
     }
 
-    final newExpense = ExpenseEntity(
-      id: DateTime.now().millisecondsSinceEpoch.toString(), // Temporary ID until backend assigns one
-      amount: amount,
-      category: typeId, // Passing the UUID to the DataSource
-      description: _descController.text,
-      date: _selectedDate,
-      isInvestment: widget.isInvestment,
-      isOnline: _isOnline,
-    );
-
-    context.read<ExpensesBloc>().add(AddExpenseSubmitted(newExpense));
+    if (widget.expense != null) {
+      final updatedExpense = ExpenseEntity(
+        id: widget.expense!.id,
+        amount: amount,
+        category: typeId,
+        description: _descController.text,
+        date: _selectedDate,
+        isInvestment: widget.isInvestment,
+        isOnline: _isOnline,
+        lineId: widget.expense!.lineId,
+      );
+      context.read<ExpensesBloc>().add(UpdateExpenseSubmitted(updatedExpense));
+    } else {
+      final newExpense = ExpenseEntity(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        amount: amount,
+        category: typeId,
+        description: _descController.text,
+        date: _selectedDate,
+        isInvestment: widget.isInvestment,
+        isOnline: _isOnline,
+      );
+      context.read<ExpensesBloc>().add(AddExpenseSubmitted(newExpense));
+    }
     Navigator.of(context).pop();
+  }
+
+  void _delete() {
+    if (widget.expense == null) return;
+    
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('Delete ${widget.isInvestment ? 'Investment' : 'Expense'}'.tr()),
+        content: Text('Are you sure you want to delete this record?'.tr()),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: Text('Cancel'.tr()),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(ctx).pop(); // Close dialog
+              context.read<ExpensesBloc>().add(DeleteExpenseSubmitted(widget.expense!.id, widget.isInvestment));
+              Navigator.of(context).pop(); // Close modal
+            },
+            child: Text('Delete'.tr(), style: const TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -99,10 +158,21 @@ class _AddExpenseModalState extends State<AddExpenseModal> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text(
-                widget.isInvestment ? 'Add Investment'.tr() : 'Add Expense'.tr(),
-                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                textAlign: TextAlign.center,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    widget.expense != null 
+                        ? 'Edit ${widget.isInvestment ? 'Investment' : 'Expense'}'.tr()
+                        : 'Add ${widget.isInvestment ? 'Investment' : 'Expense'}'.tr(),
+                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                  if (widget.expense != null)
+                    IconButton(
+                      icon: const Icon(Icons.delete, color: Colors.red),
+                      onPressed: _delete,
+                    ),
+                ],
               ),
               const SizedBox(height: 16),
               TextField(
@@ -184,14 +254,14 @@ class _AddExpenseModalState extends State<AddExpenseModal> {
                   ),
                 ],
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: _submit,
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   backgroundColor: Theme.of(context).colorScheme.primary,
                 ),
-                child: Text('SAVE'.tr(), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                child: Text(widget.expense != null ? 'Update'.tr() : 'Save'.tr(), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
               ),
             ],
           ),

@@ -3,6 +3,8 @@ import '../../../../core/error/exceptions.dart';
 
 abstract class ExpenseRemoteDataSource {
   Future<ExpenseEntity> addExpense(ExpenseEntity expense);
+  Future<ExpenseEntity> updateExpense(ExpenseEntity expense);
+  Future<void> deleteExpense(String id, bool isInvestment);
 
   Future<List<ExpenseEntity>> getExpenses({
     required DateTime from,

@@ -26,3 +26,17 @@ class ExpensesError extends ExpensesState {
   @override
   List<Object?> get props => [message];
 }
+
+class AddExpenseSuccess extends ExpensesState {}
+
+class UpdateExpenseSuccess extends ExpensesState {}
+
+class DeleteExpenseSuccess extends ExpensesState {}
+
+class ExpenseActionError extends ExpensesState {
+  final String message;
+  const ExpenseActionError(this.message);
+
+  @override
+  List<Object?> get props => [message];
+}

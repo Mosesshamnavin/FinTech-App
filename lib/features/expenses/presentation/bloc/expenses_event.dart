@@ -20,3 +20,14 @@ class AddExpenseSubmitted extends ExpensesEvent {
   final ExpenseEntity expense;
   AddExpenseSubmitted(this.expense);
 }
+
+class UpdateExpenseSubmitted extends ExpensesEvent {
+  final ExpenseEntity expense;
+  UpdateExpenseSubmitted(this.expense);
+}
+
+class DeleteExpenseSubmitted extends ExpensesEvent {
+  final String id;
+  final bool isInvestment;
+  DeleteExpenseSubmitted(this.id, this.isInvestment);
+}

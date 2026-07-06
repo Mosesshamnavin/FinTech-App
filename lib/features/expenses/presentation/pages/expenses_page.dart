@@ -9,6 +9,7 @@ import '../bloc/expenses_event.dart';
 import '../bloc/expenses_state.dart';
 import '../../../settings/presentation/bloc/settings_bloc.dart';
 import '../../../settings/presentation/bloc/settings_state.dart';
+import '../../domain/entities/expense_entity.dart';
 import '../widgets/add_expense_modal.dart';
 
 class ExpensesPage extends StatefulWidget {
@@ -24,6 +25,7 @@ class _ExpensesPageState extends State<ExpensesPage> with SingleTickerProviderSt
   String _selectedLine = 'All';
   bool _isOnlineChecked = false;
   late TabController _tabController;
+  bool _wasVisible = false;
 
   @override
   void initState() {
@@ -42,8 +44,19 @@ class _ExpensesPageState extends State<ExpensesPage> with SingleTickerProviderSt
     
     // Initial load for Expense tab
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _loadData();
+      if (mounted) _loadData();
     });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final isVisible = TickerMode.of(context);
+    if (isVisible && !_wasVisible) {
+      // Trigger a silent reload when tab becomes visible
+      _loadData();
+    }
+    _wasVisible = isVisible;
   }
 
   void _loadData() {
@@ -86,7 +99,7 @@ class _ExpensesPageState extends State<ExpensesPage> with SingleTickerProviderSt
     }
   }
 
-  void _showAddModal(BuildContext context) {
+  void _showAddModal(BuildContext context, {ExpenseEntity? expense}) {
     final isInvestment = _tabController.index == 1;
     final expensesBloc = context.read<ExpensesBloc>();
     showModalBottomSheet(
@@ -97,7 +110,10 @@ class _ExpensesPageState extends State<ExpensesPage> with SingleTickerProviderSt
       ),
       builder: (_) => BlocProvider.value(
         value: expensesBloc,
-        child: AddExpenseModal(isInvestment: isInvestment),
+        child: AddExpenseModal(
+          isInvestment: isInvestment,
+          expense: expense,
+        ),
       ),
     );
   }
@@ -325,6 +341,7 @@ class _ExpensesPageState extends State<ExpensesPage> with SingleTickerProviderSt
                       itemBuilder: (context, index) {
                         final expense = filtered[index];
                         return ListTile(
+                          onTap: () => _showAddModal(context, expense: expense),
                           leading: CircleAvatar(
                             backgroundColor: expense.isOnline ? context.primaryContainer : context.successLight,
                             child: Icon(

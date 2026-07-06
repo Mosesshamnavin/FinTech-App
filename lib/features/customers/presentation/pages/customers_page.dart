@@ -35,6 +35,18 @@ class _CustomersView extends StatefulWidget {
 class _CustomersViewState extends State<_CustomersView> {
   String? _selectedLine;
   String? _selectedArea;
+  bool _wasVisible = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final isVisible = TickerMode.of(context);
+    if (isVisible && !_wasVisible) {
+      // Reload customers when the tab becomes visible
+      context.read<CustomersBloc>().add(LoadCustomersRequested(lineId: _selectedLine, areaId: _selectedArea));
+    }
+    _wasVisible = isVisible;
+  }
 
   void _onFilterSubmitted() {
     context.read<CustomersBloc>().add(

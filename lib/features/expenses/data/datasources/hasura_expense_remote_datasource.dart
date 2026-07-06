@@ -88,6 +88,124 @@ class HasuraExpenseRemoteDataSourceImpl implements ExpenseRemoteDataSource {
     );
   }
 
+  @override
+  Future<ExpenseEntity> updateExpense(ExpenseEntity expense) async {
+    final bool isInv = expense.isInvestment;
+    final String? userId = storageService.getUserId();
+
+    if (userId == null) {
+      throw const ServerException('User not authenticated.');
+    }
+    
+    // Mutation for Expenses
+    const String mutationExpense = r'''
+      mutation UpdateExpense($id: uuid!, $amount: numeric!, $comments: String, $date: timestamp!, $isOnline: Boolean!, $lineId: uuid, $typeId: uuid!) {
+        update_expenses_by_pk(
+          pk_columns: {id: $id},
+          _set: {
+            amount: $amount,
+            comments: $comments,
+            date: $date,
+            is_online: $isOnline,
+            line_id: $lineId,
+            type_id: $typeId
+          }
+        ) {
+          id
+        }
+      }
+    ''';
+
+    // Mutation for Investments
+    const String mutationInvestment = r'''
+      mutation UpdateInvestment($id: uuid!, $amount: numeric!, $comments: String, $date: timestamp!, $isOnline: Boolean!, $lineId: uuid, $typeId: uuid!) {
+        update_investments_by_pk(
+          pk_columns: {id: $id},
+          _set: {
+            amount: $amount,
+            comments: $comments,
+            date: $date,
+            is_online: $isOnline,
+            line_id: $lineId,
+            type_id: $typeId
+          }
+        ) {
+          id
+        }
+      }
+    ''';
+
+    final result = await client.mutate(
+      MutationOptions(
+        document: gql(isInv ? mutationInvestment : mutationExpense),
+        variables: {
+          'id': expense.id,
+          'amount': expense.amount,
+          'comments': expense.description,
+          'date': expense.date.toIso8601String(),
+          'isOnline': expense.isOnline,
+          'lineId': (expense.lineId != null && expense.lineId != 'All') ? expense.lineId : null,
+          'typeId': expense.category, 
+        },
+      ),
+    );
+
+    if (result.hasException) {
+      throw ServerException(result.exception.toString());
+    }
+
+    final data = result.data![isInv ? 'update_investments_by_pk' : 'update_expenses_by_pk'];
+    if (data == null) throw const ServerException('Failed to update record.');
+
+    return expense;
+  }
+
+  @override
+  Future<void> deleteExpense(String id, bool isInvestment) async {
+    final String? userId = storageService.getUserId();
+    if (userId == null) throw const ServerException('User not authenticated.');
+
+    const String mutationExpense = r'''
+      mutation DeleteExpense($id: uuid!) {
+        update_expenses_by_pk(
+          pk_columns: {id: $id},
+          _set: {
+            is_deleted: true
+          }
+        ) {
+          id
+        }
+      }
+    ''';
+
+    const String mutationInvestment = r'''
+      mutation DeleteInvestment($id: uuid!) {
+        update_investments_by_pk(
+          pk_columns: {id: $id},
+          _set: {
+            is_deleted: true
+          }
+        ) {
+          id
+        }
+      }
+    ''';
+
+    final result = await client.mutate(
+      MutationOptions(
+        document: gql(isInvestment ? mutationInvestment : mutationExpense),
+        variables: {
+          'id': id,
+        },
+      ),
+    );
+
+    if (result.hasException) {
+      throw ServerException(result.exception.toString());
+    }
+  }
+
+  @override
   Future<List<ExpenseEntity>> getExpenses({
     required DateTime from,
     required DateTime to,
@@ -107,7 +225,7 @@ class HasuraExpenseRemoteDataSourceImpl implements ExpenseRemoteDataSource {
       'userId': userId,
     };
     
-    String whereClause = 'date: {_gte: \$from, _lte: \$to}, user_id: {_eq: \$userId}';
+    String whereClause = 'date: {_gte: \$from, _lte: \$to}, user_id: {_eq: \$userId}, is_deleted: {_eq: false}';
     if (lineId != null && lineId != 'All') {
       whereClause += ', line_id: {_eq: \$lineId}';
       variables['lineId'] = lineId;
