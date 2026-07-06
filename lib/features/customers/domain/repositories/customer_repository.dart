@@ -15,4 +15,15 @@ abstract class CustomerRepository {
     required String lineId,
     required String areaId,
   });
+
+  Future<Either<Failure, CustomerEntity>> updateCustomer({
+    required String id,
+    required String name,
+    required String phone,
+    required String address,
+    required String lineId,
+    required String areaId,
+  });
+
+  Future<Either<Failure, void>> deleteCustomer(String id);
 }

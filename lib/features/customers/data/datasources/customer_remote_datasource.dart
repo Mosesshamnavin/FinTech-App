@@ -12,6 +12,15 @@ abstract class CustomerRemoteDataSource {
     required String lineId,
     required String areaId,
   });
+  Future<CustomerModel> updateCustomer({
+    required String id,
+    required String name,
+    required String phone,
+    required String address,
+    required String lineId,
+    required String areaId,
+  });
+  Future<void> deleteCustomer(String id);
 }
 
 class MockCustomerRemoteDataSourceImpl implements CustomerRemoteDataSource {
@@ -92,5 +101,22 @@ class MockCustomerRemoteDataSourceImpl implements CustomerRemoteDataSource {
 
     _mockCustomers.add(newCustomer);
     return newCustomer;
+  }
+
+  @override
+  Future<CustomerModel> updateCustomer({
+    required String id,
+    required String name,
+    required String phone,
+    required String address,
+    required String lineId,
+    required String areaId,
+  }) async {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> deleteCustomer(String id) async {
+    throw UnimplementedError();
   }
 }

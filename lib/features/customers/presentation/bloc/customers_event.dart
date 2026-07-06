@@ -35,3 +35,33 @@ class AddCustomerSubmitted extends CustomersEvent {
   @override
   List<Object> get props => [name, phone, address, lineId, areaId];
 }
+
+class UpdateCustomerSubmitted extends CustomersEvent {
+  final String id;
+  final String name;
+  final String phone;
+  final String address;
+  final String lineId;
+  final String areaId;
+
+  const UpdateCustomerSubmitted({
+    required this.id,
+    required this.name,
+    required this.phone,
+    required this.address,
+    required this.lineId,
+    required this.areaId,
+  });
+
+  @override
+  List<Object> get props => [id, name, phone, address, lineId, areaId];
+}
+
+class DeleteCustomerSubmitted extends CustomersEvent {
+  final String id;
+
+  const DeleteCustomerSubmitted({required this.id});
+
+  @override
+  List<Object> get props => [id];
+}

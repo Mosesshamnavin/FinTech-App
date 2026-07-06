@@ -188,8 +188,13 @@ class _CustomersViewState extends State<_CustomersView> {
                               ),
                               isThreeLine: true,
                               trailing: const Icon(Icons.chevron_right),
-                              onTap: () {
-                                context.push('/customers/${customer.id}', extra: customer);
+                              onTap: () async {
+                                final shouldReload = await context.push<bool>('/customers/${customer.id}', extra: customer);
+                                if (shouldReload == true && context.mounted) {
+                                  context.read<CustomersBloc>().add(
+                                    LoadCustomersRequested(lineId: _selectedLine, areaId: _selectedArea)
+                                  );
+                                }
                               },
                             ),
                           );

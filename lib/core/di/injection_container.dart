@@ -28,8 +28,10 @@ import '../../features/customers/data/datasources/customer_remote_datasource.dar
 import '../../features/customers/data/datasources/hasura_customer_remote_datasource.dart';
 import '../../features/customers/data/repositories/customer_repository_impl.dart';
 import '../../features/customers/domain/repositories/customer_repository.dart';
-import '../../features/customers/domain/usecases/add_customer_usecase.dart';
-import '../../features/customers/domain/usecases/get_customers_usecase.dart';
+import 'package:vasooldrive/features/customers/domain/usecases/add_customer_usecase.dart';
+import 'package:vasooldrive/features/customers/domain/usecases/update_customer_usecase.dart';
+import 'package:vasooldrive/features/customers/domain/usecases/delete_customer_usecase.dart';
+import 'package:vasooldrive/features/customers/domain/usecases/get_customers_usecase.dart';
 import '../../features/customers/presentation/bloc/customers_bloc.dart';
 import '../../features/reports/data/datasources/report_remote_datasource.dart';
 import '../../features/reports/data/repositories/report_repository_impl.dart';
@@ -133,12 +135,16 @@ Future<void> initDependencies() async {
   // ─── Customers: Use Cases ─────────────────────────────────────────────────
   sl.registerLazySingleton(() => GetCustomersUseCase(sl()));
   sl.registerLazySingleton(() => AddCustomerUseCase(sl()));
+  sl.registerLazySingleton(() => UpdateCustomerUseCase(sl()));
+  sl.registerLazySingleton(() => DeleteCustomerUseCase(sl()));
 
   // ─── Customers: BLoC ──────────────────────────────────────────────────────
   sl.registerFactory(
     () => CustomersBloc(
       getCustomersUseCase: sl(),
       addCustomerUseCase: sl(),
+      updateCustomerUseCase: sl(),
+      deleteCustomerUseCase: sl(),
     ),
   );
 

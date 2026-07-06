@@ -10,20 +10,25 @@ import '../bloc/customers_state.dart';
 import '../../../settings/presentation/bloc/settings_bloc.dart';
 import '../../../settings/presentation/bloc/settings_state.dart';
 
+import '../../domain/entities/customer_entity.dart';
+
 class AddCustomerPage extends StatelessWidget {
-  const AddCustomerPage({super.key});
+  final CustomerEntity? customer;
+
+  const AddCustomerPage({super.key, this.customer});
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) => sl<CustomersBloc>(),
-      child: const _AddCustomerView(),
+      child: _AddCustomerView(customer: customer),
     );
   }
 }
 
 class _AddCustomerView extends StatefulWidget {
-  const _AddCustomerView();
+  final CustomerEntity? customer;
+  const _AddCustomerView({this.customer});
 
   @override
   State<_AddCustomerView> createState() => _AddCustomerViewState();
@@ -36,6 +41,19 @@ class _AddCustomerViewState extends State<_AddCustomerView> {
 
   String? _selectedLine;
   String? _selectedArea;
+  bool get _isEditMode => widget.customer != null;
+
+  @override
+  void initState() {
+    super.initState();
+    if (_isEditMode) {
+      _nameController.text = widget.customer!.name;
+      _phoneController.text = widget.customer!.phone;
+      _addressController.text = widget.customer!.address;
+      _selectedLine = widget.customer!.lineId;
+      _selectedArea = widget.customer!.areaId;
+    }
+  }
 
   @override
   void dispose() {
@@ -46,15 +64,28 @@ class _AddCustomerViewState extends State<_AddCustomerView> {
   }
 
   void _onSubmit() {
-    context.read<CustomersBloc>().add(
-          AddCustomerSubmitted(
-            name: _nameController.text,
-            phone: _phoneController.text,
-            address: _addressController.text,
-            lineId: _selectedLine ?? '',
-            areaId: _selectedArea ?? '',
-          ),
-        );
+    if (_isEditMode) {
+      context.read<CustomersBloc>().add(
+            UpdateCustomerSubmitted(
+              id: widget.customer!.id,
+              name: _nameController.text,
+              phone: _phoneController.text,
+              address: _addressController.text,
+              lineId: _selectedLine ?? '',
+              areaId: _selectedArea ?? '',
+            ),
+          );
+    } else {
+      context.read<CustomersBloc>().add(
+            AddCustomerSubmitted(
+              name: _nameController.text,
+              phone: _phoneController.text,
+              address: _addressController.text,
+              lineId: _selectedLine ?? '',
+              areaId: _selectedArea ?? '',
+            ),
+          );
+    }
   }
 
   @override
@@ -64,10 +95,10 @@ class _AddCustomerViewState extends State<_AddCustomerView> {
       builder: (context, language, child) {
         return BlocListener<CustomersBloc, CustomersState>(
           listener: (context, state) {
-            if (state is AddCustomerSuccess) {
+            if (state is AddCustomerSuccess || state is UpdateCustomerSuccess) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text('Customer added successfully!'.tr()),
+                  content: Text(_isEditMode ? 'Customer updated successfully!'.tr() : 'Customer added successfully!'.tr()),
                   backgroundColor: context.success,
                   behavior: SnackBarBehavior.floating,
                 ),
@@ -81,11 +112,19 @@ class _AddCustomerViewState extends State<_AddCustomerView> {
                   behavior: SnackBarBehavior.floating,
                 ),
               );
+            } else if (state is UpdateCustomerError) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(state.message),
+                  backgroundColor: context.danger,
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
             }
           },
           child: Scaffold(
             appBar: AppBar(
-              title: Text('Add Customer'.tr()),
+              title: Text(_isEditMode ? 'Edit Customer'.tr() : 'Add Customer'.tr()),
               leading: IconButton(
                 icon: const Icon(Icons.arrow_back_ios_new, size: 20),
                 onPressed: () => context.pop(),
@@ -148,17 +187,25 @@ class _AddCustomerViewState extends State<_AddCustomerView> {
                   ),
                   const SizedBox(height: 32),
                   BlocBuilder<CustomersBloc, CustomersState>(
-                    builder: (context, state) {
-                      final isLoading = state is AddCustomerLoading;
+                    builder: (context, customersState) {
+                      final isLoading = customersState is AddCustomerLoading || customersState is UpdateCustomerLoading;
                       return ElevatedButton(
                         onPressed: isLoading ? null : _onSubmit,
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          backgroundColor: Theme.of(context).colorScheme.primary,
+                          foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                        ),
                         child: isLoading
                             ? const SizedBox(
                                 height: 20,
                                 width: 20,
-                                child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                                child: CircularProgressIndicator(strokeWidth: 2),
                               )
-                            : Text('SUBMIT'.tr()),
+                            : Text(
+                                _isEditMode ? 'Update Record'.tr() : 'Save Record'.tr(),
+                                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                              ),
                       );
                     },
                   ),

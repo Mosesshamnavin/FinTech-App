@@ -55,4 +55,46 @@ class CustomerRepositoryImpl implements CustomerRepository {
       return const Left(ServerFailure());
     }
   }
+
+  @override
+  Future<Either<Failure, CustomerEntity>> updateCustomer({
+    required String id,
+    required String name,
+    required String phone,
+    required String address,
+    required String lineId,
+    required String areaId,
+  }) async {
+    try {
+      final customerModel = await remoteDataSource.updateCustomer(
+        id: id,
+        name: name,
+        phone: phone,
+        address: address,
+        lineId: lineId,
+        areaId: areaId,
+      );
+      return Right(customerModel);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } on NetworkException catch (e) {
+      return Left(NetworkFailure(e.message));
+    } catch (_) {
+      return const Left(ServerFailure());
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> deleteCustomer(String id) async {
+    try {
+      await remoteDataSource.deleteCustomer(id);
+      return const Right(null);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } on NetworkException catch (e) {
+      return Left(NetworkFailure(e.message));
+    } catch (_) {
+      return const Left(ServerFailure());
+    }
+  }
 }

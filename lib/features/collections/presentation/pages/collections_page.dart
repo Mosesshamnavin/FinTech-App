@@ -43,6 +43,8 @@ class _CollectionsViewState extends State<_CollectionsView> {
   String? _selectedArea;
   final TextEditingController _dateController = TextEditingController();
 
+  bool _wasVisible = false;
+
   @override
   void initState() {
     super.initState();
@@ -56,6 +58,17 @@ class _CollectionsViewState extends State<_CollectionsView> {
         _onSubmit();
       }
     });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final isVisible = TickerMode.of(context);
+    if (isVisible && !_wasVisible) {
+      // Trigger a silent reload when tab becomes visible
+      _onSubmit();
+    }
+    _wasVisible = isVisible;
   }
 
   @override

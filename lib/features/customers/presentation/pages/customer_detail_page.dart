@@ -16,6 +16,10 @@ import '../../../collections/presentation/bloc/collections_bloc.dart';
 import '../../../collections/presentation/bloc/collections_event.dart';
 import '../../../collections/presentation/bloc/collections_state.dart';
 import '../../../collections/domain/entities/collection_entity.dart';
+import '../bloc/customers_bloc.dart';
+import '../bloc/customers_event.dart';
+import '../bloc/customers_state.dart';
+import 'add_customer_page.dart';
 import '../../../../core/services/sms_service.dart';
 import '../../../../core/services/app_localization.dart';
 
@@ -33,6 +37,9 @@ class CustomerDetailPage extends StatelessWidget {
         ),
         BlocProvider(
           create: (_) => sl<CollectionsBloc>()..add(LoadCustomerCollectionsRequested(customerId: customer.id)),
+        ),
+        BlocProvider(
+          create: (_) => sl<CustomersBloc>(),
         ),
       ],
       child: _CustomerDetailView(customer: customer),
@@ -81,6 +88,32 @@ class _CustomerDetailViewState extends State<_CustomerDetailView> with SingleTic
               onPressed: () {
                 Navigator.pop(dialogCtx);
                 context.read<CollectionsBloc>().add(VoidCollectionRecordSubmitted(collectionId: collectionId));
+              },
+              child: Text('DELETE'.tr(), style: const TextStyle(color: Colors.white)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _deleteCustomer(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (dialogCtx) {
+        return AlertDialog(
+          title: Text('Delete Customer'.tr()),
+          content: Text('Are you sure you want to delete this customer? This will hide them from the app.'.tr()),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogCtx),
+              child: Text('CANCEL'.tr()),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+              onPressed: () {
+                Navigator.pop(dialogCtx);
+                context.read<CustomersBloc>().add(DeleteCustomerSubmitted(id: widget.customer.id));
               },
               child: Text('DELETE'.tr(), style: const TextStyle(color: Colors.white)),
             ),
@@ -142,10 +175,70 @@ class _CustomerDetailViewState extends State<_CustomerDetailView> with SingleTic
               );
             }
           },
-          child: Scaffold(
-            appBar: AppBar(
-              title: Text('Customer Profile'.tr()),
-              bottom: TabBar(
+          child: BlocListener<CustomersBloc, CustomersState>(
+            listener: (context, state) {
+              if (state is DeleteCustomerSuccess) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Customer deleted successfully!'.tr()),
+                    backgroundColor: Colors.green,
+                  ),
+                );
+                context.pop(true); // Return true to refresh list
+              } else if (state is DeleteCustomerError) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(state.message),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
+            },
+            child: Scaffold(
+              appBar: AppBar(
+                title: Text('Customer Profile'.tr()),
+                actions: [
+                  PopupMenuButton<String>(
+                    onSelected: (value) async {
+                      if (value == 'edit') {
+                        final shouldRefresh = await Navigator.push<bool>(
+                          context,
+                          MaterialPageRoute(builder: (_) => AddCustomerPage(customer: widget.customer)),
+                        );
+                        if (shouldRefresh == true) {
+                          context.pop(true); // Pop back to refresh list
+                        }
+                      } else if (value == 'delete') {
+                        _deleteCustomer(context);
+                      }
+                    },
+                    itemBuilder: (BuildContext context) {
+                      return [
+                        PopupMenuItem(
+                          value: 'edit',
+                          child: Row(
+                            children: [
+                              const Icon(Icons.edit, size: 20),
+                              const SizedBox(width: 8),
+                              Text('Edit Customer'.tr()),
+                            ],
+                          ),
+                        ),
+                        PopupMenuItem(
+                          value: 'delete',
+                          child: Row(
+                            children: [
+                              const Icon(Icons.delete, color: Colors.red, size: 20),
+                              const SizedBox(width: 8),
+                              Text('Delete Customer'.tr(), style: const TextStyle(color: Colors.red)),
+                            ],
+                          ),
+                        ),
+                      ];
+                    },
+                  ),
+                ],
+                bottom: TabBar(
                 controller: _tabController,
                 indicatorColor: Theme.of(context).colorScheme.primary,
                 labelColor: Theme.of(context).colorScheme.primary,
@@ -180,6 +273,7 @@ class _CustomerDetailViewState extends State<_CustomerDetailView> with SingleTic
               },
               icon: const Icon(Icons.add),
               label: Text('Assign Loan'.tr()),
+            ),
             ),
           ),
         );

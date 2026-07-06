@@ -16,7 +16,8 @@ class HasuraCustomerRemoteDataSourceImpl implements CustomerRemoteDataSource {
     if (userId == null) throw const ServerException('User not authenticated');
 
     Map<String, dynamic> whereClause = {
-      'user_id': {'_eq': userId}
+      'user_id': {'_eq': userId},
+      'is_deleted': {'_eq': false},
     };
     if (lineId != null && lineId.isNotEmpty) {
       whereClause['line_id'] = {'_eq': lineId};
@@ -128,6 +129,106 @@ class HasuraCustomerRemoteDataSourceImpl implements CustomerRemoteDataSource {
         areaId: data['area_id'] as String,
         isActive: true, // default
       );
+    } catch (e) {
+      if (e is ServerException) rethrow;
+      throw ServerException(e.toString());
+    }
+  }
+
+  @override
+  Future<CustomerModel> updateCustomer({
+    required String id,
+    required String name,
+    required String phone,
+    required String address,
+    required String lineId,
+    required String areaId,
+  }) async {
+    final userId = await storageService.getUserId();
+    if (userId == null) throw const ServerException('User not authenticated');
+
+    const String mutation = '''
+      mutation UpdateCustomer(\$id: uuid!, \$name: String!, \$phone: String!, \$line_id: uuid!, \$area_id: uuid!) {
+        update_customers_by_pk(
+          pk_columns: {id: \$id}, 
+          _set: {
+            name: \$name, 
+            phone: \$phone, 
+            line_id: \$line_id, 
+            area_id: \$area_id
+          }
+        ) {
+          id
+          name
+          phone
+          line_id
+          area_id
+        }
+      }
+    ''';
+
+    final MutationOptions options = MutationOptions(
+      document: gql(mutation),
+      variables: {
+        'id': id,
+        'name': name,
+        'phone': phone,
+        'line_id': lineId,
+        'area_id': areaId,
+      },
+    );
+
+    try {
+      final QueryResult result = await client.mutate(options);
+      if (result.hasException) {
+        if (result.exception.toString().contains('customers_phone_key')) {
+           throw const ServerException('A customer with this phone number already exists.');
+        }
+        throw ServerException(result.exception.toString());
+      }
+      final data = result.data?['update_customers_by_pk'];
+      if (data == null) throw const ServerException('Failed to update customer.');
+      return CustomerModel(
+        id: data['id'] as String,
+        name: data['name'] as String,
+        phone: data['phone'] as String,
+        address: '', // default
+        lineId: data['line_id'] as String,
+        areaId: data['area_id'] as String,
+        isActive: true, // default
+      );
+    } catch (e) {
+      if (e is ServerException) rethrow;
+      throw ServerException(e.toString());
+    }
+  }
+
+  @override
+  Future<void> deleteCustomer(String id) async {
+    final userId = await storageService.getUserId();
+    if (userId == null) throw const ServerException('User not authenticated');
+
+    const String mutation = '''
+      mutation DeleteCustomer(\$id: uuid!) {
+        update_customers_by_pk(
+          pk_columns: {id: \$id}, 
+          _set: {is_deleted: true}
+        ) {
+          id
+        }
+      }
+    ''';
+
+    final MutationOptions options = MutationOptions(
+      document: gql(mutation),
+      variables: {'id': id},
+    );
+
+    try {
+      final QueryResult result = await client.mutate(options);
+      if (result.hasException) {
+        throw ServerException(result.exception.toString());
+      }
     } catch (e) {
       if (e is ServerException) rethrow;
       throw ServerException(e.toString());

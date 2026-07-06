@@ -55,3 +55,42 @@ class AddCustomerError extends CustomersState {
   @override
   List<Object> get props => [message];
 }
+
+class UpdateCustomerLoading extends CustomersState {
+  const UpdateCustomerLoading();
+}
+
+class UpdateCustomerSuccess extends CustomersState {
+  final CustomerEntity customer;
+
+  const UpdateCustomerSuccess(this.customer);
+
+  @override
+  List<Object> get props => [customer];
+}
+
+class UpdateCustomerError extends CustomersState {
+  final String message;
+
+  const UpdateCustomerError(this.message);
+
+  @override
+  List<Object> get props => [message];
+}
+
+class DeleteCustomerLoading extends CustomersState {
+  const DeleteCustomerLoading();
+}
+
+class DeleteCustomerSuccess extends CustomersState {
+  const DeleteCustomerSuccess();
+}
+
+class DeleteCustomerError extends CustomersState {
+  final String message;
+
+  const DeleteCustomerError(this.message);
+
+  @override
+  List<Object> get props => [message];
+}
