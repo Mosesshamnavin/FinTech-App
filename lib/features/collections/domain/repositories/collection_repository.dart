@@ -23,6 +23,14 @@ abstract class CollectionRepository {
     required String status,
   });
 
+  /// Updates an existing collection record
+  Future<Either<Failure, void>> updateCollection({
+    required String id,
+    required double amount,
+    String? notes,
+    required String status,
+  });
+
   /// Adds a reminder
   Future<Either<Failure, void>> addReminder(String date, String text);
   

@@ -10,12 +10,14 @@ import '../bloc/collections_state.dart';
 import '../../../loans/presentation/bloc/loans_bloc.dart';
 import '../../../loans/presentation/bloc/loans_state.dart';
 import '../../../loans/domain/entities/loan_entity.dart';
+import '../../domain/entities/collection_entity.dart';
 
 class AddCollectionModal extends StatefulWidget {
   final String customerId;
   final String customerName;
   final String customerPhone;
   final String date;
+  final CollectionEntity? collection;
 
   const AddCollectionModal({
     super.key,
@@ -23,6 +25,7 @@ class AddCollectionModal extends StatefulWidget {
     required this.customerName,
     required this.customerPhone,
     required this.date,
+    this.collection,
   });
 
   @override
@@ -34,6 +37,17 @@ class _AddCollectionModalState extends State<AddCollectionModal> {
   final _notesController = TextEditingController();
   String _status = 'paid'; // 'paid', 'pending', 'skipped'
   LoanEntity? _selectedLoan;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.collection != null) {
+      _amountController.text = widget.collection!.amount.toStringAsFixed(0);
+      _notesController.text = widget.collection!.notes ?? '';
+      _status = widget.collection!.status;
+      // We don't pre-fill _selectedLoan directly because we need to fetch active loans first
+    }
+  }
 
   @override
   void dispose() {
@@ -56,16 +70,27 @@ class _AddCollectionModalState extends State<AddCollectionModal> {
       }
     }
     
-    context.read<CollectionsBloc>().add(
-      AddCollectionRecordSubmitted(
-        customerId: widget.customerId,
-        loanId: selectedLoanId,
-        amount: amount,
-        date: widget.date,
-        notes: _notesController.text,
-        status: _status,
-      ),
-    );
+    if (widget.collection != null) {
+      context.read<CollectionsBloc>().add(
+        UpdateCollectionRecordSubmitted(
+          id: widget.collection!.id,
+          amount: amount,
+          notes: _notesController.text,
+          status: _status,
+        ),
+      );
+    } else {
+      context.read<CollectionsBloc>().add(
+        AddCollectionRecordSubmitted(
+          customerId: widget.customerId,
+          loanId: selectedLoanId,
+          amount: amount,
+          date: widget.date,
+          notes: _notesController.text,
+          status: _status,
+        ),
+      );
+    }
   }
 
   @override
@@ -176,9 +201,47 @@ class _AddCollectionModalState extends State<AddCollectionModal> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text(
-                  '${'Add Collection for'.tr()} ${widget.customerName}',
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        widget.collection != null 
+                          ? '${'Edit Collection for'.tr()} ${widget.customerName}'
+                          : '${'Add Collection for'.tr()} ${widget.customerName}',
+                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    if (widget.collection != null)
+                      IconButton(
+                        icon: const Icon(Icons.delete, color: Colors.red),
+                        onPressed: () {
+                          // We are not adding the delete event to AddCollectionModal directly right now,
+                          // as per discussion, delete happens on Customer page.
+                          // Wait, the plan says: "Delete Button: Add a red Trash icon in the header...".
+                          // Let's implement VoidCollectionRecordSubmitted here.
+                          showDialog(
+                            context: context,
+                            builder: (ctx) => AlertDialog(
+                              title: Text('Delete Collection'.tr()),
+                              content: Text('Are you sure you want to delete this payment?'.tr()),
+                              actions: [
+                                TextButton(onPressed: () => Navigator.pop(ctx), child: Text('CANCEL'.tr())),
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.pop(ctx);
+                                    context.read<CollectionsBloc>().add(VoidCollectionRecordSubmitted(collectionId: widget.collection!.id));
+                                    Navigator.pop(context, true);
+                                  },
+                                  child: Text('DELETE'.tr(), style: const TextStyle(color: Colors.red)),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+                  ],
                 ),
                 const SizedBox(height: 8),
                 Text('${'Date'.tr()}: ${widget.date}', style: const TextStyle(color: Colors.grey)),
@@ -223,14 +286,27 @@ class _AddCollectionModalState extends State<AddCollectionModal> {
                           );
                         }
     
-                        final selectedValue = (activeLoans.any((l) => l.id == _selectedLoan?.id))
-                            ? activeLoans.firstWhere((l) => l.id == _selectedLoan?.id)
-                            : activeLoans.first;
-    
+                        // Pre-fill selected loan if editing
+                        LoanEntity? initialLoan;
+                        if (_selectedLoan != null && activeLoans.any((l) => l.id == _selectedLoan!.id)) {
+                          initialLoan = activeLoans.firstWhere((l) => l.id == _selectedLoan!.id);
+                        } else if (widget.collection != null && activeLoans.any((l) => l.id == widget.collection!.loanId)) {
+                          initialLoan = activeLoans.firstWhere((l) => l.id == widget.collection!.loanId);
+                        } else {
+                          initialLoan = activeLoans.first;
+                        }
+                        
+                        // Wait to update state to avoid build errors
+                        if (_selectedLoan == null) {
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            if (mounted) setState(() => _selectedLoan = initialLoan);
+                          });
+                        }
+
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 16.0),
                           child: DropdownButtonFormField<LoanEntity>(
-                            value: selectedValue,
+                            value: initialLoan,
                             isExpanded: true,
                             decoration: InputDecoration(
                               labelText: 'Select Loan for Payment'.tr(),
@@ -287,7 +363,7 @@ class _AddCollectionModalState extends State<AddCollectionModal> {
                               width: 20,
                               child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                             )
-                          : Text('SAVE RECORD'.tr()),
+                          : Text(widget.collection != null ? 'UPDATE RECORD'.tr() : 'SAVE RECORD'.tr()),
                     );
                   },
                 ),

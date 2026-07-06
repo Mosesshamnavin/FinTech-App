@@ -160,7 +160,54 @@ class HasuraCollectionRemoteDataSourceImpl implements CollectionRemoteDataSource
       status: data['status'],
     );
   }
+  @override
+  Future<void> updateCollection({
+    required String id,
+    required double amount,
+    String? notes,
+    required String status,
+  }) async {
+    final userId = await storageService.getUserId();
+    if (userId == null) throw const ServerException('User not authenticated');
 
+    const String mutation = """
+      mutation updateCollection(
+        \$id: uuid!,
+        \$amount: numeric!,
+        \$notes: String,
+        \$status: String!,
+        \$user_id: uuid!
+      ) {
+        update_collections_by_pk(
+          pk_columns: {id: \$id}, 
+          _set: {
+            amount: \$amount,
+            notes: \$notes,
+            status: \$status
+          }
+        ) {
+          id
+        }
+      }
+    """;
+
+    final MutationOptions options = MutationOptions(
+      document: gql(mutation),
+      variables: {
+        'id': id,
+        'amount': amount,
+        'notes': notes,
+        'status': status,
+        'user_id': userId,
+      },
+    );
+
+    final QueryResult result = await client.mutate(options);
+
+    if (result.hasException) {
+      throw ServerException(result.exception.toString());
+    }
+  }
   @override
   Future<void> addReminder(String date, String text) async {
     final userId = await storageService.getUserId();

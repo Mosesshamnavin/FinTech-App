@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/usecases/add_collection_usecase.dart';
+import '../../domain/usecases/update_collection_usecase.dart';
 import '../../domain/usecases/get_daily_collections_usecase.dart';
 import '../../domain/usecases/add_reminder_usecase.dart';
 import '../../domain/usecases/get_reminders_usecase.dart';
@@ -13,6 +14,7 @@ import 'collections_state.dart';
 class CollectionsBloc extends Bloc<CollectionsEvent, CollectionsState> {
   final GetDailyCollectionsUseCase getDailyCollectionsUseCase;
   final AddCollectionUseCase addCollectionUseCase;
+  final UpdateCollectionUseCase updateCollectionUseCase;
   final AddReminderUseCase addReminderUseCase;
   final GetRemindersUseCase getRemindersUseCase;
   final AddNoteUseCase addNoteUseCase;
@@ -22,6 +24,7 @@ class CollectionsBloc extends Bloc<CollectionsEvent, CollectionsState> {
   CollectionsBloc({
     required this.getDailyCollectionsUseCase,
     required this.addCollectionUseCase,
+    required this.updateCollectionUseCase,
     required this.addReminderUseCase,
     required this.getRemindersUseCase,
     required this.addNoteUseCase,
@@ -30,6 +33,7 @@ class CollectionsBloc extends Bloc<CollectionsEvent, CollectionsState> {
   }) : super(const CollectionsInitial()) {
     on<LoadDailyCollectionsRequested>(_onLoadDailyCollectionsRequested);
     on<AddCollectionRecordSubmitted>(_onAddCollectionRecordSubmitted);
+    on<UpdateCollectionRecordSubmitted>(_onUpdateCollectionRecordSubmitted);
     on<AddReminderSubmitted>(_onAddReminderSubmitted);
     on<LoadRemindersRequested>(_onLoadRemindersRequested);
     on<LoadNotesRequested>(_onLoadNotesRequested);
@@ -78,6 +82,27 @@ class CollectionsBloc extends Bloc<CollectionsEvent, CollectionsState> {
     result.fold(
       (failure) => emit(AddCollectionActionError(failure.message)),
       (collection) => emit(const AddCollectionActionSuccess()),
+    );
+  }
+
+  Future<void> _onUpdateCollectionRecordSubmitted(
+    UpdateCollectionRecordSubmitted event,
+    Emitter<CollectionsState> emit,
+  ) async {
+    emit(const AddCollectionActionLoading());
+    
+    final result = await updateCollectionUseCase(
+      UpdateCollectionParams(
+        id: event.id,
+        amount: event.amount,
+        notes: event.notes,
+        status: event.status,
+      ),
+    );
+
+    result.fold(
+      (failure) => emit(AddCollectionActionError(failure.message)),
+      (_) => emit(const AddCollectionActionSuccess()),
     );
   }
 

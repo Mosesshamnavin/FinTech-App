@@ -18,6 +18,7 @@ import '../../features/collections/data/datasources/hasura_collection_remote_dat
 import '../../features/collections/data/repositories/collection_repository_impl.dart';
 import '../../features/collections/domain/repositories/collection_repository.dart';
 import '../../features/collections/domain/usecases/add_collection_usecase.dart';
+import '../../features/collections/domain/usecases/update_collection_usecase.dart';
 import '../../features/collections/domain/usecases/get_daily_collections_usecase.dart';
 import '../../features/collections/domain/usecases/add_reminder_usecase.dart';
 import '../../features/collections/domain/usecases/get_reminders_usecase.dart';
@@ -64,6 +65,8 @@ import '../../features/expenses/data/repositories/expense_repository_impl.dart';
 import '../../features/expenses/domain/repositories/expense_repository.dart';
 import '../../features/expenses/domain/usecases/add_expense_usecase.dart';
 import '../../features/expenses/domain/usecases/get_expenses_usecase.dart';
+import '../../features/expenses/domain/usecases/update_expense_usecase.dart';
+import '../../features/expenses/domain/usecases/delete_expense_usecase.dart';
 import '../../features/expenses/presentation/bloc/expenses_bloc.dart';
 
 import '../../features/settings/data/datasources/settings_remote_datasource.dart';
@@ -199,7 +202,7 @@ Future<void> initDependencies() async {
   sl.registerLazySingleton(() => AddExpenseTypeUseCase(sl()));
   sl.registerLazySingleton(() => UpdateExpenseTypeUseCase(sl()));
   sl.registerLazySingleton(() => DeleteExpenseTypeUseCase(sl()));
-  
+
   sl.registerLazySingleton(() => GetInvestmentTypesUseCase(sl()));
   sl.registerLazySingleton(() => AddInvestmentTypeUseCase(sl()));
   sl.registerLazySingleton(() => UpdateInvestmentTypeUseCase(sl()));
@@ -226,6 +229,7 @@ Future<void> initDependencies() async {
   // ─── Collections: Use Cases ───────────────────────────────────────────────
   sl.registerLazySingleton(() => GetDailyCollectionsUseCase(sl()));
   sl.registerLazySingleton(() => AddCollectionUseCase(sl()));
+  sl.registerLazySingleton(() => UpdateCollectionUseCase(sl()));
   sl.registerLazySingleton(() => AddReminderUseCase(sl()));
   sl.registerLazySingleton(() => GetRemindersUseCase(sl()));
   sl.registerLazySingleton(() => AddNoteUseCase(sl()));
@@ -236,6 +240,7 @@ Future<void> initDependencies() async {
     () => CollectionsBloc(
       getDailyCollectionsUseCase: sl(),
       addCollectionUseCase: sl(),
+      updateCollectionUseCase: sl(),
       addReminderUseCase: sl(),
       getRemindersUseCase: sl(),
       addNoteUseCase: sl(),
@@ -331,9 +336,13 @@ Future<void> initDependencies() async {
   );
   sl.registerLazySingleton(() => AddExpenseUseCase(sl()));
   sl.registerLazySingleton(() => GetExpensesUseCase(sl()));
+  sl.registerLazySingleton(() => UpdateExpenseUseCase(sl()));
+  sl.registerLazySingleton(() => DeleteExpenseUseCase(sl()));
 
   sl.registerFactory(() => ExpensesBloc(
         getExpenses: sl(),
         addExpense: sl(),
+        updateExpense: sl(),
+        deleteExpense: sl(),
       ));
 }

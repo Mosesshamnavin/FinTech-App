@@ -43,6 +43,23 @@ class AddCollectionRecordSubmitted extends CollectionsEvent {
   List<Object?> get props => [customerId, loanId, amount, date, notes, status];
 }
 
+class UpdateCollectionRecordSubmitted extends CollectionsEvent {
+  final String id;
+  final double amount;
+  final String? notes;
+  final String status;
+
+  const UpdateCollectionRecordSubmitted({
+    required this.id,
+    required this.amount,
+    this.notes,
+    required this.status,
+  });
+
+  @override
+  List<Object?> get props => [id, amount, notes, status];
+}
+
 class AddReminderSubmitted extends CollectionsEvent {
   final String date;
   final String text;

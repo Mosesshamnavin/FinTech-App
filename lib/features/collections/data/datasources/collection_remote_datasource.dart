@@ -16,6 +16,13 @@ abstract class CollectionRemoteDataSource {
     required String status,
   });
 
+  Future<void> updateCollection({
+    required String id,
+    required double amount,
+    String? notes,
+    required String status,
+  });
+
   Future<List<CollectionModel>> getCollectionsByCustomer(String customerId);
   Future<void> deleteCollection(String id);
   Future<void> addReminder(String date, String text);
@@ -98,6 +105,29 @@ class MockCollectionRemoteDataSourceImpl implements CollectionRemoteDataSource {
 
     _mockCollections.add(newCollection);
     return newCollection;
+  }
+
+  @override
+  Future<void> updateCollection({
+    required String id,
+    required double amount,
+    String? notes,
+    required String status,
+  }) async {
+    await Future.delayed(_mockDelay);
+    final index = _mockCollections.indexWhere((c) => c.id == id);
+    if (index >= 0) {
+      final existing = _mockCollections[index];
+      _mockCollections[index] = CollectionModel(
+        id: existing.id,
+        customerId: existing.customerId,
+        loanId: existing.loanId,
+        amount: amount,
+        date: existing.date,
+        notes: notes,
+        status: status,
+      );
+    }
   }
 
   @override

@@ -18,6 +18,7 @@ import '../../../settings/presentation/bloc/settings_state.dart';
 import '../../../settings/domain/entities/settings_entities.dart';
 import '../../../loans/presentation/bloc/loans_bloc.dart';
 import '../../../loans/presentation/bloc/loans_event.dart';
+import '../../domain/entities/collection_entity.dart';
 
 class CollectionsPage extends StatelessWidget {
   const CollectionsPage({super.key});
@@ -101,11 +102,15 @@ class _CollectionsViewState extends State<_CollectionsView> {
     );
   }
 
-  void _showAddCollectionModal(BuildContext context, String customerId, String customerName, String customerPhone) async {
-    // Provide the existing bloc to the modal so it can fire events
+  void _showAddCollectionModal(
+    BuildContext context, 
+    String customerId, 
+    String customerName, 
+    String customerPhone, 
+    {CollectionEntity? collection}
+  ) {
     final bloc = context.read<CollectionsBloc>();
-    
-    final result = await showModalBottomSheet(
+    showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
@@ -123,14 +128,14 @@ class _CollectionsViewState extends State<_CollectionsView> {
           customerName: customerName,
           customerPhone: customerPhone,
           date: _dateController.text,
+          collection: collection,
         ),
       ),
-    );
-
-    // If modal returned true (success), reload the list to show new data
-    if (result == true && context.mounted) {
-      _onSubmit();
-    }
+    ).then((result) {
+      if (result == true && context.mounted) {
+        _onSubmit();
+      }
+    });
   }
 
   @override
@@ -339,7 +344,13 @@ class _CollectionsViewState extends State<_CollectionsView> {
                                   ),
                                 ),
                                 child: ListTile(
-                                  onTap: () => _showAddCollectionModal(context, customer.id, customer.name, customer.phone),
+                                  onTap: () => _showAddCollectionModal(
+                                    context, 
+                                    customer.id, 
+                                    customer.name, 
+                                    customer.phone,
+                                    collection: collection,
+                                  ),
                                   leading: CircleAvatar(
                                     backgroundColor: item.hasPaid ? context.successLight : context.primaryContainer,
                                     child: Icon(

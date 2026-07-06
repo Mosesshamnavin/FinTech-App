@@ -83,6 +83,30 @@ class CollectionRepositoryImpl implements CollectionRepository {
   }
 
   @override
+  Future<Either<Failure, void>> updateCollection({
+    required String id,
+    required double amount,
+    String? notes,
+    required String status,
+  }) async {
+    try {
+      await collectionRemoteDataSource.updateCollection(
+        id: id,
+        amount: amount,
+        notes: notes,
+        status: status,
+      );
+      return const Right(null);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } on NetworkException catch (e) {
+      return Left(ServerFailure(e.message));
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
   Future<Either<Failure, void>> addReminder(String date, String text) async {
     try {
       await collectionRemoteDataSource.addReminder(date, text);
