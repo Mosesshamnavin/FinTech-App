@@ -2,8 +2,6 @@
 
 This document tracks completed achievements and pending todo tasks for the project.
 
----
-
 ## ✅ Completed Tasks
 
 ### 📊 Reports & Database Alignments
@@ -53,4 +51,6 @@ This document tracks completed achievements and pending todo tasks for the proje
 
 ### 💳 Collection & Loan Payments Selector
 - [x] **Loan Selection Dropdown**: Render a selector for target active loans during collection payments in `add_collection_modal.dart`.
-
+- [x] **Pending Balance Display**: Updated the dropdown to clearly display the remaining pending balance of a loan to prevent over-collection.
+- [x] **Precise Collection Allocation**: Updated Hasura SQL triggers to respect explicitly selected `loan_id` assignments when customers have multiple active loans.
+- [x] **Chronological Timeline**: Fixed GraphQL query sorting in the timeline to accurately order multiple same-day payments by exact timestamp.

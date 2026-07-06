@@ -240,7 +240,7 @@ class _AddCollectionModalState extends State<AddCollectionModal> {
                               return DropdownMenuItem<LoanEntity>(
                                 value: loan,
                                 child: Text(
-                                  '${'Total'.tr()}: ₹${loan.totalAmount.toStringAsFixed(0)} (${'Due'.tr()}: ₹${loan.dailyDueAmount.toStringAsFixed(0)}/${'day'.tr()})',
+                                  '${'Pending'.tr()}: ₹${loan.outstandingBalance.toStringAsFixed(0)} | ${'Due'.tr()}: ₹${loan.dailyDueAmount.toStringAsFixed(0)}',
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               );

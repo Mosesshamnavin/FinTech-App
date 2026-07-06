@@ -14,7 +14,8 @@ Vasool Drive is a premium, comprehensive microfinance and daily collection manag
   - Record daily payments, assign new loans, and view active/completed loan progress.
   - Interactive calculator modal to compute loan schedules on the fly.
   - Timeline-style daily summaries and card metrics on the main dashboard.
-  - Features robust **Soft Delete architecture** on Hasura, hiding deleted payments from the UI while keeping ledger integrity intact.
+  - **Multiple Active Loans**: Automatically calculates and allocates daily payments to explicitly assigned loans, supporting customers with multiple overlapping loans.
+  - **Soft Delete Architecture**: Powered by Hasura SQL triggers, deleted payments instantly revert loan balances while preserving ledger integrity and hiding records from the UI.
 - **💬 SMS & WhatsApp Template Integration**:
   - Persists English and Tamil templates locally using SharedPreferences.
   - Standalone `SmsService` formats customized collection templates replacing tags like `{CustomerName}` and `{AmountPaidToday}` dynamically.

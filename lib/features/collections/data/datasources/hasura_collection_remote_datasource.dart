@@ -42,7 +42,7 @@ class HasuraCollectionRemoteDataSourceImpl implements CollectionRemoteDataSource
 
     const String query = """
       query getCollectionsByDate(\$date: timestamp!, \$userId: uuid!) {
-        collections(where: {date: {_eq: \$date}, user_id: {_eq: \$userId}, is_deleted: {_eq: false}}) {
+        collections(where: {date: {_eq: \$date}, user_id: {_eq: \$userId}, is_deleted: {_eq: false}}, order_by: {created_at: desc}) {
           id
           customer_id
           loan_id
@@ -312,7 +312,7 @@ class HasuraCollectionRemoteDataSourceImpl implements CollectionRemoteDataSource
 
     const String query = """
       query getCollectionsByCustomer(\$customerId: uuid!, \$userId: uuid!) {
-        collections(where: {customer_id: {_eq: \$customerId}, user_id: {_eq: \$userId}, is_deleted: {_eq: false}}, order_by: {date: desc}) {
+        collections(where: {customer_id: {_eq: \$customerId}, user_id: {_eq: \$userId}, is_deleted: {_eq: false}}, order_by: [{date: desc}, {created_at: desc}]) {
           id
           customer_id
           loan_id
