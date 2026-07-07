@@ -101,9 +101,15 @@ class LoadCustomerCollectionsRequested extends CollectionsEvent {
 
 class VoidCollectionRecordSubmitted extends CollectionsEvent {
   final String collectionId;
+  final String? loanId;
+  final double amount;
 
-  const VoidCollectionRecordSubmitted({required this.collectionId});
+  const VoidCollectionRecordSubmitted({
+    required this.collectionId,
+    this.loanId,
+    required this.amount,
+  });
 
   @override
-  List<Object?> get props => [collectionId];
+  List<Object?> get props => [collectionId, loanId, amount];
 }

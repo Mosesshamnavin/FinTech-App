@@ -24,7 +24,7 @@ abstract class CollectionRemoteDataSource {
   });
 
   Future<List<CollectionModel>> getCollectionsByCustomer(String customerId);
-  Future<void> deleteCollection(String id);
+  Future<void> deleteCollection({required String id, String? loanId, required double amount});
   Future<void> addReminder(String date, String text);
   Future<List<ReminderModel>> getReminders();
   Future<void> addNote(String text);
@@ -53,7 +53,7 @@ class MockCollectionRemoteDataSourceImpl implements CollectionRemoteDataSource {
   }
 
   @override
-  Future<void> deleteCollection(String id) async {
+  Future<void> deleteCollection({required String id, String? loanId, required double amount}) async {
     await Future.delayed(_mockDelay);
     _mockCollections.removeWhere((c) => c.id == id);
   }

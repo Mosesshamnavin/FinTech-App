@@ -50,10 +50,13 @@ class CustomerDetailPage extends StatelessWidget {
 class _CustomerDetailView extends StatefulWidget {
   final CustomerEntity customer;
 
-  State<CustomerDetailPage> createState() => _CustomerDetailPageState();
+  const _CustomerDetailView({required this.customer});
+
+  @override
+  State<_CustomerDetailView> createState() => _CustomerDetailViewState();
 }
 
-class _CustomerDetailPageState extends State<CustomerDetailPage> {
+class _CustomerDetailViewState extends State<_CustomerDetailView> {
   @override
   void initState() {
     super.initState();
@@ -61,7 +64,7 @@ class _CustomerDetailPageState extends State<CustomerDetailPage> {
     context.read<CollectionsBloc>().add(LoadCustomerCollectionsRequested(customerId: widget.customer.id));
   }
 
-  void _voidCollection(BuildContext context, String collectionId) {
+  void _voidCollection(BuildContext context, String collectionId, String? loanId, double amount) {
     showDialog(
       context: context,
       builder: (dialogCtx) {
@@ -77,7 +80,11 @@ class _CustomerDetailPageState extends State<CustomerDetailPage> {
               style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
               onPressed: () {
                 Navigator.pop(dialogCtx);
-                context.read<CollectionsBloc>().add(VoidCollectionRecordSubmitted(collectionId: collectionId));
+                context.read<CollectionsBloc>().add(VoidCollectionRecordSubmitted(
+                  collectionId: collectionId,
+                  loanId: loanId,
+                  amount: amount,
+                ));
               },
               child: Text('DELETE'.tr(), style: const TextStyle(color: Colors.white)),
             ),
@@ -227,11 +234,26 @@ class _CustomerDetailPageState extends State<CustomerDetailPage> {
                     },
                   ),
                 ],
-                }
-              },
-              icon: const Icon(Icons.add),
-              label: Text('Assign Loan'.tr()),
-            ),
+              ),
+              body: Column(
+                children: [
+                  _buildProfileHeader(context, lineName, areaName),
+                  const Divider(height: 1),
+                  Expanded(
+                    child: _buildLoansList(),
+                  ),
+                ],
+              ),
+              floatingActionButton: FloatingActionButton.extended(
+                onPressed: () async {
+                  final result = await context.push('/customers/${widget.customer.id}/add-loan', extra: widget.customer);
+                  if (result == true && context.mounted) {
+                    context.read<LoansBloc>().add(LoadCustomerLoansRequested(widget.customer.id));
+                  }
+                },
+                icon: const Icon(Icons.add),
+                label: Text('Assign Loan'.tr()),
+              ),
             ),
           ),
         );
@@ -322,20 +344,39 @@ class _CustomerDetailPageState extends State<CustomerDetailPage> {
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: loan.status == 'Active' ? context.successLight : context.surfaceVariant,
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Text(
-                            loan.status.tr(),
-                            style: TextStyle(
-                              color: loan.status == 'Active' ? context.success : context.textMuted,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 12,
+                        Row(
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.edit, size: 20, color: Colors.blue),
+                              onPressed: () async {
+                                final result = await context.push('/customers/${widget.customer.id}/add-loan', extra: {
+                                  'customer': widget.customer,
+                                  'loan': loan,
+                                });
+                                if (result == true && context.mounted) {
+                                  context.read<LoansBloc>().add(LoadCustomerLoansRequested(widget.customer.id));
+                                }
+                              },
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(),
                             ),
-                          ),
+                            const SizedBox(width: 12),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: loan.status == 'Active' ? context.successLight : context.surfaceVariant,
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
+                                loan.status.tr(),
+                                style: TextStyle(
+                                  color: loan.status == 'Active' ? context.success : context.textMuted,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
@@ -384,26 +425,13 @@ class _CustomerDetailPageState extends State<CustomerDetailPage> {
                       ],
                     ),
                     const Divider(height: 32),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text('Payment History'.tr(), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                        TextButton.icon(
-                          onPressed: () async {
-                            final result = await context.push('/customers/${widget.customer.id}/add-loan', extra: {
-                              'customer': widget.customer,
-                              'loan': loan,
-                            });
-                            if (result == true && context.mounted) {
-                              context.read<LoansBloc>().add(LoadCustomerLoansRequested(widget.customer.id));
-                            }
-                          },
-                          icon: const Icon(Icons.edit, size: 16),
-                          label: Text('Edit Loan'.tr(), style: const TextStyle(fontSize: 12)),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
+                    Theme(
+                      data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+                      child: ExpansionTile(
+                        tilePadding: EdgeInsets.zero,
+                        childrenPadding: EdgeInsets.zero,
+                        title: Text('Payment History'.tr(), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                        children: [
                     BlocBuilder<CollectionsBloc, CollectionsState>(
                       builder: (context, collectionsState) {
                         if (collectionsState is CustomerCollectionsLoading || collectionsState is VoidCollectionActionLoading) {
@@ -479,7 +507,7 @@ class _CustomerDetailPageState extends State<CustomerDetailPage> {
                                     ),
                                     IconButton(
                                       icon: const FaIcon(FontAwesomeIcons.trash, color: Colors.red, size: 14),
-                                      onPressed: () => _voidCollection(context, collection.id),
+                                      onPressed: () => _voidCollection(context, collection.id, collection.loanId, collection.amount),
                                       tooltip: 'Delete Payment',
                                       padding: EdgeInsets.zero,
                                       constraints: const BoxConstraints(),
@@ -493,6 +521,9 @@ class _CustomerDetailPageState extends State<CustomerDetailPage> {
                         return const SizedBox.shrink();
                       },
                     ),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -503,7 +534,5 @@ class _CustomerDetailPageState extends State<CustomerDetailPage> {
         return const SizedBox.shrink();
       },
     );
-  }
-
   }
 }

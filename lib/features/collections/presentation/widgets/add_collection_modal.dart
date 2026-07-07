@@ -231,7 +231,11 @@ class _AddCollectionModalState extends State<AddCollectionModal> {
                                 TextButton(
                                   onPressed: () {
                                     Navigator.pop(ctx);
-                                    context.read<CollectionsBloc>().add(VoidCollectionRecordSubmitted(collectionId: widget.collection!.id));
+                                    context.read<CollectionsBloc>().add(VoidCollectionRecordSubmitted(
+                                      collectionId: widget.collection!.id,
+                                      loanId: widget.collection!.loanId,
+                                      amount: widget.collection!.amount,
+                                    ));
                                     Navigator.pop(context, true);
                                   },
                                   child: Text('DELETE'.tr(), style: const TextStyle(color: Colors.red)),

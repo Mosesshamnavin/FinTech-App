@@ -80,6 +80,7 @@ class HasuraLoanRemoteDataSourceImpl implements LoanRemoteDataSource {
         \$interest_amount: numeric!,
         \$total_amount: numeric!,
         \$daily_due_amount: numeric!,
+        \$outstanding_balance: numeric!,
         \$start_date: timestamp!,
         \$end_date: date!,
         \$status: String!
@@ -91,6 +92,7 @@ class HasuraLoanRemoteDataSourceImpl implements LoanRemoteDataSource {
             interest_amount: \$interest_amount,
             total_amount: \$total_amount,
             daily_due_amount: \$daily_due_amount,
+            outstanding_balance: \$outstanding_balance,
             start_date: \$start_date,
             end_date: \$end_date,
             status: \$status
@@ -109,6 +111,7 @@ class HasuraLoanRemoteDataSourceImpl implements LoanRemoteDataSource {
         'interest_amount': loan.interestAmount,
         'total_amount': loan.totalAmount,
         'daily_due_amount': loan.dailyDueAmount,
+        'outstanding_balance': loan.outstandingBalance,
         'start_date': loan.startDate.toIso8601String().split('T')[0],
         'end_date': loan.endDate.toIso8601String().split('T')[0],
         'status': loan.status,

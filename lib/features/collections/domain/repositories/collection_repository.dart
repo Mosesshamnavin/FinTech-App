@@ -47,5 +47,5 @@ abstract class CollectionRepository {
   Future<Either<Failure, List<CollectionEntity>>> getCollectionsByCustomer(String customerId);
 
   /// Deletes/Voids a collection record
-  Future<Either<Failure, void>> deleteCollection(String id);
+  Future<Either<Failure, void>> deleteCollection({required String id, String? loanId, required double amount});
 }

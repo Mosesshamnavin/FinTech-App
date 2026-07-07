@@ -189,7 +189,11 @@ class CollectionsBloc extends Bloc<CollectionsEvent, CollectionsState> {
   ) async {
     emit(const VoidCollectionActionLoading());
     
-    final result = await collectionRepository.deleteCollection(event.collectionId);
+    final result = await collectionRepository.deleteCollection(
+      id: event.collectionId,
+      loanId: event.loanId,
+      amount: event.amount,
+    );
 
     result.fold(
       (failure) => emit(VoidCollectionActionError(failure.message)),

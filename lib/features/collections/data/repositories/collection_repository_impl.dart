@@ -169,9 +169,9 @@ class CollectionRepositoryImpl implements CollectionRepository {
   }
 
   @override
-  Future<Either<Failure, void>> deleteCollection(String id) async {
+  Future<Either<Failure, void>> deleteCollection({required String id, String? loanId, required double amount}) async {
     try {
-      await collectionRemoteDataSource.deleteCollection(id);
+      await collectionRemoteDataSource.deleteCollection(id: id, loanId: loanId, amount: amount);
       return const Right(null);
     } on ServerException catch (e) {
       return Left(ServerFailure(e.message));

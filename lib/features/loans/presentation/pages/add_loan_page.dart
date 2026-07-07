@@ -40,7 +40,8 @@ class _AddLoanFormState extends State<_AddLoanForm> {
 
   final _principalController = TextEditingController();
   final _interestController = TextEditingController();
-  final _daysController = TextEditingController(text: '100'); // Default to 100 days
+  final _daysController = TextEditingController(text: '100');
+  final _outstandingBalanceController = TextEditingController();
 
   double _totalAmount = 0.0;
   double _dailyDueAmount = 0.0;
@@ -55,6 +56,7 @@ class _AddLoanFormState extends State<_AddLoanForm> {
       _daysController.text = (days > 0 ? days : 100).toString();
       _totalAmount = widget.loan!.totalAmount;
       _dailyDueAmount = widget.loan!.dailyDueAmount;
+      _outstandingBalanceController.text = widget.loan!.outstandingBalance.toString();
     }
     _principalController.addListener(_calculateMath);
     _interestController.addListener(_calculateMath);
@@ -66,6 +68,7 @@ class _AddLoanFormState extends State<_AddLoanForm> {
     _principalController.dispose();
     _interestController.dispose();
     _daysController.dispose();
+    _outstandingBalanceController.dispose();
     super.dispose();
   }
 
@@ -89,7 +92,9 @@ class _AddLoanFormState extends State<_AddLoanForm> {
         interestAmount: double.parse(_interestController.text),
         totalAmount: _totalAmount,
         dailyDueAmount: _dailyDueAmount,
-        outstandingBalance: widget.loan?.outstandingBalance ?? _totalAmount,
+        outstandingBalance: widget.loan != null 
+            ? (double.tryParse(_outstandingBalanceController.text) ?? _totalAmount) 
+            : _totalAmount,
         startDate: widget.loan?.startDate ?? DateTime.now(),
         endDate: (widget.loan?.startDate ?? DateTime.now()).add(Duration(days: int.parse(_daysController.text))),
         status: widget.loan?.status ?? 'Active',
@@ -157,13 +162,24 @@ class _AddLoanFormState extends State<_AddLoanForm> {
                       TextFormField(
                         controller: _daysController,
                         decoration: InputDecoration(
-                          labelText: 'Duration (Days)'.tr(),
+                          labelText: 'Number of Days'.tr(),
                           border: const OutlineInputBorder(),
                         ),
                         keyboardType: TextInputType.number,
                         validator: (v) => (v == null || v.isEmpty) ? 'Required'.tr() : null,
                       ),
-                      const SizedBox(height: 32),
+                      if (widget.loan != null) ...[
+                        const SizedBox(height: 16),
+                        TextFormField(
+                          controller: _outstandingBalanceController,
+                          decoration: InputDecoration(
+                            labelText: 'Outstanding Balance (₹)'.tr(),
+                            border: const OutlineInputBorder(),
+                          ),
+                          keyboardType: TextInputType.number,
+                        ),
+                      ],
+                      const SizedBox(height: 24),
                       
                       // Math Preview Card
                       Card(

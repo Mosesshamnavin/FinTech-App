@@ -145,6 +145,27 @@ class HasuraCollectionRemoteDataSourceImpl implements CollectionRemoteDataSource
       throw ServerException(result.exception.toString());
     }
 
+    if (loanId != null) {
+      const String updateLoanMutation = """
+        mutation UpdateLoanBalance(\$loan_id: uuid!, \$amount: numeric!) {
+          update_loans_by_pk(
+            pk_columns: {id: \$loan_id},
+            _inc: { outstanding_balance: \$amount }
+          ) {
+            id
+          }
+        }
+      """;
+      final MutationOptions loanOptions = MutationOptions(
+        document: gql(updateLoanMutation),
+        variables: {
+          'loan_id': loanId,
+          'amount': -amount,
+        },
+      );
+      await client.mutate(loanOptions);
+    }
+
     final data = result.data?['insert_collections_one'];
     if (data == null) {
       throw ServerException("Failed to insert collection record.");
@@ -398,13 +419,18 @@ class HasuraCollectionRemoteDataSourceImpl implements CollectionRemoteDataSource
   }
 
   @override
-  Future<void> deleteCollection(String id) async {
+  Future<void> deleteCollection({required String id, String? loanId, required double amount}) async {
     final userId = await storageService.getUserId();
     if (userId == null) throw const ServerException('User not authenticated');
 
     const String mutation = """
       mutation deleteCollection(\$id: uuid!) {
-        update_collections_by_pk(pk_columns: {id: \$id}, _set: {is_deleted: true}) {
+        update_collections_by_pk(
+          pk_columns: {id: \$id}, 
+          _set: {
+            is_deleted: true
+          }
+        ) {
           id
         }
       }
@@ -412,13 +438,36 @@ class HasuraCollectionRemoteDataSourceImpl implements CollectionRemoteDataSource
 
     final MutationOptions options = MutationOptions(
       document: gql(mutation),
-      variables: {'id': id},
+      variables: {
+        'id': id,
+      },
     );
 
     final QueryResult result = await client.mutate(options);
 
     if (result.hasException) {
       throw ServerException(result.exception.toString());
+    }
+
+    if (loanId != null) {
+      const String updateLoanMutation = """
+        mutation UpdateLoanBalance(\$loan_id: uuid!, \$amount: numeric!) {
+          update_loans_by_pk(
+            pk_columns: {id: \$loan_id},
+            _inc: { outstanding_balance: \$amount }
+          ) {
+            id
+          }
+        }
+      """;
+      final MutationOptions loanOptions = MutationOptions(
+        document: gql(updateLoanMutation),
+        variables: {
+          'loan_id': loanId,
+          'amount': amount,
+        },
+      );
+      await client.mutate(loanOptions);
     }
   }
 }
