@@ -63,4 +63,17 @@ class LoanRemoteDataSource {
     await Future.delayed(const Duration(milliseconds: 200));
     return _loans.where((l) => l.customerId == customerId).toList();
   }
+
+  Future<void> updateLoan(LoanEntity loan) async {
+    await Future.delayed(const Duration(milliseconds: 300));
+    final index = _loans.indexWhere((l) => l.id == loan.id);
+    if (index >= 0) {
+      _loans[index] = loan;
+    }
+  }
+
+  Future<void> deleteLoan(String id) async {
+    await Future.delayed(const Duration(milliseconds: 300));
+    _loans.removeWhere((l) => l.id == id);
+  }
 }

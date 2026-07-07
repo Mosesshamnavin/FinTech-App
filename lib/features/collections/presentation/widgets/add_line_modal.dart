@@ -6,7 +6,8 @@ import '../../../settings/presentation/bloc/settings_bloc.dart';
 import '../../../settings/presentation/bloc/settings_event.dart';
 
 class AddLineModal extends StatefulWidget {
-  const AddLineModal({super.key});
+  final LineEntity? line;
+  const AddLineModal({super.key, this.line});
 
   @override
   State<AddLineModal> createState() => _AddLineModalState();
@@ -24,6 +25,22 @@ class _AddLineModalState extends State<AddLineModal> {
   final TextEditingController _billAmountController = TextEditingController();
   final TextEditingController _installController = TextEditingController();
   final TextEditingController _badLoanDaysController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.line != null) {
+      _nameController.text = widget.line!.name;
+      _selectedLineType = widget.line!.type;
+      _closeLoanManually = widget.line!.closeLoanManually;
+      _enablePenalty = widget.line!.enablePenalty;
+      _keepPaidCustomer = widget.line!.keepPaidCustomer;
+      _interestController.text = widget.line!.interestPerHundred.toString();
+      _billAmountController.text = widget.line!.billAmountPerHundred.toString();
+      _installController.text = widget.line!.noOfInstall.toString();
+      _badLoanDaysController.text = widget.line!.badLoanDays.toString();
+    }
+  }
 
   @override
   void dispose() {
@@ -110,7 +127,7 @@ class _AddLineModalState extends State<AddLineModal> {
     return Dialog.fullscreen(
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Add Line'),
+          title: Text(widget.line == null ? 'Add Line' : 'Edit Line'),
           automaticallyImplyLeading: false,
           actions: [
             IconButton(
@@ -165,28 +182,48 @@ class _AddLineModalState extends State<AddLineModal> {
             ),
             Padding(
               padding: const EdgeInsets.all(16.0),
-              child: ElevatedButton(
-                onPressed: () {
-                  if (_nameController.text.trim().isEmpty || _selectedLineType == null) {
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please fill Line Name and Type')));
-                    return;
-                  }
-                  final newLine = LineEntity(
-                    id: DateTime.now().millisecondsSinceEpoch.toString(),
-                    name: _nameController.text.trim(),
-                    type: _selectedLineType!,
-                    interestPerHundred: double.tryParse(_interestController.text) ?? 0.0,
-                    billAmountPerHundred: double.tryParse(_billAmountController.text) ?? 0.0,
-                    noOfInstall: int.tryParse(_installController.text) ?? 0,
-                    badLoanDays: int.tryParse(_badLoanDaysController.text) ?? 0,
-                    closeLoanManually: _closeLoanManually,
-                    enablePenalty: _enablePenalty,
-                    keepPaidCustomer: _keepPaidCustomer,
-                  );
-                  context.read<SettingsBloc>().add(AddLineSubmitted(newLine));
-                  Navigator.of(context).pop();
-                },
-                child: const Text('SAVE'),
+              child: Column(
+                children: [
+                  ElevatedButton(
+                    onPressed: () {
+                      if (_nameController.text.trim().isEmpty || _selectedLineType == null) {
+                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please fill Line Name and Type')));
+                        return;
+                      }
+                      final newLine = LineEntity(
+                        id: widget.line?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
+                        name: _nameController.text.trim(),
+                        type: _selectedLineType!,
+                        interestPerHundred: double.tryParse(_interestController.text) ?? 0.0,
+                        billAmountPerHundred: double.tryParse(_billAmountController.text) ?? 0.0,
+                        noOfInstall: int.tryParse(_installController.text) ?? 0,
+                        badLoanDays: int.tryParse(_badLoanDaysController.text) ?? 0,
+                        closeLoanManually: _closeLoanManually,
+                        enablePenalty: _enablePenalty,
+                        keepPaidCustomer: _keepPaidCustomer,
+                      );
+                      
+                      if (widget.line == null) {
+                        context.read<SettingsBloc>().add(AddLineSubmitted(newLine));
+                      } else {
+                        context.read<SettingsBloc>().add(UpdateLineSubmitted(newLine));
+                      }
+                      Navigator.of(context).pop();
+                    },
+                    child: Text(widget.line == null ? 'SAVE' : 'UPDATE'),
+                  ),
+                  if (widget.line != null) ...[
+                    const SizedBox(height: 16),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                      onPressed: () {
+                        context.read<SettingsBloc>().add(DeleteLineSubmitted(widget.line!.id));
+                        Navigator.of(context).pop();
+                      },
+                      child: const Text('DELETE', style: TextStyle(color: Colors.white)),
+                    ),
+                  ],
+                ],
               ),
             ),
           ],

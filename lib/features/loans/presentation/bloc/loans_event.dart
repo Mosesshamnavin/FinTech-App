@@ -13,3 +13,13 @@ class AddLoanSubmitted extends LoansEvent {
   final LoanEntity loan;
   AddLoanSubmitted(this.loan);
 }
+
+class UpdateLoanSubmitted extends LoansEvent {
+  final LoanEntity loan;
+  UpdateLoanSubmitted(this.loan);
+}
+
+class DeleteLoanSubmitted extends LoansEvent {
+  final String id;
+  DeleteLoanSubmitted(this.id);
+}

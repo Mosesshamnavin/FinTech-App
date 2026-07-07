@@ -91,6 +91,9 @@ class AreaPage extends StatelessWidget {
                       // Find line name if possible
                       final line = state.lines.where((l) => l.id == area.lineId).firstOrNull;
                       return ListTile(
+                        onTap: () {
+                          context.push('/settings/add-area', extra: area);
+                        },
                         title: Text(area.name, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                         subtitle: Text(line != null ? line.name : 'Unknown Line', style: const TextStyle(color: Colors.grey)),
                       );

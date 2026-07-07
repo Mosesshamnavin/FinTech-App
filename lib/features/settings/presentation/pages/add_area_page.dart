@@ -6,7 +6,9 @@ import '../bloc/settings_event.dart';
 import '../bloc/settings_state.dart';
 
 class AddAreaPage extends StatefulWidget {
-  const AddAreaPage({super.key});
+  final AreaEntity? area;
+
+  const AddAreaPage({super.key, this.area});
 
   @override
   State<AddAreaPage> createState() => _AddAreaPageState();
@@ -16,6 +18,14 @@ class _AddAreaPageState extends State<AddAreaPage> {
   final TextEditingController _nameController = TextEditingController();
   bool _isDropdownOpen = false;
   LineEntity? _selectedLine;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.area != null) {
+      _nameController.text = widget.area!.name;
+    }
+  }
 
   @override
   void dispose() {
@@ -74,7 +84,7 @@ class _AddAreaPageState extends State<AddAreaPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add Area'),
+        title: Text(widget.area == null ? 'Add Area' : 'Edit Area'),
         elevation: 2,
         shadowColor: Colors.black26,
         automaticallyImplyLeading: false,
@@ -90,6 +100,13 @@ class _AddAreaPageState extends State<AddAreaPage> {
           List<LineEntity> lines = [];
           if (state is SettingsLoaded) {
             lines = state.lines;
+            // set initial line if editing
+            if (widget.area != null && _selectedLine == null) {
+              final existingLine = lines.where((l) => l.id == widget.area!.lineId).firstOrNull;
+              if (existingLine != null) {
+                _selectedLine = existingLine;
+              }
+            }
           }
 
           return Padding(
@@ -153,17 +170,34 @@ class _AddAreaPageState extends State<AddAreaPage> {
                       }
                       
                       final newArea = AreaEntity(
-                        id: DateTime.now().millisecondsSinceEpoch.toString(),
+                        id: widget.area?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
                         name: _nameController.text.trim(),
                         lineId: _selectedLine!.id,
                       );
                       
-                      context.read<SettingsBloc>().add(AddAreaSubmitted(newArea));
+                      if (widget.area == null) {
+                        context.read<SettingsBloc>().add(AddAreaSubmitted(newArea));
+                      } else {
+                        context.read<SettingsBloc>().add(UpdateAreaSubmitted(newArea));
+                      }
                       Navigator.of(context).pop();
                     },
-                    child: const Text('SAVE'),
+                    child: Text(widget.area == null ? 'SAVE' : 'UPDATE'),
                   ),
                 ),
+                if (widget.area != null) ...[
+                  const SizedBox(height: 16),
+                  Center(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                      onPressed: () {
+                        context.read<SettingsBloc>().add(DeleteAreaSubmitted(widget.area!.id));
+                        Navigator.of(context).pop();
+                      },
+                      child: const Text('DELETE', style: TextStyle(color: Colors.white)),
+                    ),
+                  )
+                ],
               ],
             ),
           );

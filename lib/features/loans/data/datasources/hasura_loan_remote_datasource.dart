@@ -69,6 +69,97 @@ class HasuraLoanRemoteDataSourceImpl implements LoanRemoteDataSource {
   }
 
   @override
+  Future<void> updateLoan(LoanEntity loan) async {
+    final userId = await storageService.getUserId();
+    if (userId == null) throw const ServerException('User not authenticated');
+
+    const String mutation = '''
+      mutation UpdateLoan(
+        \$id: uuid!,
+        \$principal_amount: numeric!,
+        \$interest_amount: numeric!,
+        \$total_amount: numeric!,
+        \$daily_due_amount: numeric!,
+        \$start_date: timestamp!,
+        \$end_date: date!,
+        \$status: String!
+      ) {
+        update_loans_by_pk(
+          pk_columns: {id: \$id},
+          _set: {
+            principal_amount: \$principal_amount,
+            interest_amount: \$interest_amount,
+            total_amount: \$total_amount,
+            daily_due_amount: \$daily_due_amount,
+            start_date: \$start_date,
+            end_date: \$end_date,
+            status: \$status
+          }
+        ) {
+          id
+        }
+      }
+    ''';
+
+    final MutationOptions options = MutationOptions(
+      document: gql(mutation),
+      variables: {
+        'id': loan.id,
+        'principal_amount': loan.principalAmount,
+        'interest_amount': loan.interestAmount,
+        'total_amount': loan.totalAmount,
+        'daily_due_amount': loan.dailyDueAmount,
+        'start_date': loan.startDate.toIso8601String().split('T')[0],
+        'end_date': loan.endDate.toIso8601String().split('T')[0],
+        'status': loan.status,
+      },
+    );
+
+    try {
+      final QueryResult result = await client.mutate(options);
+
+      if (result.hasException) {
+        throw ServerException(result.exception.toString());
+      }
+    } catch (e) {
+      if (e is ServerException) rethrow;
+      throw ServerException(e.toString());
+    }
+  }
+
+  @override
+  Future<void> deleteLoan(String id) async {
+    final userId = await storageService.getUserId();
+    if (userId == null) throw const ServerException('User not authenticated');
+
+    const String mutation = '''
+      mutation DeleteLoan(\$id: uuid!) {
+        delete_loans_by_pk(id: \$id) {
+          id
+        }
+      }
+    ''';
+
+    final MutationOptions options = MutationOptions(
+      document: gql(mutation),
+      variables: {
+        'id': id,
+      },
+    );
+
+    try {
+      final QueryResult result = await client.mutate(options);
+
+      if (result.hasException) {
+        throw ServerException(result.exception.toString());
+      }
+    } catch (e) {
+      if (e is ServerException) rethrow;
+      throw ServerException(e.toString());
+    }
+  }
+
+  @override
   Future<List<LoanEntity>> getAllLoans() async {
     final userId = await storageService.getUserId();
     if (userId == null) throw const ServerException('User not authenticated');

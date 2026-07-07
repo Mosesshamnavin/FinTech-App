@@ -96,6 +96,12 @@ class LinePage extends StatelessWidget {
                     itemBuilder: (context, index) {
                       final line = state.lines[index];
                       return ListTile(
+                        onTap: () {
+                          showDialog(
+                            context: context,
+                            builder: (context) => AddLineModal(line: line),
+                          );
+                        },
                         title: Text(line.name, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                         subtitle: Text(line.type, style: const TextStyle(color: Colors.grey)),
                       );

@@ -50,25 +50,15 @@ class CustomerDetailPage extends StatelessWidget {
 class _CustomerDetailView extends StatefulWidget {
   final CustomerEntity customer;
 
-  const _CustomerDetailView({required this.customer});
-
-  @override
-  State<_CustomerDetailView> createState() => _CustomerDetailViewState();
+  State<CustomerDetailPage> createState() => _CustomerDetailPageState();
 }
 
-class _CustomerDetailViewState extends State<_CustomerDetailView> with SingleTickerProviderStateMixin {
-  late TabController _tabController;
-
+class _CustomerDetailPageState extends State<CustomerDetailPage> {
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
+    context.read<LoansBloc>().add(LoadCustomerLoansRequested(widget.customer.id));
+    context.read<CollectionsBloc>().add(LoadCustomerCollectionsRequested(customerId: widget.customer.id));
   }
 
   void _voidCollection(BuildContext context, String collectionId) {
@@ -163,7 +153,6 @@ class _CustomerDetailViewState extends State<_CustomerDetailView> with SingleTic
                   backgroundColor: Colors.green,
                 ),
               );
-              // Reload both Blocs to update UI and balances
               context.read<LoansBloc>().add(LoadCustomerLoansRequested(widget.customer.id));
               context.read<CollectionsBloc>().add(LoadCustomerCollectionsRequested(customerId: widget.customer.id));
             } else if (state is VoidCollectionActionError) {
@@ -184,7 +173,7 @@ class _CustomerDetailViewState extends State<_CustomerDetailView> with SingleTic
                     backgroundColor: Colors.green,
                   ),
                 );
-                context.pop(true); // Return true to refresh list
+                context.pop(true);
               } else if (state is DeleteCustomerError) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
@@ -206,7 +195,7 @@ class _CustomerDetailViewState extends State<_CustomerDetailView> with SingleTic
                           MaterialPageRoute(builder: (_) => AddCustomerPage(customer: widget.customer)),
                         );
                         if (shouldRefresh == true) {
-                          context.pop(true); // Pop back to refresh list
+                          context.pop(true);
                         }
                       } else if (value == 'delete') {
                         _deleteCustomer(context);
@@ -238,37 +227,6 @@ class _CustomerDetailViewState extends State<_CustomerDetailView> with SingleTic
                     },
                   ),
                 ],
-                bottom: TabBar(
-                controller: _tabController,
-                indicatorColor: Theme.of(context).colorScheme.primary,
-                labelColor: Theme.of(context).colorScheme.primary,
-                unselectedLabelColor: Colors.grey,
-                tabs: [
-                  Tab(text: 'Loans'.tr()),
-                  Tab(text: 'Payments'.tr()),
-                ],
-              ),
-            ),
-            body: Column(
-              children: [
-                _buildProfileHeader(context, lineName, areaName),
-                const Divider(height: 1),
-                Expanded(
-                  child: TabBarView(
-                    controller: _tabController,
-                    children: [
-                      _buildLoansList(),
-                      _buildPaymentsList(context),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            floatingActionButton: FloatingActionButton.extended(
-              onPressed: () async {
-                final result = await context.push('/customers/${widget.customer.id}/add-loan', extra: widget.customer);
-                if (result == true && context.mounted) {
-                  context.read<LoansBloc>().add(LoadCustomerLoansRequested(widget.customer.id));
                 }
               },
               icon: const Icon(Icons.add),
@@ -350,84 +308,194 @@ class _CustomerDetailViewState extends State<_CustomerDetailView> with SingleTic
                 margin: const EdgeInsets.only(bottom: 16),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: Text(
-                              '${'Total'.tr()}: ${formatter.format(loan.totalAmount)}',
-                              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                              overflow: TextOverflow.ellipsis,
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            '${'Total'.tr()}: ${formatter.format(loan.totalAmount)}',
+                            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: loan.status == 'Active' ? context.successLight : context.surfaceVariant,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            loan.status.tr(),
+                            style: TextStyle(
+                              color: loan.status == 'Active' ? context.success : context.textMuted,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
                             ),
                           ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: loan.status == 'Active' ? context.successLight : context.surfaceVariant,
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: Text(
-                              loan.status.tr(),
-                              style: TextStyle(
-                                color: loan.status == 'Active' ? context.success : context.textMuted,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 12,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text('Principal'.tr(), style: const TextStyle(color: Colors.grey, fontSize: 12)),
-                              Text(formatter.format(loan.principalAmount), style: const TextStyle(fontWeight: FontWeight.w600)),
-                            ],
-                          ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text('Interest'.tr(), style: const TextStyle(color: Colors.grey, fontSize: 12)),
-                              Text(formatter.format(loan.interestAmount), style: const TextStyle(fontWeight: FontWeight.w600)),
-                            ],
-                          ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text('Daily Due'.tr(), style: const TextStyle(color: Colors.grey, fontSize: 12)),
-                              Text(formatter.format(loan.dailyDueAmount), style: const TextStyle(fontWeight: FontWeight.w600)),
-                            ],
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      Text('${'Progress'.tr()} (${(progress * 100).toInt()}%)', style: const TextStyle(fontSize: 12, color: Colors.grey)),
-                      const SizedBox(height: 4),
-                      LinearProgressIndicator(
-                        value: progress,
-                        backgroundColor: Colors.grey.shade200,
-                        minHeight: 8,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          Expanded(child: Text('${'Paid'.tr()}: ${formatter.format(loan.totalAmount - loan.outstandingBalance)}', style: TextStyle(fontSize: 12, color: context.success))),
-                          const SizedBox(width: 8),
-                          Expanded(child: Text('${'Balance'.tr()}: ${formatter.format(loan.outstandingBalance)}', style: TextStyle(fontSize: 12, color: context.warning), textAlign: TextAlign.right)),
-                        ],
-                      ),
-                    ],
-                  ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Principal'.tr(), style: const TextStyle(color: Colors.grey, fontSize: 12)),
+                            Text(formatter.format(loan.principalAmount), style: const TextStyle(fontWeight: FontWeight.w600)),
+                          ],
+                        ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Interest'.tr(), style: const TextStyle(color: Colors.grey, fontSize: 12)),
+                            Text(formatter.format(loan.interestAmount), style: const TextStyle(fontWeight: FontWeight.w600)),
+                          ],
+                        ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Daily Due'.tr(), style: const TextStyle(color: Colors.grey, fontSize: 12)),
+                            Text(formatter.format(loan.dailyDueAmount), style: const TextStyle(fontWeight: FontWeight.w600)),
+                          ],
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    Text('${'Progress'.tr()} (${(progress * 100).toInt()}%)', style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                    const SizedBox(height: 4),
+                    LinearProgressIndicator(
+                      value: progress,
+                      backgroundColor: Colors.grey.shade200,
+                      minHeight: 8,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Expanded(child: Text('${'Paid'.tr()}: ${formatter.format(loan.totalAmount - loan.outstandingBalance)}', style: TextStyle(fontSize: 12, color: context.success))),
+                        const SizedBox(width: 8),
+                        Expanded(child: Text('${'Balance'.tr()}: ${formatter.format(loan.outstandingBalance)}', style: TextStyle(fontSize: 12, color: context.warning), textAlign: TextAlign.right)),
+                      ],
+                    ),
+                    const Divider(height: 32),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('Payment History'.tr(), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                        TextButton.icon(
+                          onPressed: () async {
+                            final result = await context.push('/customers/${widget.customer.id}/add-loan', extra: {
+                              'customer': widget.customer,
+                              'loan': loan,
+                            });
+                            if (result == true && context.mounted) {
+                              context.read<LoansBloc>().add(LoadCustomerLoansRequested(widget.customer.id));
+                            }
+                          },
+                          icon: const Icon(Icons.edit, size: 16),
+                          label: Text('Edit Loan'.tr(), style: const TextStyle(fontSize: 12)),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    BlocBuilder<CollectionsBloc, CollectionsState>(
+                      builder: (context, collectionsState) {
+                        if (collectionsState is CustomerCollectionsLoading || collectionsState is VoidCollectionActionLoading) {
+                          return const Center(child: CircularProgressIndicator());
+                        } else if (collectionsState is CustomerCollectionsLoaded) {
+                          final loanPayments = collectionsState.collections.where((c) => c.loanId == loan.id).toList();
+                          
+                          if (loanPayments.isEmpty) {
+                            return Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text('No payments found for this loan.'.tr(), style: const TextStyle(color: Colors.grey, fontStyle: FontStyle.italic)),
+                            );
+                          }
+                          
+                          return Column(
+                            children: loanPayments.map((collection) {
+                              return Container(
+                                margin: const EdgeInsets.only(bottom: 8),
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: Colors.grey.withOpacity(0.05),
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(color: Colors.grey.withOpacity(0.2)),
+                                ),
+                                child: Row(
+                                  children: [
+                                    CircleAvatar(
+                                      radius: 16,
+                                      backgroundColor: collection.status == 'paid' ? context.successLight : context.surfaceVariant,
+                                      child: FaIcon(
+                                        collection.status == 'paid' ? FontAwesomeIcons.check : FontAwesomeIcons.clock,
+                                        color: collection.status == 'paid' ? context.success : context.textMuted,
+                                        size: 12,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Row(
+                                            children: [
+                                              Text(
+                                                formatter.format(collection.amount),
+                                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                                              ),
+                                              const SizedBox(width: 8),
+                                              Container(
+                                                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                                                decoration: BoxDecoration(
+                                                  color: collection.status == 'paid' ? context.successLight : context.surfaceVariant,
+                                                  borderRadius: BorderRadius.circular(4),
+                                                ),
+                                                child: Text(
+                                                  collection.status.toUpperCase().tr(),
+                                                  style: TextStyle(
+                                                    color: collection.status == 'paid' ? context.success : context.textMuted,
+                                                    fontSize: 8,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          const SizedBox(height: 2),
+                                          Text(collection.date, style: const TextStyle(fontSize: 11, color: Colors.grey)),
+                                          if (collection.notes != null && collection.notes!.isNotEmpty) ...[
+                                            const SizedBox(height: 2),
+                                            Text(collection.notes!, style: const TextStyle(fontSize: 11, fontStyle: FontStyle.italic)),
+                                          ]
+                                        ],
+                                      ),
+                                    ),
+                                    IconButton(
+                                      icon: const FaIcon(FontAwesomeIcons.trash, color: Colors.red, size: 14),
+                                      onPressed: () => _voidCollection(context, collection.id),
+                                      tooltip: 'Delete Payment',
+                                      padding: EdgeInsets.zero,
+                                      constraints: const BoxConstraints(),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }).toList(),
+                          );
+                        }
+                        return const SizedBox.shrink();
+                      },
+                    ),
+                  ],
                 ),
+              ),
               );
             },
           );
@@ -437,96 +505,5 @@ class _CustomerDetailViewState extends State<_CustomerDetailView> with SingleTic
     );
   }
 
-  Widget _buildPaymentsList(BuildContext context) {
-    return BlocBuilder<CollectionsBloc, CollectionsState>(
-      builder: (context, state) {
-        if (state is CustomerCollectionsLoading || state is VoidCollectionActionLoading) {
-          return const Center(child: CircularProgressIndicator());
-        } else if (state is CustomerCollectionsError) {
-          return Center(child: Text(state.message.tr(), style: TextStyle(color: context.danger)));
-        } else if (state is CustomerCollectionsLoaded) {
-          if (state.collections.isEmpty) {
-            return Center(child: Text('No payments found.'.tr(), style: const TextStyle(color: Colors.grey)));
-          }
-
-          final formatter = NumberFormat.currency(symbol: '₹', decimalDigits: 0);
-
-          return ListView.builder(
-            padding: const EdgeInsets.all(16.0),
-            itemCount: state.collections.length,
-            itemBuilder: (context, index) {
-              final collection = state.collections[index];
-              return Card(
-                elevation: 1,
-                margin: const EdgeInsets.only(bottom: 12),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                child: ListTile(
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                  leading: CircleAvatar(
-                    backgroundColor: collection.status == 'paid' ? context.successLight : context.surfaceVariant,
-                    child: FaIcon(
-                      collection.status == 'paid' ? FontAwesomeIcons.check : FontAwesomeIcons.clock,
-                      color: collection.status == 'paid' ? context.success : context.textMuted,
-                      size: 16,
-                    ),
-                  ),
-                  title: Row(
-                    children: [
-                      Text(
-                        formatter.format(collection.amount),
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                      ),
-                      const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: collection.status == 'paid' ? context.successLight : context.surfaceVariant,
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Text(
-                          collection.status.toUpperCase().tr(),
-                          style: TextStyle(
-                            color: collection.status == 'paid' ? context.success : context.textMuted,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const SizedBox(height: 4),
-                      Text(collection.date, style: const TextStyle(fontSize: 12, color: Colors.grey)),
-                      if (collection.notes != null && collection.notes!.isNotEmpty) ...[
-                        const SizedBox(height: 4),
-                        Text(collection.notes!, style: const TextStyle(fontSize: 12, fontStyle: FontStyle.italic)),
-                      ]
-                    ],
-                  ),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      // IconButton(
-                      //   icon: const FaIcon(FontAwesomeIcons.whatsapp, color: Colors.green, size: 20),
-                      //   onPressed: () => _shareReceipt(context, collection),
-                      //   tooltip: 'Share Receipt',
-                      // ),
-                      IconButton(
-                        icon: const FaIcon(FontAwesomeIcons.trash, color: Colors.red, size: 16),
-                        onPressed: () => _voidCollection(context, collection.id),
-                        tooltip: 'Delete Payment',
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          );
-        }
-        return const SizedBox.shrink();
-      },
-    );
   }
 }

@@ -45,4 +45,27 @@ class LoanRepositoryImpl implements LoanRepository {
       return Left(const ServerFailure());
     }
   }
+  @override
+  Future<Either<Failure, void>> updateLoan(LoanEntity loan) async {
+    try {
+      await remoteDataSource.updateLoan(loan);
+      return const Right(null);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } catch (_) {
+      return Left(const ServerFailure());
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> deleteLoan(String id) async {
+    try {
+      await remoteDataSource.deleteLoan(id);
+      return const Right(null);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } catch (_) {
+      return Left(const ServerFailure());
+    }
+  }
 }
