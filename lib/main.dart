@@ -12,6 +12,8 @@ import 'features/auth/presentation/bloc/auth_state.dart';
 import 'features/loans/presentation/bloc/loans_bloc.dart';
 import 'features/loans/presentation/bloc/loans_event.dart';
 import 'features/expenses/presentation/bloc/expenses_bloc.dart';
+import 'features/settings/domain/entities/settings_entities.dart';
+import 'features/loans/domain/entities/loan_entity.dart';
 import 'features/settings/presentation/bloc/settings_bloc.dart';
 import 'features/settings/presentation/bloc/settings_event.dart';
 import 'features/collections/presentation/bloc/cashout_bloc.dart';
@@ -175,6 +177,12 @@ final GoRouter _router = GoRouter(
                 GoRoute(
                   path: ':id/add-loan',
                   builder: (context, state) {
+                    if (state.extra is Map<String, dynamic>) {
+                      final extra = state.extra as Map<String, dynamic>;
+                      final customer = extra['customer'] as CustomerEntity;
+                      final loan = extra['loan'] as LoanEntity?;
+                      return AddLoanPage(customer: customer, loan: loan);
+                    }
                     final customer = state.extra as CustomerEntity;
                     return AddLoanPage(customer: customer);
                   },
@@ -341,7 +349,7 @@ final GoRouter _router = GoRouter(
                 ),
                 GoRoute(
                   path: 'add-area',
-                  builder: (context, state) => const AddAreaPage(),
+                  builder: (context, state) => AddAreaPage(area: state.extra as AreaEntity?),
                 ),
                 GoRoute(
                   path: 'license',

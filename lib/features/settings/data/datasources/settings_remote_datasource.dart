@@ -98,6 +98,65 @@ class SettingsRemoteDataSource {
     )).toList();
   }
 
+  Future<void> updateLine(LineEntity line) async {
+    const String mutation = r'''
+      mutation UpdateLine($id: uuid!, $name: String!, $type: String!, $interest: numeric!, $bill: numeric!, $install: Int!, $bad: Int!, $close: Boolean!, $penalty: Boolean!, $keep: Boolean!) {
+        update_lines_by_pk(
+          pk_columns: {id: $id},
+          _set: {
+            name: $name,
+            type: $type,
+            interest_per_hundred: $interest,
+            bill_amount_per_hundred: $bill,
+            no_of_install: $install,
+            bad_loan_days: $bad,
+            close_loan_manually: $close,
+            enable_penalty: $penalty,
+            keep_paid_customer: $keep
+          }
+        ) {
+          id
+        }
+      }
+    ''';
+
+    final result = await client.mutate(
+      MutationOptions(
+        document: gql(mutation),
+        variables: {
+          'id': line.id,
+          'name': line.name,
+          'type': line.type,
+          'interest': line.interestPerHundred,
+          'bill': line.billAmountPerHundred,
+          'install': line.noOfInstall,
+          'bad': line.badLoanDays,
+          'close': line.closeLoanManually,
+          'penalty': line.enablePenalty,
+          'keep': line.keepPaidCustomer,
+        },
+      ),
+    );
+
+    if (result.hasException) throw ServerException(result.exception.toString());
+  }
+
+  Future<void> deleteLine(String id) async {
+    const String mutation = r'''
+      mutation DeleteLine($id: uuid!) {
+        delete_lines_by_pk(id: $id) {
+          id
+        }
+      }
+    ''';
+
+    final result = await client.mutate(
+      MutationOptions(document: gql(mutation), variables: {'id': id}),
+    );
+
+    if (result.hasException) throw ServerException(result.exception.toString());
+  }
+
   Future<AreaEntity> addArea(AreaEntity area) async {
     const String mutation = r'''
       mutation InsertArea($name: String!, $lineId: uuid!) {
@@ -143,6 +202,41 @@ class SettingsRemoteDataSource {
       name: e['name']?.toString() ?? '',
       lineId: e['line_id']?.toString() ?? '',
     )).toList();
+  }
+
+  Future<void> updateArea(AreaEntity area) async {
+    const String mutation = r'''
+      mutation UpdateArea($id: uuid!, $name: String!, $lineId: uuid!) {
+        update_areas_by_pk(pk_columns: {id: $id}, _set: {name: $name, line_id: $lineId}) {
+          id
+        }
+      }
+    ''';
+
+    final result = await client.mutate(
+      MutationOptions(
+        document: gql(mutation),
+        variables: {'id': area.id, 'name': area.name, 'lineId': area.lineId},
+      ),
+    );
+
+    if (result.hasException) throw ServerException(result.exception.toString());
+  }
+
+  Future<void> deleteArea(String id) async {
+    const String mutation = r'''
+      mutation DeleteArea($id: uuid!) {
+        delete_areas_by_pk(id: $id) {
+          id
+        }
+      }
+    ''';
+
+    final result = await client.mutate(
+      MutationOptions(document: gql(mutation), variables: {'id': id}),
+    );
+
+    if (result.hasException) throw ServerException(result.exception.toString());
   }
 
   Future<ExpenseTypeEntity> addExpenseType(ExpenseTypeEntity expenseType) async {

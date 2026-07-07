@@ -77,6 +77,20 @@ class GetAreasUseCase extends UseCase<List<AreaEntity>, NoParams> {
   Future<Either<Failure, List<AreaEntity>>> call(NoParams params) async => repository.getAreas();
 }
 
+class UpdateAreaUseCase extends UseCase<void, AreaEntity> {
+  final SettingsRepository repository;
+  UpdateAreaUseCase(this.repository);
+  @override
+  Future<Either<Failure, void>> call(AreaEntity params) async => repository.updateArea(params);
+}
+
+class DeleteAreaUseCase extends UseCase<void, String> {
+  final SettingsRepository repository;
+  DeleteAreaUseCase(this.repository);
+  @override
+  Future<Either<Failure, void>> call(String params) async => repository.deleteArea(params);
+}
+
 // --- Lines ---
 class AddLineUseCase extends UseCase<LineEntity, LineEntity> {
   final SettingsRepository repository;
@@ -90,4 +104,18 @@ class GetLinesUseCase extends UseCase<List<LineEntity>, NoParams> {
   GetLinesUseCase(this.repository);
   @override
   Future<Either<Failure, List<LineEntity>>> call(NoParams params) async => repository.getLines();
+}
+
+class UpdateLineUseCase extends UseCase<void, LineEntity> {
+  final SettingsRepository repository;
+  UpdateLineUseCase(this.repository);
+  @override
+  Future<Either<Failure, void>> call(LineEntity params) async => repository.updateLine(params);
+}
+
+class DeleteLineUseCase extends UseCase<void, String> {
+  final SettingsRepository repository;
+  DeleteLineUseCase(this.repository);
+  @override
+  Future<Either<Failure, void>> call(String params) async => repository.deleteLine(params);
 }

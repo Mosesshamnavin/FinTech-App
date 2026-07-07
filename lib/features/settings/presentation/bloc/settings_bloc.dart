@@ -17,9 +17,13 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
   
   final GetAreasUseCase getAreas;
   final AddAreaUseCase addArea;
+  final UpdateAreaUseCase updateArea;
+  final DeleteAreaUseCase deleteArea;
   
   final GetLinesUseCase getLines;
   final AddLineUseCase addLine;
+  final UpdateLineUseCase updateLine;
+  final DeleteLineUseCase deleteLine;
 
   SettingsBloc({
     required this.getExpenseTypes,
@@ -32,8 +36,12 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     required this.deleteInvestmentType,
     required this.getAreas,
     required this.addArea,
+    required this.updateArea,
+    required this.deleteArea,
     required this.getLines,
     required this.addLine,
+    required this.updateLine,
+    required this.deleteLine,
   }) : super(SettingsInitial()) {
     on<LoadSettingsRequested>(_onLoadSettings);
     on<AddExpenseTypeSubmitted>(_onAddExpenseType);
@@ -43,7 +51,11 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     on<UpdateInvestmentTypeSubmitted>(_onUpdateInvestmentType);
     on<DeleteInvestmentTypeSubmitted>(_onDeleteInvestmentType);
     on<AddAreaSubmitted>(_onAddArea);
+    on<UpdateAreaSubmitted>(_onUpdateArea);
+    on<DeleteAreaSubmitted>(_onDeleteArea);
     on<AddLineSubmitted>(_onAddLine);
+    on<UpdateLineSubmitted>(_onUpdateLine);
+    on<DeleteLineSubmitted>(_onDeleteLine);
   }
 
   Future<void> _onLoadSettings(LoadSettingsRequested event, Emitter<SettingsState> emit) async {
@@ -70,49 +82,76 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
 
   Future<void> _onAddExpenseType(AddExpenseTypeSubmitted event, Emitter<SettingsState> emit) async {
     emit(SettingsLoading());
-    await addExpenseType(event.expenseType);
-    add(LoadSettingsRequested());
+    final result = await addExpenseType(event.expenseType);
+    result.fold((f) => emit(SettingsError(f.message)), (_) => add(LoadSettingsRequested()));
   }
 
   Future<void> _onUpdateExpenseType(UpdateExpenseTypeSubmitted event, Emitter<SettingsState> emit) async {
     emit(SettingsLoading());
-    await updateExpenseType(event.expenseType);
-    add(LoadSettingsRequested());
+    final result = await updateExpenseType(event.expenseType);
+    result.fold((f) => emit(SettingsError(f.message)), (_) => add(LoadSettingsRequested()));
   }
 
   Future<void> _onDeleteExpenseType(DeleteExpenseTypeSubmitted event, Emitter<SettingsState> emit) async {
     emit(SettingsLoading());
-    await deleteExpenseType(event.id);
-    add(LoadSettingsRequested());
+    final result = await deleteExpenseType(event.id);
+    result.fold((f) => emit(SettingsError(f.message)), (_) => add(LoadSettingsRequested()));
   }
 
   Future<void> _onAddInvestmentType(AddInvestmentTypeSubmitted event, Emitter<SettingsState> emit) async {
     emit(SettingsLoading());
-    await addInvestmentType(event.investmentType);
-    add(LoadSettingsRequested());
+    final result = await addInvestmentType(event.investmentType);
+    result.fold((f) => emit(SettingsError(f.message)), (_) => add(LoadSettingsRequested()));
   }
 
   Future<void> _onUpdateInvestmentType(UpdateInvestmentTypeSubmitted event, Emitter<SettingsState> emit) async {
     emit(SettingsLoading());
-    await updateInvestmentType(event.investmentType);
-    add(LoadSettingsRequested());
+    final result = await updateInvestmentType(event.investmentType);
+    result.fold((f) => emit(SettingsError(f.message)), (_) => add(LoadSettingsRequested()));
   }
 
   Future<void> _onDeleteInvestmentType(DeleteInvestmentTypeSubmitted event, Emitter<SettingsState> emit) async {
     emit(SettingsLoading());
-    await deleteInvestmentType(event.id);
-    add(LoadSettingsRequested());
+    final result = await deleteInvestmentType(event.id);
+    result.fold((f) => emit(SettingsError(f.message)), (_) => add(LoadSettingsRequested()));
   }
 
   Future<void> _onAddArea(AddAreaSubmitted event, Emitter<SettingsState> emit) async {
     emit(SettingsLoading());
-    await addArea(event.area);
-    add(LoadSettingsRequested());
+    final result = await addArea(event.area);
+    result.fold((f) => emit(SettingsError(f.message)), (_) => add(LoadSettingsRequested()));
+  }
+
+  Future<void> _onUpdateArea(UpdateAreaSubmitted event, Emitter<SettingsState> emit) async {
+    emit(SettingsLoading());
+    final result = await updateArea(event.area);
+    result.fold((f) => emit(SettingsError(f.message)), (_) => add(LoadSettingsRequested()));
+  }
+
+  Future<void> _onDeleteArea(DeleteAreaSubmitted event, Emitter<SettingsState> emit) async {
+    emit(SettingsLoading());
+    final result = await deleteArea(event.id);
+    result.fold((f) => emit(SettingsError(f.message)), (_) => add(LoadSettingsRequested()));
   }
 
   Future<void> _onAddLine(AddLineSubmitted event, Emitter<SettingsState> emit) async {
     emit(SettingsLoading());
-    await addLine(event.line);
-    add(LoadSettingsRequested());
+    final result = await addLine(event.line);
+    result.fold((f) => emit(SettingsError(f.message)), (_) => add(LoadSettingsRequested()));
+  }
+
+  Future<void> _onUpdateLine(UpdateLineSubmitted event, Emitter<SettingsState> emit) async {
+    emit(SettingsLoading());
+    final result = await updateLine(event.line);
+    result.fold((f) {
+      print('Error in _onUpdateLine: ${f.message}');
+      emit(SettingsError(f.message));
+    }, (_) => add(LoadSettingsRequested()));
+  }
+
+  Future<void> _onDeleteLine(DeleteLineSubmitted event, Emitter<SettingsState> emit) async {
+    emit(SettingsLoading());
+    final result = await deleteLine(event.id);
+    result.fold((f) => emit(SettingsError(f.message)), (_) => add(LoadSettingsRequested()));
   }
 }

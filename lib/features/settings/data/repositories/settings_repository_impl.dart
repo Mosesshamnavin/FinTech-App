@@ -131,6 +131,30 @@ class SettingsRepositoryImpl implements SettingsRepository {
   }
 
   @override
+  Future<Either<Failure, void>> updateArea(AreaEntity area) async {
+    try {
+      await remoteDataSource.updateArea(area);
+      return const Right(null);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } catch (_) {
+      return Left(const ServerFailure());
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> deleteArea(String id) async {
+    try {
+      await remoteDataSource.deleteArea(id);
+      return const Right(null);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } catch (_) {
+      return Left(const ServerFailure());
+    }
+  }
+
+  @override
   Future<Either<Failure, LineEntity>> addLine(LineEntity line) async {
     try {
       final result = await remoteDataSource.addLine(line);
@@ -147,6 +171,32 @@ class SettingsRepositoryImpl implements SettingsRepository {
     try {
       final result = await remoteDataSource.getLines();
       return Right(result);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } catch (_) {
+      return Left(const ServerFailure());
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> updateLine(LineEntity line) async {
+    try {
+      await remoteDataSource.updateLine(line);
+      return const Right(null);
+    } on ServerException catch (e) {
+      print('ServerException updating line: ${e.message}');
+      return Left(ServerFailure(e.message));
+    } catch (e) {
+      print('Generic Exception updating line: $e');
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> deleteLine(String id) async {
+    try {
+      await remoteDataSource.deleteLine(id);
+      return const Right(null);
     } on ServerException catch (e) {
       return Left(ServerFailure(e.message));
     } catch (_) {

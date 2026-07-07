@@ -39,7 +39,27 @@ class AddAreaSubmitted extends SettingsEvent {
   AddAreaSubmitted(this.area);
 }
 
+class UpdateAreaSubmitted extends SettingsEvent {
+  final AreaEntity area;
+  UpdateAreaSubmitted(this.area);
+}
+
+class DeleteAreaSubmitted extends SettingsEvent {
+  final String id;
+  DeleteAreaSubmitted(this.id);
+}
+
 class AddLineSubmitted extends SettingsEvent {
   final LineEntity line;
   AddLineSubmitted(this.line);
+}
+
+class UpdateLineSubmitted extends SettingsEvent {
+  final LineEntity line;
+  UpdateLineSubmitted(this.line);
+}
+
+class DeleteLineSubmitted extends SettingsEvent {
+  final String id;
+  DeleteLineSubmitted(this.id);
 }

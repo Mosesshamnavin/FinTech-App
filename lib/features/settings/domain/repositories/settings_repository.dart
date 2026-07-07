@@ -14,8 +14,12 @@ abstract class SettingsRepository {
   Future<Either<Failure, List<InvestmentTypeEntity>>> getInvestmentTypes();
 
   Future<Either<Failure, AreaEntity>> addArea(AreaEntity area);
+  Future<Either<Failure, void>> updateArea(AreaEntity area);
+  Future<Either<Failure, void>> deleteArea(String id);
   Future<Either<Failure, List<AreaEntity>>> getAreas();
 
   Future<Either<Failure, LineEntity>> addLine(LineEntity line);
+  Future<Either<Failure, void>> updateLine(LineEntity line);
+  Future<Either<Failure, void>> deleteLine(String id);
   Future<Either<Failure, List<LineEntity>>> getLines();
 }

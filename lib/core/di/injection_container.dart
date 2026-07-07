@@ -56,6 +56,8 @@ import '../../features/collections/presentation/bloc/cashout_bloc.dart';
 import '../../features/loans/domain/usecases/add_loan_usecase.dart';
 import '../../features/loans/domain/usecases/get_all_loans_usecase.dart';
 import '../../features/loans/domain/usecases/get_customer_loans_usecase.dart';
+import '../../features/loans/domain/usecases/update_loan_usecase.dart';
+import '../../features/loans/domain/usecases/delete_loan_usecase.dart';
 import '../../features/loans/presentation/bloc/loans_bloc.dart';
 
 // Expenses
@@ -194,8 +196,12 @@ Future<void> initDependencies() async {
         deleteInvestmentType: sl(),
         getAreas: sl(),
         addArea: sl(),
+        updateArea: sl(),
+        deleteArea: sl(),
         getLines: sl(),
         addLine: sl(),
+        updateLine: sl(),
+        deleteLine: sl(),
       ));
 
   sl.registerLazySingleton(() => GetExpenseTypesUseCase(sl()));
@@ -207,10 +213,16 @@ Future<void> initDependencies() async {
   sl.registerLazySingleton(() => AddInvestmentTypeUseCase(sl()));
   sl.registerLazySingleton(() => UpdateInvestmentTypeUseCase(sl()));
   sl.registerLazySingleton(() => DeleteInvestmentTypeUseCase(sl()));
+
   sl.registerLazySingleton(() => GetAreasUseCase(sl()));
   sl.registerLazySingleton(() => AddAreaUseCase(sl()));
+  sl.registerLazySingleton(() => UpdateAreaUseCase(sl()));
+  sl.registerLazySingleton(() => DeleteAreaUseCase(sl()));
+
   sl.registerLazySingleton(() => GetLinesUseCase(sl()));
   sl.registerLazySingleton(() => AddLineUseCase(sl()));
+  sl.registerLazySingleton(() => UpdateLineUseCase(sl()));
+  sl.registerLazySingleton(() => DeleteLineUseCase(sl()));
 
   sl.registerLazySingleton<SettingsRepository>(
     () => SettingsRepositoryImpl(remoteDataSource: sl()),
@@ -313,6 +325,8 @@ Future<void> initDependencies() async {
     () => LoanRepositoryImpl(remoteDataSource: sl()),
   );
   sl.registerLazySingleton(() => AddLoanUseCase(sl()));
+  sl.registerLazySingleton(() => UpdateLoanUseCase(sl()));
+  sl.registerLazySingleton(() => DeleteLoanUseCase(sl()));
   sl.registerLazySingleton(() => GetAllLoansUseCase(sl()));
   sl.registerLazySingleton(() => GetCustomerLoansUseCase(sl()));
 
@@ -320,6 +334,8 @@ Future<void> initDependencies() async {
         getAllLoans: sl(),
         getCustomerLoans: sl(),
         addLoan: sl(),
+        updateLoan: sl(),
+        deleteLoan: sl(),
       ));
 
   // ---------------------------------------------------------------------------
