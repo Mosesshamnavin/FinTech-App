@@ -27,6 +27,8 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
       final token = storageService.getAuthToken();
       final username = storageService.getUsername();
       final name = storageService.getName() ?? username;
+      final email = storageService.getEmail() ?? '';
+      final mobile = storageService.getMobile() ?? '';
       final userId = storageService.getUserId();
       final role = storageService.getUserRole();
 
@@ -36,7 +38,8 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
         id: userId,
         username: username,
         name: name!,
-        email: '',
+        email: email,
+        mobile: mobile,
         role: role ?? 'agent',
         token: token,
       );
@@ -52,6 +55,8 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
       await storageService.saveUsername(user.username);
       await storageService.saveName(user.name);
       await storageService.saveUserRole(user.role);
+      await storageService.saveEmail(user.email);
+      await storageService.saveMobile(user.mobile);
       if (user.token != null) {
         await storageService.saveAuthToken(user.token!);
       }

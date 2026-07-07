@@ -68,8 +68,8 @@ class _MySettingsPageState extends State<MySettingsPage> {
 
     // Load Profile Settings
     _nameController = TextEditingController(text: _storage.getName() ?? 'Test User');
-    _mobileController = TextEditingController(text: _storage.getString('my_settings_profile_phone', defaultValue: '1234567890'));
-    _emailController = TextEditingController(text: _storage.getString('my_settings_profile_email', defaultValue: 'test@example.com'));
+    _mobileController = TextEditingController(text: _storage.getMobile() ?? '');
+    _emailController = TextEditingController(text: _storage.getEmail() ?? '');
     stateValue = _storage.getString('my_settings_state', defaultValue: 'Test State');
     primarySite = _storage.getString('my_settings_primary_site', defaultValue: 'Test Site');
 

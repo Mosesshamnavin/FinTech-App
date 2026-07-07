@@ -68,6 +68,7 @@ class HasuraAuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           username
           name
           email
+          mobile
           role
         }
       }
@@ -103,6 +104,7 @@ class HasuraAuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       username: user['username'].toString(),
       name: user['name']?.toString() ?? user['username'].toString(),
       email: user['email'].toString(),
+      mobile: user['mobile']?.toString() ?? '',
       role: role,
       token: token,
     );
@@ -191,6 +193,7 @@ class HasuraAuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       username: username,
       name: name,
       email: email,
+      mobile: mobile,
       role: role,
       token: token,
     );

@@ -47,6 +47,18 @@ class StorageService {
 
   String? getUserRole() => _prefs.getString(AppConfig.kUserRole);
 
+  Future<void> saveEmail(String email) async {
+    await _prefs.setString('my_settings_profile_email', email);
+  }
+
+  String? getEmail() => _prefs.getString('my_settings_profile_email');
+
+  Future<void> saveMobile(String mobile) async {
+    await _prefs.setString('my_settings_profile_phone', mobile);
+  }
+
+  String? getMobile() => _prefs.getString('my_settings_profile_phone');
+
   Future<void> setLoggedIn(bool value) async {
     await _prefs.setBool(AppConfig.kIsLoggedIn, value);
   }

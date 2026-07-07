@@ -7,6 +7,7 @@ class UserEntity extends Equatable {
   final String username;
   final String name;
   final String email;
+  final String mobile;
   final String role; // 'admin' | 'agent'
   final String? siteName;
   final String? token;
@@ -16,6 +17,7 @@ class UserEntity extends Equatable {
     required this.username,
     required this.name,
     required this.email,
+    required this.mobile,
     required this.role,
     this.siteName,
     this.token,
@@ -24,5 +26,5 @@ class UserEntity extends Equatable {
   bool get isAdmin => role == 'admin';
 
   @override
-  List<Object?> get props => [id, username, name, email, role, siteName, token];
+  List<Object?> get props => [id, username, name, email, mobile, role, siteName, token];
 }
