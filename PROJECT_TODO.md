@@ -28,7 +28,9 @@ This document tracks completed achievements and pending todo tasks for the proje
 ### 💳 Customer Profile & Payment History
 - [x] **Payment Timeline**: Render a timeline listing all collections for a customer in `customer_detail_page.dart`.
 - [x] **Share Receipt**: Format and send payment receipts directly to customers via WhatsApp in `customer_detail_page.dart`.
-- [x] **Delete Payment**: Implement delete mutation in Hasura to remove invalid payment records (Soft delete) and automatically recalculate loan balances.
+- [x] **Delete Payment (Voiding)**: Wire the UI button in `customer_detail_page.dart` to dispatch the delete event to Hasura, including passing correct `loanId` and `amount` for triggers.
+- [x] **Profile Data Sync**: Fetch and locally cache user `mobile` and `email` on login, ensuring the "My Settings" page displays real data rather than hardcoded dummies.
+- [x] **Loan Partial Updates**: Modified `hasura_loan_remote_datasource.dart` to support partial updates (outstanding balances) without requiring unrelated fields (customerId, interest, etc.).
 
 ### 💬 SMS & WhatsApp Templates
 - [x] **Templates Persistence**: Save English and Tamil templates to storage in `sms_template_page.dart`.

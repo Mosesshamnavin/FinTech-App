@@ -7,7 +7,7 @@ Vasool Drive is a premium, comprehensive microfinance and daily collection manag
 ## ✨ Features
 
 - **🔒 Auth & Security**:
-  - Secure login/registration flows.
+  - Secure login/registration flows with complete profile data synchronization (email, mobile, roles).
   - In-app **Change Password** directly linked to Hasura.
   - Custom preference toggles for **Fingerprint Auth** and **OTP Security Alerts** verified against your credentials.
 - **💰 Collections & Loan Management (Vasool)**:

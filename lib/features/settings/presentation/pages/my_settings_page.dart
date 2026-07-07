@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/di/injection_container.dart';
 import '../../../../core/services/storage_service.dart';
+import 'package:graphql_flutter/graphql_flutter.dart' as graphql;
 
 class MySettingsPage extends StatefulWidget {
   const MySettingsPage({super.key});
@@ -76,6 +77,40 @@ class _MySettingsPageState extends State<MySettingsPage> {
     // Load Local Settings
     showLineChangeWarning = _storage.getBool('local_settings_show_line_change_warning', defaultValue: false);
     useNativeCallNumber = _storage.getBool('local_settings_use_native_call_number', defaultValue: false);
+    
+    _fetchProfileFromDb();
+  }
+
+  Future<void> _fetchProfileFromDb() async {
+    try {
+      final userId = _storage.getUserId();
+      if (userId == null) return;
+      final client = sl<graphql.GraphQLClient>();
+      final result = await client.query(graphql.QueryOptions(
+        document: graphql.gql(r'''
+          query GetUser($id: uuid!) {
+            users_by_pk(id: $id) {
+              email
+              mobile
+            }
+          }
+        '''),
+        variables: {'id': userId},
+        fetchPolicy: graphql.FetchPolicy.networkOnly,
+      ));
+      if (result.data != null && result.data!['users_by_pk'] != null) {
+        final email = result.data!['users_by_pk']['email']?.toString() ?? '';
+        final mobile = result.data!['users_by_pk']['mobile']?.toString() ?? '';
+        if (mounted) {
+          setState(() {
+            _emailController.text = email;
+            _mobileController.text = mobile;
+          });
+        }
+        await _storage.saveEmail(email);
+        await _storage.saveMobile(mobile);
+      }
+    } catch (_) {}
   }
 
   @override
