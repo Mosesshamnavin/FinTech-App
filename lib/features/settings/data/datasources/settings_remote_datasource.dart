@@ -7,12 +7,92 @@ class SettingsRemoteDataSource {
 
   SettingsRemoteDataSource({required this.client});
 
+  // ─── Line Type CRUD ─────────────────────────────────────────────────────
+
+  Future<LineTypeEntity> addLineType(LineTypeEntity lineType) async {
+    const String mutation = r'''
+      mutation InsertLineType($name: String!) {
+        insert_line_types_one(object: {name: $name}) {
+          id
+        }
+      }
+    ''';
+
+    final result = await client.mutate(
+      MutationOptions(document: gql(mutation), variables: {'name': lineType.name}),
+    );
+
+    if (result.hasException) throw ServerException(result.exception.toString());
+
+    final id = result.data!['insert_line_types_one']['id'];
+    return LineTypeEntity(id: id, name: lineType.name);
+  }
+
+  Future<List<LineTypeEntity>> getLineTypes() async {
+    const String query = r'''
+      query GetLineTypes {
+        line_types {
+          id
+          name
+          is_active
+        }
+      }
+    ''';
+
+    final result = await client.query(QueryOptions(document: gql(query), fetchPolicy: FetchPolicy.networkOnly));
+    if (result.hasException) throw ServerException(result.exception.toString());
+
+    final List data = result.data!['line_types'];
+    return data.map((e) => LineTypeEntity(
+      id: e['id']?.toString() ?? '',
+      name: e['name']?.toString() ?? '',
+      isActive: e['is_active'] == true,
+    )).toList();
+  }
+
+  Future<void> updateLineType(LineTypeEntity lineType) async {
+    const String mutation = r'''
+      mutation UpdateLineType($id: uuid!, $name: String!, $isActive: Boolean!) {
+        update_line_types_by_pk(pk_columns: {id: $id}, _set: {name: $name, is_active: $isActive}) {
+          id
+        }
+      }
+    ''';
+
+    final result = await client.mutate(
+      MutationOptions(
+        document: gql(mutation),
+        variables: {'id': lineType.id, 'name': lineType.name, 'isActive': lineType.isActive},
+      ),
+    );
+
+    if (result.hasException) throw ServerException(result.exception.toString());
+  }
+
+  Future<void> deleteLineType(String id) async {
+    const String mutation = r'''
+      mutation DeleteLineType($id: uuid!) {
+        delete_line_types_by_pk(id: $id) {
+          id
+        }
+      }
+    ''';
+
+    final result = await client.mutate(
+      MutationOptions(document: gql(mutation), variables: {'id': id}),
+    );
+
+    if (result.hasException) throw ServerException(result.exception.toString());
+  }
+
+  // ─── Line CRUD ──────────────────────────────────────────────────────────
+
   Future<LineEntity> addLine(LineEntity line) async {
     const String mutation = r'''
-      mutation InsertLine($name: String!, $type: String!, $interest: numeric!, $bill: numeric!, $install: Int!, $bad: Int!, $close: Boolean!, $penalty: Boolean!, $keep: Boolean!) {
+      mutation InsertLine($name: String!, $lineTypeId: uuid!, $interest: numeric!, $bill: numeric!, $install: Int!, $bad: Int!, $close: Boolean!, $penalty: Boolean!, $keep: Boolean!) {
         insert_lines_one(object: {
           name: $name,
-          type: $type,
+          line_type_id: $lineTypeId,
           interest_per_hundred: $interest,
           bill_amount_per_hundred: $bill,
           no_of_install: $install,
@@ -31,7 +111,7 @@ class SettingsRemoteDataSource {
         document: gql(mutation),
         variables: {
           'name': line.name,
-          'type': line.type,
+          'lineTypeId': line.lineTypeId,
           'interest': line.interestPerHundred,
           'bill': line.billAmountPerHundred,
           'install': line.noOfInstall,
@@ -51,7 +131,8 @@ class SettingsRemoteDataSource {
     return LineEntity(
       id: id,
       name: line.name,
-      type: line.type,
+      lineTypeId: line.lineTypeId,
+      lineTypeName: line.lineTypeName,
       interestPerHundred: line.interestPerHundred,
       billAmountPerHundred: line.billAmountPerHundred,
       noOfInstall: line.noOfInstall,
@@ -68,7 +149,10 @@ class SettingsRemoteDataSource {
         lines {
           id
           name
-          type
+          line_type_id
+          line_type {
+            name
+          }
           interest_per_hundred
           bill_amount_per_hundred
           no_of_install
@@ -87,7 +171,8 @@ class SettingsRemoteDataSource {
     return linesData.map((e) => LineEntity(
       id: e['id']?.toString() ?? '',
       name: e['name']?.toString() ?? '',
-      type: e['type']?.toString() ?? '',
+      lineTypeId: e['line_type_id']?.toString() ?? '',
+      lineTypeName: e['line_type']?['name']?.toString() ?? '',
       interestPerHundred: double.tryParse(e['interest_per_hundred']?.toString() ?? '0') ?? 0.0,
       billAmountPerHundred: double.tryParse(e['bill_amount_per_hundred']?.toString() ?? '0') ?? 0.0,
       noOfInstall: int.tryParse(e['no_of_install']?.toString() ?? '0') ?? 0,
@@ -100,12 +185,12 @@ class SettingsRemoteDataSource {
 
   Future<void> updateLine(LineEntity line) async {
     const String mutation = r'''
-      mutation UpdateLine($id: uuid!, $name: String!, $type: String!, $interest: numeric!, $bill: numeric!, $install: Int!, $bad: Int!, $close: Boolean!, $penalty: Boolean!, $keep: Boolean!) {
+      mutation UpdateLine($id: uuid!, $name: String!, $lineTypeId: uuid!, $interest: numeric!, $bill: numeric!, $install: Int!, $bad: Int!, $close: Boolean!, $penalty: Boolean!, $keep: Boolean!) {
         update_lines_by_pk(
           pk_columns: {id: $id},
           _set: {
             name: $name,
-            type: $type,
+            line_type_id: $lineTypeId,
             interest_per_hundred: $interest,
             bill_amount_per_hundred: $bill,
             no_of_install: $install,
@@ -126,7 +211,7 @@ class SettingsRemoteDataSource {
         variables: {
           'id': line.id,
           'name': line.name,
-          'type': line.type,
+          'lineTypeId': line.lineTypeId,
           'interest': line.interestPerHundred,
           'bill': line.billAmountPerHundred,
           'install': line.noOfInstall,
@@ -156,6 +241,8 @@ class SettingsRemoteDataSource {
 
     if (result.hasException) throw ServerException(result.exception.toString());
   }
+
+  // ─── Area CRUD ──────────────────────────────────────────────────────────
 
   Future<AreaEntity> addArea(AreaEntity area) async {
     const String mutation = r'''
@@ -239,6 +326,8 @@ class SettingsRemoteDataSource {
     if (result.hasException) throw ServerException(result.exception.toString());
   }
 
+  // ─── Expense Type CRUD ──────────────────────────────────────────────────
+
   Future<ExpenseTypeEntity> addExpenseType(ExpenseTypeEntity expenseType) async {
     const String mutation = r'''
       mutation InsertExpenseType($name: String!) {
@@ -314,6 +403,8 @@ class SettingsRemoteDataSource {
 
     if (result.hasException) throw ServerException(result.exception.toString());
   }
+
+  // ─── Investment Type CRUD ───────────────────────────────────────────────
 
   Future<InvestmentTypeEntity> addInvestmentType(InvestmentTypeEntity investmentType) async {
     const String mutation = r'''

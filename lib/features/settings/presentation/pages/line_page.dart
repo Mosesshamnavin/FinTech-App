@@ -103,7 +103,7 @@ class LinePage extends StatelessWidget {
                           );
                         },
                         title: Text(line.name, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                        subtitle: Text(line.type, style: const TextStyle(color: Colors.grey)),
+                        subtitle: Text(line.lineTypeName, style: const TextStyle(color: Colors.grey)),
                       );
                     },
                   ),

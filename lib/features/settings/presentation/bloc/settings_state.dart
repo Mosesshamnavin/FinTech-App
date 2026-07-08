@@ -15,17 +15,19 @@ class SettingsLoaded extends SettingsState {
   final List<ExpenseTypeEntity> expenseTypes;
   final List<InvestmentTypeEntity> investmentTypes;
   final List<AreaEntity> areas;
+  final List<LineTypeEntity> lineTypes;
   final List<LineEntity> lines;
 
   const SettingsLoaded({
     required this.expenseTypes,
     required this.investmentTypes,
     required this.areas,
+    required this.lineTypes,
     required this.lines,
   });
 
   @override
-  List<Object?> get props => [expenseTypes, investmentTypes, areas, lines];
+  List<Object?> get props => [expenseTypes, investmentTypes, areas, lineTypes, lines];
 }
 
 class SettingsError extends SettingsState {

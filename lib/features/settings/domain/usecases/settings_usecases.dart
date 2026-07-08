@@ -91,6 +91,35 @@ class DeleteAreaUseCase extends UseCase<void, String> {
   Future<Either<Failure, void>> call(String params) async => repository.deleteArea(params);
 }
 
+// --- Line Types ---
+class AddLineTypeUseCase extends UseCase<LineTypeEntity, LineTypeEntity> {
+  final SettingsRepository repository;
+  AddLineTypeUseCase(this.repository);
+  @override
+  Future<Either<Failure, LineTypeEntity>> call(LineTypeEntity params) async => repository.addLineType(params);
+}
+
+class GetLineTypesUseCase extends UseCase<List<LineTypeEntity>, NoParams> {
+  final SettingsRepository repository;
+  GetLineTypesUseCase(this.repository);
+  @override
+  Future<Either<Failure, List<LineTypeEntity>>> call(NoParams params) async => repository.getLineTypes();
+}
+
+class UpdateLineTypeUseCase extends UseCase<void, LineTypeEntity> {
+  final SettingsRepository repository;
+  UpdateLineTypeUseCase(this.repository);
+  @override
+  Future<Either<Failure, void>> call(LineTypeEntity params) async => repository.updateLineType(params);
+}
+
+class DeleteLineTypeUseCase extends UseCase<void, String> {
+  final SettingsRepository repository;
+  DeleteLineTypeUseCase(this.repository);
+  @override
+  Future<Either<Failure, void>> call(String params) async => repository.deleteLineType(params);
+}
+
 // --- Lines ---
 class AddLineUseCase extends UseCase<LineEntity, LineEntity> {
   final SettingsRepository repository;

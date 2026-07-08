@@ -34,10 +34,23 @@ class AreaEntity {
   });
 }
 
+class LineTypeEntity {
+  final String id;
+  final String name;
+  final bool isActive;
+
+  LineTypeEntity({
+    required this.id,
+    required this.name,
+    this.isActive = true,
+  });
+}
+
 class LineEntity {
   final String id;
   final String name;
-  final String type;
+  final String lineTypeId;
+  final String lineTypeName;
   final double interestPerHundred;
   final double billAmountPerHundred;
   final int noOfInstall;
@@ -49,7 +62,8 @@ class LineEntity {
   LineEntity({
     required this.id,
     required this.name,
-    required this.type,
+    required this.lineTypeId,
+    this.lineTypeName = '',
     required this.interestPerHundred,
     required this.billAmountPerHundred,
     required this.noOfInstall,

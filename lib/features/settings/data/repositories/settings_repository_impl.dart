@@ -155,6 +155,54 @@ class SettingsRepositoryImpl implements SettingsRepository {
   }
 
   @override
+  Future<Either<Failure, LineTypeEntity>> addLineType(LineTypeEntity lineType) async {
+    try {
+      final result = await remoteDataSource.addLineType(lineType);
+      return Right(result);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } catch (_) {
+      return Left(const ServerFailure());
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> updateLineType(LineTypeEntity lineType) async {
+    try {
+      await remoteDataSource.updateLineType(lineType);
+      return const Right(null);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } catch (_) {
+      return Left(const ServerFailure());
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> deleteLineType(String id) async {
+    try {
+      await remoteDataSource.deleteLineType(id);
+      return const Right(null);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } catch (_) {
+      return Left(const ServerFailure());
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<LineTypeEntity>>> getLineTypes() async {
+    try {
+      final result = await remoteDataSource.getLineTypes();
+      return Right(result);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } catch (_) {
+      return Left(const ServerFailure());
+    }
+  }
+
+  @override
   Future<Either<Failure, LineEntity>> addLine(LineEntity line) async {
     try {
       final result = await remoteDataSource.addLine(line);

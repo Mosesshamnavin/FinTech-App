@@ -59,7 +59,7 @@ import 'features/settings/presentation/pages/my_settings_page.dart';
 import 'features/settings/presentation/pages/settings_page.dart';
 import 'features/settings/presentation/pages/change_password_page.dart';
 import 'features/settings/presentation/pages/enable_security_alert_page.dart';
-import 'features/settings/presentation/pages/enable_fingerprint_page.dart';
+import 'features/settings/presentation/pages/line_type_page.dart';
 import 'features/settings/presentation/pages/site_page.dart';
 import 'features/settings/presentation/pages/expense_type_page.dart';
 import 'features/settings/presentation/pages/investment_type_page.dart';
@@ -320,8 +320,8 @@ final GoRouter _router = GoRouter(
                   builder: (context, state) => const EnableSecurityAlertPage(),
                 ),
                 GoRoute(
-                  path: 'enable-fingerprint',
-                  builder: (context, state) => const EnableFingerprintPage(),
+                  path: 'line-type',
+                  builder: (context, state) => const LineTypePage(),
                 ),
                 GoRoute(
                   path: 'site',

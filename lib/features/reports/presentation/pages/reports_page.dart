@@ -45,7 +45,7 @@ class ReportsPage extends StatelessWidget {
             
             if (settingsState is SettingsLoaded) {
               _mockLines = settingsState.lines.map((e) => e.name).toList();
-              _mockLineTypes = settingsState.lines.map((e) => e.type).toSet().toList(); // Unique types
+              _mockLineTypes = settingsState.lines.map<String>((e) => e.lineTypeName).toSet().toList(); // Unique types
               _mockAreas = settingsState.areas.map((e) => e.name).toList();
             }
             

@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:local_auth/local_auth.dart';
 import '../../../../features/auth/presentation/bloc/auth_bloc.dart';
 import '../../../../features/auth/presentation/bloc/auth_state.dart';
+import '../../../../features/auth/presentation/bloc/auth_event.dart';
+import '../../../../core/di/injection_container.dart' as di;
+import '../../../../core/services/storage_service.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -26,11 +30,42 @@ class _SplashPageState extends State<SplashPage> with SingleTickerProviderStateM
     _controller.forward();
 
     // Navigate based on Auth State after 1.5 seconds
-    Future.delayed(const Duration(milliseconds: 1500), () {
+    Future.delayed(const Duration(milliseconds: 1500), () async {
       if (mounted) {
         final authState = context.read<AuthBloc>().state;
         if (authState is AuthAuthenticated) {
-          context.go('/collections');
+          
+          // Check if biometrics is enabled
+          final storage = di.sl<StorageService>();
+          final isFingerprintEnabled = storage.getBool('my_settings_fingerprint_enabled', defaultValue: false);
+          
+          if (isFingerprintEnabled) {
+            final localAuth = LocalAuthentication();
+            bool didAuthenticate = false;
+            
+            try {
+              didAuthenticate = await localAuth.authenticate(
+                localizedReason: 'Scan your fingerprint or face to unlock Vasool Drive',
+                biometricOnly: true,
+              );
+            } catch (e) {
+              didAuthenticate = false;
+            }
+            
+            if (mounted) {
+              if (didAuthenticate) {
+                context.go('/collections');
+              } else {
+                // Biometrics failed or cancelled, log the user out so they can log in via password
+                context.read<AuthBloc>().add(const AuthLogoutRequested());
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Biometric authentication failed or cancelled.')),
+                );
+              }
+            }
+          } else {
+            context.go('/collections');
+          }
         } else {
           context.go('/login');
         }

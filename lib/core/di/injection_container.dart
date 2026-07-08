@@ -198,6 +198,10 @@ Future<void> initDependencies() async {
         addArea: sl(),
         updateArea: sl(),
         deleteArea: sl(),
+        getLineTypes: sl(),
+        addLineType: sl(),
+        updateLineType: sl(),
+        deleteLineType: sl(),
         getLines: sl(),
         addLine: sl(),
         updateLine: sl(),
@@ -218,6 +222,11 @@ Future<void> initDependencies() async {
   sl.registerLazySingleton(() => AddAreaUseCase(sl()));
   sl.registerLazySingleton(() => UpdateAreaUseCase(sl()));
   sl.registerLazySingleton(() => DeleteAreaUseCase(sl()));
+
+  sl.registerLazySingleton(() => GetLineTypesUseCase(sl()));
+  sl.registerLazySingleton(() => AddLineTypeUseCase(sl()));
+  sl.registerLazySingleton(() => UpdateLineTypeUseCase(sl()));
+  sl.registerLazySingleton(() => DeleteLineTypeUseCase(sl()));
 
   sl.registerLazySingleton(() => GetLinesUseCase(sl()));
   sl.registerLazySingleton(() => AddLineUseCase(sl()));

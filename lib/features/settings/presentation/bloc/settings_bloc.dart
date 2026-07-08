@@ -19,6 +19,11 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
   final AddAreaUseCase addArea;
   final UpdateAreaUseCase updateArea;
   final DeleteAreaUseCase deleteArea;
+
+  final GetLineTypesUseCase getLineTypes;
+  final AddLineTypeUseCase addLineType;
+  final UpdateLineTypeUseCase updateLineType;
+  final DeleteLineTypeUseCase deleteLineType;
   
   final GetLinesUseCase getLines;
   final AddLineUseCase addLine;
@@ -38,6 +43,10 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     required this.addArea,
     required this.updateArea,
     required this.deleteArea,
+    required this.getLineTypes,
+    required this.addLineType,
+    required this.updateLineType,
+    required this.deleteLineType,
     required this.getLines,
     required this.addLine,
     required this.updateLine,
@@ -53,6 +62,9 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     on<AddAreaSubmitted>(_onAddArea);
     on<UpdateAreaSubmitted>(_onUpdateArea);
     on<DeleteAreaSubmitted>(_onDeleteArea);
+    on<AddLineTypeSubmitted>(_onAddLineType);
+    on<UpdateLineTypeSubmitted>(_onUpdateLineType);
+    on<DeleteLineTypeSubmitted>(_onDeleteLineType);
     on<AddLineSubmitted>(_onAddLine);
     on<UpdateLineSubmitted>(_onUpdateLine);
     on<DeleteLineSubmitted>(_onDeleteLine);
@@ -64,20 +76,47 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     final expenseTypesResult = await getExpenseTypes(NoParams());
     final investmentTypesResult = await getInvestmentTypes(NoParams());
     final areasResult = await getAreas(NoParams());
+    final lineTypesResult = await getLineTypes(NoParams());
     final linesResult = await getLines(NoParams());
+
+    // Log failures for debugging
+    expenseTypesResult.fold((f) => print('Expense Types Load Failure: ${f.message}'), (_) {});
+    investmentTypesResult.fold((f) => print('Investment Types Load Failure: ${f.message}'), (_) {});
+    areasResult.fold((f) => print('Areas Load Failure: ${f.message}'), (_) {});
+    lineTypesResult.fold((f) => print('Line Types Load Failure: ${f.message}'), (_) {});
+    linesResult.fold((f) => print('Lines Load Failure: ${f.message}'), (_) {});
 
     // Instead of failing entirely if one request fails, we accumulate what we can.
     // If all fail, then we emit error. If at least one succeeds, we show partial data.
-    if (expenseTypesResult.isRight || investmentTypesResult.isRight || areasResult.isRight || linesResult.isRight) {
+    if (expenseTypesResult.isRight || investmentTypesResult.isRight || areasResult.isRight || lineTypesResult.isRight || linesResult.isRight) {
       emit(SettingsLoaded(
         expenseTypes: expenseTypesResult.getOrNull() ?? [],
         investmentTypes: investmentTypesResult.getOrNull() ?? [],
         areas: areasResult.getOrNull() ?? [],
+        lineTypes: lineTypesResult.getOrNull() ?? [],
         lines: linesResult.getOrNull() ?? [],
       ));
     } else {
       emit(const SettingsError('Failed to load settings. Please check your connection.'));
     }
+  }
+
+  Future<void> _onAddLineType(AddLineTypeSubmitted event, Emitter<SettingsState> emit) async {
+    emit(SettingsLoading());
+    final result = await addLineType(event.lineType);
+    result.fold((f) => emit(SettingsError(f.message)), (_) => add(LoadSettingsRequested()));
+  }
+
+  Future<void> _onUpdateLineType(UpdateLineTypeSubmitted event, Emitter<SettingsState> emit) async {
+    emit(SettingsLoading());
+    final result = await updateLineType(event.lineType);
+    result.fold((f) => emit(SettingsError(f.message)), (_) => add(LoadSettingsRequested()));
+  }
+
+  Future<void> _onDeleteLineType(DeleteLineTypeSubmitted event, Emitter<SettingsState> emit) async {
+    emit(SettingsLoading());
+    final result = await deleteLineType(event.id);
+    result.fold((f) => emit(SettingsError(f.message)), (_) => add(LoadSettingsRequested()));
   }
 
   Future<void> _onAddExpenseType(AddExpenseTypeSubmitted event, Emitter<SettingsState> emit) async {

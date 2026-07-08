@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
-
+import 'package:local_auth/local_auth.dart';
+import 'package:graphql_flutter/graphql_flutter.dart';
+import '../../../../core/theme/app_theme.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/di/injection_container.dart';
 import '../../../../core/services/storage_service.dart';
-import '../../../../core/theme/app_theme.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_event.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:vasooldrive/core/services/app_localization.dart';
 
 class SettingsPage extends StatelessWidget {
@@ -31,6 +32,9 @@ class SettingsPage extends StatelessWidget {
                 context.go('/settings/license');
               }),
               const Divider(),
+              _buildListTile(FontAwesomeIcons.list, 'Line Type', onTap: () {
+                context.go('/settings/line-type');
+              }),
               _buildListTile(FontAwesomeIcons.moneyBillWave, 'Line', onTap: () {
                 context.go('/settings/line');
               }),
@@ -65,12 +69,8 @@ class SettingsPage extends StatelessWidget {
               _buildListTile(FontAwesomeIcons.commentSms, 'SMS Template', onTap: () {
                 context.go('/settings/sms-template');
               }),
-              _buildListTile(FontAwesomeIcons.fingerprint, 'Enable Fingerprint', onTap: () {
-                context.go('/settings/enable-fingerprint');
-              }),
-              _buildListTile(FontAwesomeIcons.shieldHalved, 'Enable Security Alert', onTap: () {
-                context.go('/settings/enable-security-alert');
-              }),
+              const _FingerprintToggleTile(),
+              const _SecurityAlertToggleTile(),
               _buildListTile(FontAwesomeIcons.lock, 'Change Password', onTap: () {
                 context.go('/settings/change-password');
               }),
@@ -136,5 +136,133 @@ class SettingsPage extends StatelessWidget {
     if (theme.contains('Orange')) return Colors.orange;
     if (theme.contains('Green')) return Colors.green;
     return Colors.blue;
+  }
+}
+
+class _FingerprintToggleTile extends StatefulWidget {
+  const _FingerprintToggleTile();
+
+  @override
+  State<_FingerprintToggleTile> createState() => _FingerprintToggleTileState();
+}
+
+class _FingerprintToggleTileState extends State<_FingerprintToggleTile> {
+  bool _isEnabled = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _isEnabled = sl<StorageService>().getBool('my_settings_fingerprint_enabled', defaultValue: false);
+  }
+
+  Future<void> _toggleFingerprint(bool value) async {
+    final storage = sl<StorageService>();
+    
+    if (value) {
+      // Trying to enable
+      final localAuth = LocalAuthentication();
+      final canCheckBiometrics = await localAuth.canCheckBiometrics;
+      final isDeviceSupported = await localAuth.isDeviceSupported();
+
+      if (canCheckBiometrics || isDeviceSupported) {
+        bool biometricSuccess = false;
+        try {
+          biometricSuccess = await localAuth.authenticate(
+            localizedReason: 'Scan your fingerprint or face to enable biometric login',
+            biometricOnly: true,
+          );
+        } catch (e) {
+          biometricSuccess = false;
+        }
+
+        if (biometricSuccess) {
+          await storage.setBool('my_settings_fingerprint_enabled', true);
+          setState(() {
+            _isEnabled = true;
+          });
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Biometric login enabled successfully!')),
+            );
+          }
+        } else {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Biometric authentication failed or cancelled.')),
+            );
+          }
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Device does not support biometrics.')),
+          );
+        }
+      }
+    } else {
+      // Disabling does not require fingerprint confirmation
+      await storage.setBool('my_settings_fingerprint_enabled', false);
+      setState(() {
+        _isEnabled = false;
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Biometric login disabled successfully!')),
+        );
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SwitchListTile(
+      secondary: FaIcon(FontAwesomeIcons.fingerprint, color: Colors.grey[700], size: 20),
+      title: Text('Enable Biometric Login'.tr()),
+      value: _isEnabled,
+      onChanged: _toggleFingerprint,
+    );
+  }
+}
+
+class _SecurityAlertToggleTile extends StatefulWidget {
+  const _SecurityAlertToggleTile();
+
+  @override
+  State<_SecurityAlertToggleTile> createState() => _SecurityAlertToggleTileState();
+}
+
+class _SecurityAlertToggleTileState extends State<_SecurityAlertToggleTile> {
+  bool _isEnabled = false;
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _isEnabled = sl<StorageService>().getBool('my_settings_security_alert_enabled', defaultValue: false);
+  }
+
+  Future<void> _toggleSecurityAlert(bool newValue) async {
+    final storage = sl<StorageService>();
+    await storage.setBool('my_settings_security_alert_enabled', newValue);
+    
+    setState(() {
+      _isEnabled = newValue;
+    });
+    
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Security OTP Alert ${newValue ? "enabled" : "disabled"} successfully!')),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SwitchListTile(
+      secondary: FaIcon(FontAwesomeIcons.shieldHalved, color: Colors.grey[700], size: 20),
+      title: Text('Enable Security Alert'.tr()),
+      value: _isEnabled,
+      onChanged: _toggleSecurityAlert,
+    );
   }
 }

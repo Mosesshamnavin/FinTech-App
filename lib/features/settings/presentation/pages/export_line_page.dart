@@ -129,7 +129,7 @@ class _ExportLinePageState extends State<ExportLinePage> {
   void _showLineSelectionDialog({required bool isDownloadTab}) async {
     final filteredLines = _lines.where((l) {
       final filterType = isDownloadTab ? _selectedTypeDownload : _selectedTypeExport;
-      return filterType == null || l.type == filterType;
+      return filterType == null || l.lineTypeName == filterType;
     }).toList();
 
     if (filteredLines.isEmpty) {
@@ -193,7 +193,7 @@ class _ExportLinePageState extends State<ExportLinePage> {
   }
 
   void _showTypeSelectionDialog({required bool isDownloadTab}) async {
-    final types = ['All', ..._lines.map((l) => l.type).toSet().toList()];
+    final types = ['All', ..._lines.map<String>((l) => l.lineTypeName).toSet().toList()];
 
     if (isDownloadTab) {
       setState(() => _isLineTypeOpen = true);
@@ -351,7 +351,8 @@ class _ExportLinePageState extends State<ExportLinePage> {
         final line = _lines.firstWhere((l) => l.id == lineId, orElse: () => LineEntity(
           id: '',
           name: '',
-          type: '',
+          lineTypeId: '',
+          lineTypeName: '',
           interestPerHundred: 0.0,
           billAmountPerHundred: 0.0,
           noOfInstall: 100,

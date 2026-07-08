@@ -63,3 +63,18 @@ class DeleteLineSubmitted extends SettingsEvent {
   final String id;
   DeleteLineSubmitted(this.id);
 }
+
+class AddLineTypeSubmitted extends SettingsEvent {
+  final LineTypeEntity lineType;
+  AddLineTypeSubmitted(this.lineType);
+}
+
+class UpdateLineTypeSubmitted extends SettingsEvent {
+  final LineTypeEntity lineType;
+  UpdateLineTypeSubmitted(this.lineType);
+}
+
+class DeleteLineTypeSubmitted extends SettingsEvent {
+  final String id;
+  DeleteLineTypeSubmitted(this.id);
+}

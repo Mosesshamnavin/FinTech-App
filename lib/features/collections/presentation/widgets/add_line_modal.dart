@@ -4,6 +4,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../../settings/domain/entities/settings_entities.dart';
 import '../../../settings/presentation/bloc/settings_bloc.dart';
 import '../../../settings/presentation/bloc/settings_event.dart';
+import '../../../settings/presentation/bloc/settings_state.dart';
 
 class AddLineModal extends StatefulWidget {
   final LineEntity? line;
@@ -14,7 +15,8 @@ class AddLineModal extends StatefulWidget {
 }
 
 class _AddLineModalState extends State<AddLineModal> {
-  String? _selectedLineType;
+  String? _selectedLineTypeId;
+  String? _selectedLineTypeName;
   bool _isLineTypeOpen = false;
   bool _closeLoanManually = false;
   bool _enablePenalty = false;
@@ -31,7 +33,8 @@ class _AddLineModalState extends State<AddLineModal> {
     super.initState();
     if (widget.line != null) {
       _nameController.text = widget.line!.name;
-      _selectedLineType = widget.line!.type;
+      _selectedLineTypeId = widget.line!.lineTypeId;
+      _selectedLineTypeName = widget.line!.lineTypeName;
       _closeLoanManually = widget.line!.closeLoanManually;
       _enablePenalty = widget.line!.enablePenalty;
       _keepPaidCustomer = widget.line!.keepPaidCustomer;
@@ -58,17 +61,7 @@ class _AddLineModalState extends State<AddLineModal> {
     ExpansionTileController(),
   ];
 
-  List<String> get _lineTypes => [
-    'Daily',
-    'Weekly',
-    'Monthly',
-    'Monthly(Interest)',
-    'Enterprise',
-    'Auto Finance',
-    'Gold Loan',
-  ];
-
-  void _showLineTypeDialog() async {
+  void _showLineTypeDialog(List<LineTypeEntity> lineTypes) async {
     setState(() {
       _isLineTypeOpen = true;
     });
@@ -83,17 +76,19 @@ class _AddLineModalState extends State<AddLineModal> {
               content: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
-                  children: _lineTypes.map((type) {
+                  children: lineTypes.map((type) {
                     return RadioListTile<String>(
-                      title: Text(type),
-                      value: type,
-                      groupValue: _selectedLineType,
+                      title: Text(type.name),
+                      value: type.id,
+                      groupValue: _selectedLineTypeId,
                       onChanged: (value) {
                         setDialogState(() {
-                          _selectedLineType = value;
+                          _selectedLineTypeId = value;
+                          _selectedLineTypeName = type.name;
                         });
                         setState(() {
-                          _selectedLineType = value;
+                          _selectedLineTypeId = value;
+                          _selectedLineTypeName = type.name;
                         });
                       },
                     );
@@ -124,6 +119,12 @@ class _AddLineModalState extends State<AddLineModal> {
 
   @override
   Widget build(BuildContext context) {
+    final settingsState = context.read<SettingsBloc>().state;
+    List<LineTypeEntity> lineTypes = [];
+    if (settingsState is SettingsLoaded) {
+      lineTypes = settingsState.lineTypes.where((t) => t.isActive).toList();
+    }
+
     return Dialog.fullscreen(
       child: Scaffold(
         appBar: AppBar(
@@ -143,7 +144,7 @@ class _AddLineModalState extends State<AddLineModal> {
                 children: [
                   _buildTextField('Line Name', _nameController),
                   GestureDetector(
-                    onTap: _showLineTypeDialog,
+                    onTap: () => _showLineTypeDialog(lineTypes),
                     behavior: HitTestBehavior.opaque,
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
@@ -156,7 +157,7 @@ class _AddLineModalState extends State<AddLineModal> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            _selectedLineType ?? 'Line Type',
+                            _selectedLineTypeName ?? 'Line Type',
                             style: TextStyle(fontSize: 16, color: _isLineTypeOpen ? Colors.redAccent : Theme.of(context).colorScheme.onSurface),
                           ),
                           Icon(
@@ -186,14 +187,15 @@ class _AddLineModalState extends State<AddLineModal> {
                 children: [
                   ElevatedButton(
                     onPressed: () {
-                      if (_nameController.text.trim().isEmpty || _selectedLineType == null) {
+                      if (_nameController.text.trim().isEmpty || _selectedLineTypeId == null) {
                         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please fill Line Name and Type')));
                         return;
                       }
                       final newLine = LineEntity(
                         id: widget.line?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
                         name: _nameController.text.trim(),
-                        type: _selectedLineType!,
+                        lineTypeId: _selectedLineTypeId!,
+                        lineTypeName: _selectedLineTypeName ?? '',
                         interestPerHundred: double.tryParse(_interestController.text) ?? 0.0,
                         billAmountPerHundred: double.tryParse(_billAmountController.text) ?? 0.0,
                         noOfInstall: int.tryParse(_installController.text) ?? 0,
