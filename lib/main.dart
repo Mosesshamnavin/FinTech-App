@@ -1,5 +1,6 @@
 import 'core/theme/app_theme.dart';
 import 'core/services/storage_service.dart';
+import 'core/services/notification_service.dart';
 import 'core/services/app_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -82,6 +83,8 @@ void main() async {
   final savedTheme = di.sl<StorageService>().getString('app_theme', defaultValue: 'Blue');
   AppTheme.themeNotifier.value = savedTheme;
   AppLocalization.init(di.sl<StorageService>());
+  // Initialize local notifications
+  await di.sl<NotificationService>().init();
   runApp(const MyApp());
 }
 
@@ -115,7 +118,7 @@ final GoRouter _router = GoRouter(
     ),
 
     GoRoute(
-      path: '/forgot-password',
+      path: '/forgot-password', 
       builder: (context, state) => const ForgotPasswordPage(),
     ),
     StatefulShellRoute.indexedStack(

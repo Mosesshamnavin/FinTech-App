@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../services/storage_service.dart';
 import '../services/sms_service.dart';
+import '../services/notification_service.dart';
 import '../../features/auth/data/datasources/auth_local_datasource.dart';
 import '../../features/auth/data/datasources/auth_remote_datasource.dart';
 import '../../features/auth/data/repositories/auth_repository_impl.dart';
@@ -87,6 +88,7 @@ Future<void> initDependencies() async {
   sl.registerLazySingleton(() => sharedPreferences);
   sl.registerLazySingleton(() => StorageService(sl()));
   sl.registerLazySingleton(() => SmsService(storageService: sl(), loanRemoteDataSource: sl()));
+  sl.registerLazySingleton(() => NotificationService());
 
   // GraphQLService now reads JWT from StorageService dynamically per request
   sl.registerLazySingleton(() => GraphQLService(storageService: sl<StorageService>()));

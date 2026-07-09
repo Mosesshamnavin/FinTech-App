@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/di/injection_container.dart';
+import '../../../../core/services/storage_service.dart';
+import '../../../../core/services/notification_service.dart';
 import '../bloc/collections_bloc.dart';
 import '../bloc/collections_event.dart';
 import '../bloc/collections_state.dart';
@@ -36,6 +39,38 @@ class _AddReminderModalState extends State<AddReminderModal> {
     }
   }
 
+  /// Schedule a local notification for the reminder date at 8:00 AM.
+  void _scheduleReminderNotification() {
+    final notificationsEnabled = sl<StorageService>().getBool('notifications_enabled', defaultValue: true);
+    if (!notificationsEnabled) return;
+
+    final dateText = _dateController.text.trim();
+    final reminderText = _textController.text.trim();
+    if (dateText.isEmpty) return;
+
+    try {
+      // Parse dd/MM/yyyy format
+      final parts = dateText.split('/');
+      final day = int.parse(parts[0]);
+      final month = int.parse(parts[1]);
+      final year = int.parse(parts[2]);
+      final scheduledDate = DateTime(year, month, day, 8, 0); // 8:00 AM
+
+      // Generate a unique notification ID from the date
+      final notificationId = year * 10000 + month * 100 + day;
+
+      sl<NotificationService>().scheduleNotification(
+        id: notificationId,
+        title: '📋 Reminder',
+        body: reminderText,
+        scheduledDate: scheduledDate,
+        payload: 'reminder_$dateText',
+      );
+    } catch (e) {
+      print('Failed to schedule notification: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocListener<CollectionsBloc, CollectionsState>(
@@ -44,6 +79,8 @@ class _AddReminderModalState extends State<AddReminderModal> {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Reminder saved successfully')),
           );
+          // Schedule a local notification if notifications are enabled
+          _scheduleReminderNotification();
           Navigator.of(context).pop(true);
         } else if (state is AddReminderActionError) {
           ScaffoldMessenger.of(context).showSnackBar(

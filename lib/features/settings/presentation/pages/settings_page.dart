@@ -6,6 +6,7 @@ import '../../../../core/theme/app_theme.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/di/injection_container.dart';
 import '../../../../core/services/storage_service.dart';
+import '../../../../core/services/notification_service.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_event.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -71,6 +72,21 @@ class SettingsPage extends StatelessWidget {
               }),
               const _FingerprintToggleTile(),
               const _SecurityAlertToggleTile(),
+              const _NotificationToggleTile(),
+              _buildListTile(FontAwesomeIcons.solidBell, 'Test Notification', onTap: () {
+                final isEnabled = sl<StorageService>().getBool('notifications_enabled', defaultValue: true);
+                if (!isEnabled) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Notifications are currently disabled. Enable them first!')),
+                  );
+                  return;
+                }
+                sl<NotificationService>().showNow(
+                  id: 999,
+                  title: 'Test Successful! 🎉',
+                  body: 'Your local notifications are working perfectly.',
+                );
+              }),
               _buildListTile(FontAwesomeIcons.lock, 'Change Password', onTap: () {
                 context.go('/settings/change-password');
               }),
@@ -266,3 +282,57 @@ class _SecurityAlertToggleTileState extends State<_SecurityAlertToggleTile> {
     );
   }
 }
+
+class _NotificationToggleTile extends StatefulWidget {
+  const _NotificationToggleTile();
+
+  @override
+  State<_NotificationToggleTile> createState() => _NotificationToggleTileState();
+}
+
+class _NotificationToggleTileState extends State<_NotificationToggleTile> {
+  bool _isEnabled = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _isEnabled = sl<StorageService>().getBool('notifications_enabled', defaultValue: true);
+  }
+
+  Future<void> _toggleNotifications(bool newValue) async {
+    final storage = sl<StorageService>();
+    final notificationService = sl<NotificationService>();
+
+    await storage.setBool('notifications_enabled', newValue);
+
+    if (!newValue) {
+      // Cancel all pending notifications when disabled
+      try {
+        await notificationService.cancelAll();
+      } catch (e) {
+        print('Error canceling notifications: $e');
+      }
+    }
+
+    setState(() {
+      _isEnabled = newValue;
+    });
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Notifications ${newValue ? "enabled" : "disabled"} successfully!')),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SwitchListTile(
+      secondary: FaIcon(FontAwesomeIcons.bell, color: Colors.grey[700], size: 20),
+      title: Text('Enable Notifications'.tr()),
+      value: _isEnabled,
+      onChanged: _toggleNotifications,
+    );
+  }
+}
+
