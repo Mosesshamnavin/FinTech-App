@@ -56,3 +56,16 @@ This document tracks completed achievements and pending todo tasks for the proje
 - [x] **Pending Balance Display**: Updated the dropdown to clearly display the remaining pending balance of a loan to prevent over-collection.
 - [x] **Precise Collection Allocation**: Updated Hasura SQL triggers to respect explicitly selected `loan_id` assignments when customers have multiple active loans.
 - [x] **Chronological Timeline**: Fixed GraphQL query sorting in the timeline to accurately order multiple same-day payments by exact timestamp.
+
+### 🔔 Notifications & Dynamic Data (Recent Work)
+- [x] **Local Notifications (Reminders)**: Integrated `flutter_local_notifications` and `timezone` to automatically schedule background push notifications at 8:00 AM on the dates chosen in the Add Reminder modal.
+- [x] **Dynamic Line Types**: Replaced hardcoded line types with a dynamic Hasura `line_types` table. Built full CRUD UI in `line_type_page.dart` and wired it into the Add Line dropdown.
+- [x] **Settings Page Streamlining**: Replaced redundant sub-pages for `Enable Fingerprint` and `Enable Security Alert` with clean, direct toggle switches directly on the main Settings page.
+
+---
+
+## ⏳ Pending Tasks
+- [ ] **Email OTP Integration**: (On Hold) Connect Resend/SendGrid for Forgot Password and Security Alerts (waiting on team discussion).
+- [ ] **Transparent Notification Icon**: (Visual Polish) User to provide a transparent white PNG logo (`ic_notification.png`) to fix the default grey Android box.
+- [ ] **Firebase Push Notifications**: (Optional) Integrate FCM if remote server-triggered announcements are needed.
+- [ ] **Final QA & Bug Fixes**: Test all edge cases before release.

@@ -9,9 +9,12 @@ Vasool Drive is a premium, comprehensive microfinance and daily collection manag
 - **🔒 Auth & Security**:
   - Secure login/registration flows with complete profile data synchronization (email, mobile, roles).
   - In-app **Change Password** directly linked to Hasura.
-  - Custom preference toggles for **Fingerprint Auth** and **OTP Security Alerts** verified against your credentials.
+  - Unified Settings UI with direct toggles for **Biometric Auth** and **Security Alerts**.
+- **🔔 Notifications & Reminders**:
+  - **Local Push Notifications**: Automated background scheduling for daily vasool reminders at 8:00 AM using `flutter_local_notifications` and `timezone`.
 - **💰 Collections & Loan Management (Vasool)**:
   - Record daily payments, assign new loans, and view active/completed loan progress.
+  - **Dynamic Line Types**: Manage line categories natively via Hasura dynamic tables instead of hardcoded enumerations.
   - Interactive calculator modal to compute loan schedules on the fly.
   - Timeline-style daily summaries and card metrics on the main dashboard.
   - **Multiple Active Loans**: Automatically calculates and allocates daily payments to explicitly assigned loans, supporting customers with multiple overlapping loans.
