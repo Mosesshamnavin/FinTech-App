@@ -72,7 +72,8 @@ class NotificationService {
       channelDescription: 'Notifications for reminders and alerts',
       importance: Importance.high,
       priority: Priority.high,
-      icon: '@mipmap/launcher_icon',
+      icon: '@drawable/ic_notification',
+      largeIcon: const DrawableResourceAndroidBitmap('@mipmap/launcher_icon'),
       styleInformation: BigTextStyleInformation(body),
     );
 
@@ -121,7 +122,8 @@ class NotificationService {
       channelDescription: 'Notifications for reminders and alerts',
       importance: Importance.high,
       priority: Priority.high,
-      icon: '@mipmap/launcher_icon',
+      icon: '@drawable/ic_notification',
+      largeIcon: const DrawableResourceAndroidBitmap('@mipmap/launcher_icon'),
       styleInformation: BigTextStyleInformation(body),
     );
 
