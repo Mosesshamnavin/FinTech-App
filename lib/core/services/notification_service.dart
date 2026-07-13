@@ -38,15 +38,17 @@ class NotificationService {
       onDidReceiveNotificationResponse: _onNotificationTapped,
     );
 
-    // Request notification permissions on Android 13+
+    _isInitialized = true;
+  }
+
+  /// Request permissions on Android 13+. Call this AFTER the first UI frame is drawn.
+  Future<void> requestPermissions() async {
     final androidPlugin = _plugin.resolvePlatformSpecificImplementation<
         AndroidFlutterLocalNotificationsPlugin>();
     if (androidPlugin != null) {
       await androidPlugin.requestNotificationsPermission();
       await androidPlugin.requestExactAlarmsPermission();
     }
-
-    _isInitialized = true;
   }
 
   /// Called when user taps a notification

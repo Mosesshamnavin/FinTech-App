@@ -303,6 +303,11 @@ class _NotificationToggleTileState extends State<_NotificationToggleTile> {
     final storage = sl<StorageService>();
     final notificationService = sl<NotificationService>();
 
+    if (newValue) {
+      // Safely request permissions when the user explicitly enables them in Settings
+      await notificationService.requestPermissions();
+    }
+
     await storage.setBool('notifications_enabled', newValue);
 
     if (!newValue) {

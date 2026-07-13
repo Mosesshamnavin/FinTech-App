@@ -1,6 +1,6 @@
-# Vasool Drive (PayTrack) 🚀
+# Sri Vinayaga Finance 🚀
 
-Vasool Drive is a premium, comprehensive microfinance and daily collection management system built with Flutter. It streamlines daily collections (vasool), loan histories, customer tracking, expense logging, and line accounting for field agents and lenders.
+Sri Vinayaga Finance is a premium, comprehensive microfinance and daily collection management system built with Flutter. It streamlines daily collections (vasool), loan histories, customer tracking, expense logging, and line accounting for field agents and lenders.
 
 ---
 

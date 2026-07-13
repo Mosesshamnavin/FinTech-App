@@ -7,6 +7,7 @@ import '../../../../features/auth/presentation/bloc/auth_state.dart';
 import '../../../../features/auth/presentation/bloc/auth_event.dart';
 import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/services/storage_service.dart';
+import '../../../../core/services/notification_service.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -28,6 +29,11 @@ class _SplashPageState extends State<SplashPage> with SingleTickerProviderStateM
     );
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(_controller);
     _controller.forward();
+
+    // Safely request notification permissions on Android 13+ AFTER the first frame renders
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      di.sl<NotificationService>().requestPermissions();
+    });
 
     // Navigate based on Auth State after 1.5 seconds
     Future.delayed(const Duration(milliseconds: 1500), () async {

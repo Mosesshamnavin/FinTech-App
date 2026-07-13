@@ -151,7 +151,7 @@ final GoRouter _router = GoRouter(
           navigatorKey: _sectionBNavigatorKey,
           routes: [
             GoRoute(
-              path: '/expenses',
+              path: '/expenses', 
               builder: (context, state) => BlocProvider<ExpensesBloc>(
                 create: (_) => sl<ExpensesBloc>(),
                 child: const ExpensesPage(),
