@@ -1,6 +1,8 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../../settings/domain/entities/settings_entities.dart';
 import '../../../settings/presentation/bloc/settings_bloc.dart';
 import '../../../settings/presentation/bloc/settings_event.dart';
@@ -27,6 +29,9 @@ class _AddLineModalState extends State<AddLineModal> {
   final TextEditingController _billAmountController = TextEditingController();
   final TextEditingController _installController = TextEditingController();
   final TextEditingController _badLoanDaysController = TextEditingController();
+
+  final List<String?> _qrImagePaths = [null, null, null];
+  final ImagePicker _picker = ImagePicker();
 
   @override
   void initState() {
@@ -294,8 +299,10 @@ class _AddLineModalState extends State<AddLineModal> {
                     ),
                     child: Stack(
                       children: [
-                        const Center(
-                          child: Icon(Icons.image, size: 48, color: Colors.grey),
+                        Center(
+                          child: _qrImagePaths[index] != null 
+                              ? Image.file(File(_qrImagePaths[index]!), fit: BoxFit.cover)
+                              : const Icon(Icons.image, size: 48, color: Colors.grey),
                         ),
                         Positioned(
                           bottom: 8,
@@ -303,14 +310,44 @@ class _AddLineModalState extends State<AddLineModal> {
                           child: Row(
                             children: [
                               IconButton(
-                                onPressed: () {},
-                                icon: Icon(Icons.camera_alt, color: Colors.white),
+                                onPressed: () {
+                                  showModalBottomSheet(
+                                    context: context,
+                                    builder: (ctx) => SafeArea(
+                                      child: Wrap(
+                                        children: [
+                                          ListTile(
+                                            leading: const Icon(Icons.photo_library),
+                                            title: const Text('Choose from Gallery'),
+                                            onTap: () {
+                                              Navigator.of(ctx).pop();
+                                              _pickImage(index, ImageSource.gallery);
+                                            },
+                                          ),
+                                          ListTile(
+                                            leading: const Icon(Icons.camera_alt),
+                                            title: const Text('Take a Photo'),
+                                            onTap: () {
+                                              Navigator.of(ctx).pop();
+                                              _pickImage(index, ImageSource.camera);
+                                            },
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                },
+                                icon: const Icon(Icons.camera_alt, color: Colors.white),
                                 style: IconButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.primary, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4))),
                               ),
                               const SizedBox(width: 8),
                               IconButton(
-                                onPressed: () {},
-                                icon: Icon(Icons.delete, color: Colors.white),
+                                onPressed: () {
+                                  setState(() {
+                                    _qrImagePaths[index] = null;
+                                  });
+                                },
+                                icon: const Icon(Icons.delete, color: Colors.white),
                                 style: IconButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.primary, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4))),
                               ),
                             ],
@@ -327,5 +364,14 @@ class _AddLineModalState extends State<AddLineModal> {
         const Divider(height: 1),
       ],
     );
+  }
+
+  Future<void> _pickImage(int index, ImageSource source) async {
+    final XFile? pickedFile = await _picker.pickImage(source: source);
+    if (pickedFile != null) {
+      setState(() {
+        _qrImagePaths[index] = pickedFile.path;
+      });
+    }
   }
 }
