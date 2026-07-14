@@ -51,7 +51,7 @@ class _SplashPageState extends State<SplashPage> with SingleTickerProviderStateM
             
             try {
               didAuthenticate = await localAuth.authenticate(
-                localizedReason: 'Scan your fingerprint or face to unlock Vasool Drive',
+                localizedReason: 'Unlock securely with your fingerprint or Face ID.',
                 biometricOnly: true,
               );
             } catch (e) {

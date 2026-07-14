@@ -68,9 +68,22 @@ class _AddCashOutModalState extends State<AddCashOutModal> {
                 children: [
                   BlocBuilder<SettingsBloc, SettingsState>(
                     builder: (context, state) {
-                      if (state is SettingsLoaded) {
+                      if (state is SettingsLoading) {
+                        return const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 16.0),
+                          child: Center(child: CircularProgressIndicator()),
+                        );
+                      } else if (state is SettingsError) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 16.0),
+                          child: Text(
+                            'Error loading lines: ${state.message}\n(Please check internet and Hasura permissions)',
+                            style: const TextStyle(color: Colors.red),
+                          ),
+                        );
+                      } else if (state is SettingsLoaded) {
                         return DropdownButtonFormField<String>(
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             contentPadding: EdgeInsets.symmetric(vertical: 8.0),
                           ),
                           isExpanded: true,

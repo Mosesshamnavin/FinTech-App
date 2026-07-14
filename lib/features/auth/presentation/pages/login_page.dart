@@ -6,6 +6,7 @@ import '../../../../core/di/injection_container.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
+import '../../../../features/settings/presentation/pages/support_page.dart';
 
 class LoginPage extends StatelessWidget {
   const LoginPage({super.key});
@@ -184,7 +185,12 @@ class _LoginViewState extends State<_LoginView> {
                   const SizedBox(height: 64),
                   Center(
                     child: TextButton(
-                      onPressed: () => context.go('/settings/support'),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const SupportPage()),
+                        );
+                      },
                       child: const Text(
                         'Support',
                         style: TextStyle(color: Colors.lightBlue, fontSize: 16),

@@ -184,7 +184,7 @@ class _FingerprintToggleTileState extends State<_FingerprintToggleTile> {
         bool biometricSuccess = false;
         try {
           biometricSuccess = await localAuth.authenticate(
-            localizedReason: 'Scan your fingerprint or face to enable biometric login',
+            localizedReason: 'Unlock securely with your fingerprint or Face ID.',
             biometricOnly: true,
           );
         } catch (e) {

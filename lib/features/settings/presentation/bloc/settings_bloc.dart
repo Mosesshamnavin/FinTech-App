@@ -102,95 +102,300 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
   }
 
   Future<void> _onAddLineType(AddLineTypeSubmitted event, Emitter<SettingsState> emit) async {
+    final currentState = state;
     emit(SettingsLoading());
     final result = await addLineType(event.lineType);
-    result.fold((f) => emit(SettingsError(f.message)), (_) => add(LoadSettingsRequested()));
+    result.fold((f) => emit(SettingsError(f.message)), (newItem) {
+      if (currentState is SettingsLoaded) {
+        emit(SettingsLoaded(
+          expenseTypes: currentState.expenseTypes,
+          investmentTypes: currentState.investmentTypes,
+          areas: currentState.areas,
+          lineTypes: [...currentState.lineTypes, newItem],
+          lines: currentState.lines,
+        ));
+      } else {
+        add(LoadSettingsRequested());
+      }
+    });
   }
 
   Future<void> _onUpdateLineType(UpdateLineTypeSubmitted event, Emitter<SettingsState> emit) async {
+    final currentState = state;
     emit(SettingsLoading());
     final result = await updateLineType(event.lineType);
-    result.fold((f) => emit(SettingsError(f.message)), (_) => add(LoadSettingsRequested()));
+    result.fold((f) => emit(SettingsError(f.message)), (_) {
+      if (currentState is SettingsLoaded) {
+        final updatedList = currentState.lineTypes.map((e) => e.id == event.lineType.id ? event.lineType : e).toList();
+        emit(SettingsLoaded(
+          expenseTypes: currentState.expenseTypes,
+          investmentTypes: currentState.investmentTypes,
+          areas: currentState.areas,
+          lineTypes: updatedList,
+          lines: currentState.lines,
+        ));
+      } else {
+        add(LoadSettingsRequested());
+      }
+    });
   }
 
   Future<void> _onDeleteLineType(DeleteLineTypeSubmitted event, Emitter<SettingsState> emit) async {
+    final currentState = state;
     emit(SettingsLoading());
     final result = await deleteLineType(event.id);
-    result.fold((f) => emit(SettingsError(f.message)), (_) => add(LoadSettingsRequested()));
+    result.fold((f) => emit(SettingsError(f.message)), (_) {
+      if (currentState is SettingsLoaded) {
+        final updatedList = currentState.lineTypes.where((e) => e.id != event.id).toList();
+        emit(SettingsLoaded(
+          expenseTypes: currentState.expenseTypes,
+          investmentTypes: currentState.investmentTypes,
+          areas: currentState.areas,
+          lineTypes: updatedList,
+          lines: currentState.lines,
+        ));
+      } else {
+        add(LoadSettingsRequested());
+      }
+    });
   }
 
   Future<void> _onAddExpenseType(AddExpenseTypeSubmitted event, Emitter<SettingsState> emit) async {
+    final currentState = state;
     emit(SettingsLoading());
     final result = await addExpenseType(event.expenseType);
-    result.fold((f) => emit(SettingsError(f.message)), (_) => add(LoadSettingsRequested()));
+    result.fold((f) => emit(SettingsError(f.message)), (newItem) {
+      if (currentState is SettingsLoaded) {
+        emit(SettingsLoaded(
+          expenseTypes: [...currentState.expenseTypes, newItem],
+          investmentTypes: currentState.investmentTypes,
+          areas: currentState.areas,
+          lineTypes: currentState.lineTypes,
+          lines: currentState.lines,
+        ));
+      } else {
+        add(LoadSettingsRequested());
+      }
+    });
   }
 
   Future<void> _onUpdateExpenseType(UpdateExpenseTypeSubmitted event, Emitter<SettingsState> emit) async {
+    final currentState = state;
     emit(SettingsLoading());
     final result = await updateExpenseType(event.expenseType);
-    result.fold((f) => emit(SettingsError(f.message)), (_) => add(LoadSettingsRequested()));
+    result.fold((f) => emit(SettingsError(f.message)), (_) {
+      if (currentState is SettingsLoaded) {
+        final updatedList = currentState.expenseTypes.map((e) => e.id == event.expenseType.id ? event.expenseType : e).toList();
+        emit(SettingsLoaded(
+          expenseTypes: updatedList,
+          investmentTypes: currentState.investmentTypes,
+          areas: currentState.areas,
+          lineTypes: currentState.lineTypes,
+          lines: currentState.lines,
+        ));
+      } else {
+        add(LoadSettingsRequested());
+      }
+    });
   }
 
   Future<void> _onDeleteExpenseType(DeleteExpenseTypeSubmitted event, Emitter<SettingsState> emit) async {
+    final currentState = state;
     emit(SettingsLoading());
     final result = await deleteExpenseType(event.id);
-    result.fold((f) => emit(SettingsError(f.message)), (_) => add(LoadSettingsRequested()));
+    result.fold((f) => emit(SettingsError(f.message)), (_) {
+      if (currentState is SettingsLoaded) {
+        final updatedList = currentState.expenseTypes.where((e) => e.id != event.id).toList();
+        emit(SettingsLoaded(
+          expenseTypes: updatedList,
+          investmentTypes: currentState.investmentTypes,
+          areas: currentState.areas,
+          lineTypes: currentState.lineTypes,
+          lines: currentState.lines,
+        ));
+      } else {
+        add(LoadSettingsRequested());
+      }
+    });
   }
 
   Future<void> _onAddInvestmentType(AddInvestmentTypeSubmitted event, Emitter<SettingsState> emit) async {
+    final currentState = state;
     emit(SettingsLoading());
     final result = await addInvestmentType(event.investmentType);
-    result.fold((f) => emit(SettingsError(f.message)), (_) => add(LoadSettingsRequested()));
+    result.fold((f) => emit(SettingsError(f.message)), (newItem) {
+      if (currentState is SettingsLoaded) {
+        emit(SettingsLoaded(
+          expenseTypes: currentState.expenseTypes,
+          investmentTypes: [...currentState.investmentTypes, newItem],
+          areas: currentState.areas,
+          lineTypes: currentState.lineTypes,
+          lines: currentState.lines,
+        ));
+      } else {
+        add(LoadSettingsRequested());
+      }
+    });
   }
 
   Future<void> _onUpdateInvestmentType(UpdateInvestmentTypeSubmitted event, Emitter<SettingsState> emit) async {
+    final currentState = state;
     emit(SettingsLoading());
     final result = await updateInvestmentType(event.investmentType);
-    result.fold((f) => emit(SettingsError(f.message)), (_) => add(LoadSettingsRequested()));
+    result.fold((f) => emit(SettingsError(f.message)), (_) {
+      if (currentState is SettingsLoaded) {
+        final updatedList = currentState.investmentTypes.map((e) => e.id == event.investmentType.id ? event.investmentType : e).toList();
+        emit(SettingsLoaded(
+          expenseTypes: currentState.expenseTypes,
+          investmentTypes: updatedList,
+          areas: currentState.areas,
+          lineTypes: currentState.lineTypes,
+          lines: currentState.lines,
+        ));
+      } else {
+        add(LoadSettingsRequested());
+      }
+    });
   }
 
   Future<void> _onDeleteInvestmentType(DeleteInvestmentTypeSubmitted event, Emitter<SettingsState> emit) async {
+    final currentState = state;
     emit(SettingsLoading());
     final result = await deleteInvestmentType(event.id);
-    result.fold((f) => emit(SettingsError(f.message)), (_) => add(LoadSettingsRequested()));
+    result.fold((f) => emit(SettingsError(f.message)), (_) {
+      if (currentState is SettingsLoaded) {
+        final updatedList = currentState.investmentTypes.where((e) => e.id != event.id).toList();
+        emit(SettingsLoaded(
+          expenseTypes: currentState.expenseTypes,
+          investmentTypes: updatedList,
+          areas: currentState.areas,
+          lineTypes: currentState.lineTypes,
+          lines: currentState.lines,
+        ));
+      } else {
+        add(LoadSettingsRequested());
+      }
+    });
   }
 
   Future<void> _onAddArea(AddAreaSubmitted event, Emitter<SettingsState> emit) async {
+    final currentState = state;
     emit(SettingsLoading());
     final result = await addArea(event.area);
-    result.fold((f) => emit(SettingsError(f.message)), (_) => add(LoadSettingsRequested()));
+    result.fold((f) => emit(SettingsError(f.message)), (newItem) {
+      if (currentState is SettingsLoaded) {
+        emit(SettingsLoaded(
+          expenseTypes: currentState.expenseTypes,
+          investmentTypes: currentState.investmentTypes,
+          areas: [...currentState.areas, newItem],
+          lineTypes: currentState.lineTypes,
+          lines: currentState.lines,
+        ));
+      } else {
+        add(LoadSettingsRequested());
+      }
+    });
   }
 
   Future<void> _onUpdateArea(UpdateAreaSubmitted event, Emitter<SettingsState> emit) async {
+    final currentState = state;
     emit(SettingsLoading());
     final result = await updateArea(event.area);
-    result.fold((f) => emit(SettingsError(f.message)), (_) => add(LoadSettingsRequested()));
+    result.fold((f) => emit(SettingsError(f.message)), (_) {
+      if (currentState is SettingsLoaded) {
+        final updatedList = currentState.areas.map((e) => e.id == event.area.id ? event.area : e).toList();
+        emit(SettingsLoaded(
+          expenseTypes: currentState.expenseTypes,
+          investmentTypes: currentState.investmentTypes,
+          areas: updatedList,
+          lineTypes: currentState.lineTypes,
+          lines: currentState.lines,
+        ));
+      } else {
+        add(LoadSettingsRequested());
+      }
+    });
   }
 
   Future<void> _onDeleteArea(DeleteAreaSubmitted event, Emitter<SettingsState> emit) async {
+    final currentState = state;
     emit(SettingsLoading());
     final result = await deleteArea(event.id);
-    result.fold((f) => emit(SettingsError(f.message)), (_) => add(LoadSettingsRequested()));
+    result.fold((f) => emit(SettingsError(f.message)), (_) {
+      if (currentState is SettingsLoaded) {
+        final updatedList = currentState.areas.where((e) => e.id != event.id).toList();
+        emit(SettingsLoaded(
+          expenseTypes: currentState.expenseTypes,
+          investmentTypes: currentState.investmentTypes,
+          areas: updatedList,
+          lineTypes: currentState.lineTypes,
+          lines: currentState.lines,
+        ));
+      } else {
+        add(LoadSettingsRequested());
+      }
+    });
   }
 
   Future<void> _onAddLine(AddLineSubmitted event, Emitter<SettingsState> emit) async {
+    final currentState = state;
     emit(SettingsLoading());
     final result = await addLine(event.line);
-    result.fold((f) => emit(SettingsError(f.message)), (_) => add(LoadSettingsRequested()));
+    result.fold((f) => emit(SettingsError(f.message)), (newItem) {
+      if (currentState is SettingsLoaded) {
+        emit(SettingsLoaded(
+          expenseTypes: currentState.expenseTypes,
+          investmentTypes: currentState.investmentTypes,
+          areas: currentState.areas,
+          lineTypes: currentState.lineTypes,
+          lines: [...currentState.lines, newItem],
+        ));
+      } else {
+        add(LoadSettingsRequested());
+      }
+    });
   }
 
   Future<void> _onUpdateLine(UpdateLineSubmitted event, Emitter<SettingsState> emit) async {
+    final currentState = state;
     emit(SettingsLoading());
     final result = await updateLine(event.line);
     result.fold((f) {
       print('Error in _onUpdateLine: ${f.message}');
       emit(SettingsError(f.message));
-    }, (_) => add(LoadSettingsRequested()));
+    }, (_) {
+      if (currentState is SettingsLoaded) {
+        final updatedList = currentState.lines.map((e) => e.id == event.line.id ? event.line : e).toList();
+        emit(SettingsLoaded(
+          expenseTypes: currentState.expenseTypes,
+          investmentTypes: currentState.investmentTypes,
+          areas: currentState.areas,
+          lineTypes: currentState.lineTypes,
+          lines: updatedList,
+        ));
+      } else {
+        add(LoadSettingsRequested());
+      }
+    });
   }
 
   Future<void> _onDeleteLine(DeleteLineSubmitted event, Emitter<SettingsState> emit) async {
+    final currentState = state;
     emit(SettingsLoading());
     final result = await deleteLine(event.id);
-    result.fold((f) => emit(SettingsError(f.message)), (_) => add(LoadSettingsRequested()));
+    result.fold((f) => emit(SettingsError(f.message)), (_) {
+      if (currentState is SettingsLoaded) {
+        final updatedList = currentState.lines.where((e) => e.id != event.id).toList();
+        emit(SettingsLoaded(
+          expenseTypes: currentState.expenseTypes,
+          investmentTypes: currentState.investmentTypes,
+          areas: currentState.areas,
+          lineTypes: currentState.lineTypes,
+          lines: updatedList,
+        ));
+      } else {
+        add(LoadSettingsRequested());
+      }
+    });
   }
 }
