@@ -148,11 +148,11 @@ class _CollectionsViewState extends State<_CollectionsView> {
             title: Text('Collection'.tr()),
             actions: [
               IconButton(
-                icon: const FaIcon(FontAwesomeIcons.wallet, size: 20),
+                icon: const Icon(Icons.account_balance_wallet_outlined, size: 24),
                 onPressed: () => context.push('/collections/cashout'),
               ),
               IconButton(
-                icon: const FaIcon(FontAwesomeIcons.calculator, size: 20),
+                icon: const Icon(Icons.calculate_outlined, size: 24),
                 onPressed: () {
                   showDialog(
                     context: context,
@@ -161,7 +161,7 @@ class _CollectionsViewState extends State<_CollectionsView> {
                 },
               ),
               IconButton(
-                icon: const FaIcon(FontAwesomeIcons.bell, size: 20),
+                icon: const Icon(Icons.notifications_outlined, size: 24),
                 onPressed: () => context.push('/collections/reminders'),
               ),
             ],
@@ -181,7 +181,7 @@ class _CollectionsViewState extends State<_CollectionsView> {
                         labelText: 'Date'.tr(),
                         suffixIcon: Padding(
                           padding: const EdgeInsets.only(top: 14.0, bottom: 14.0),
-                          child: FaIcon(FontAwesomeIcons.calendarDay, color: context.accent, size: 20),
+                          child: Icon(Icons.calendar_month_outlined, color: context.accent, size: 24),
                         ),
                       ),
                     ),

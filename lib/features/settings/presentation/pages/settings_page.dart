@@ -26,54 +26,54 @@ class SettingsPage extends StatelessWidget {
           ),
           body: ListView(
             children: [
-              _buildListTile(FontAwesomeIcons.circleQuestion, 'Support', onTap: () {
+              _buildListTile(Icons.help_outline, 'Support', onTap: () {
                 context.go('/settings/support');
               }),
-              _buildListTile(FontAwesomeIcons.key, 'License', onTap: () {
+              _buildListTile(Icons.vpn_key_outlined, 'License', onTap: () {
                 context.go('/settings/license');
               }),
               const Divider(),
-              _buildListTile(FontAwesomeIcons.list, 'Line Type', onTap: () {
+              _buildListTile(Icons.format_list_bulleted_outlined, 'Line Type', onTap: () {
                 context.go('/settings/line-type');
               }),
-              _buildListTile(FontAwesomeIcons.moneyBillWave, 'Line', onTap: () {
+              _buildListTile(Icons.receipt_long_outlined, 'Line', onTap: () {
                 context.go('/settings/line');
               }),
-              _buildListTile(FontAwesomeIcons.cloudArrowDown, 'Import Line', onTap: () {
+              _buildListTile(Icons.cloud_download_outlined, 'Import Line', onTap: () {
                 context.go('/settings/import-line');
               }),
-              _buildListTile(FontAwesomeIcons.cloudArrowUp, 'Export Line', onTap: () {
+              _buildListTile(Icons.cloud_upload_outlined, 'Export Line', onTap: () {
                 context.go('/settings/export-line');
               }),
               const Divider(),
-              _buildListTile(FontAwesomeIcons.locationCrosshairs, 'Area', onTap: () {
+              _buildListTile(Icons.my_location_outlined, 'Area', onTap: () {
                 context.go('/settings/area');
               }),
               const Divider(),
-              _buildListTile(FontAwesomeIcons.solidCreditCard, 'Expense Type', onTap: () {
+              _buildListTile(Icons.credit_card_outlined, 'Expense Type', onTap: () {
                 context.go('/settings/expense-type');
               }),
-              _buildListTile(FontAwesomeIcons.briefcase, 'Investment Type', onTap: () {
+              _buildListTile(Icons.account_balance_wallet_outlined, 'Investment Type', onTap: () {
                 context.go('/settings/investment-type');
               }),
               const Divider(),
-              _buildListTile(FontAwesomeIcons.borderAll, 'Site', onTap: () {
+              _buildListTile(Icons.domain_outlined, 'Site', onTap: () {
                 context.go('/settings/site');
               }),
               const Divider(),
-              _buildListTile(FontAwesomeIcons.gear, 'My Settings', onTap: () {
+              _buildListTile(Icons.tune_outlined, 'My Settings', onTap: () {
                 context.go('/settings/my-settings');
               }),
-              _buildListTile(FontAwesomeIcons.language, 'Language Settings', onTap: () {
+              _buildListTile(Icons.language_outlined, 'Language Settings', onTap: () {
                 context.go('/settings/language');
               }),
-              _buildListTile(FontAwesomeIcons.commentSms, 'SMS Template', onTap: () {
+              _buildListTile(Icons.sms_outlined, 'SMS Template', onTap: () {
                 context.go('/settings/sms-template');
               }),
               const _FingerprintToggleTile(),
               const _SecurityAlertToggleTile(),
               const _NotificationToggleTile(),
-              _buildListTile(FontAwesomeIcons.solidBell, 'Test Notification', onTap: () {
+              _buildListTile(Icons.notifications_active_outlined, 'Test Notification', onTap: () {
                 final isEnabled = sl<StorageService>().getBool('notifications_enabled', defaultValue: true);
                 if (!isEnabled) {
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -87,16 +87,16 @@ class SettingsPage extends StatelessWidget {
                   body: 'Your local notifications are working perfectly.',
                 );
               }),
-              _buildListTile(FontAwesomeIcons.lock, 'Change Password', onTap: () {
+              _buildListTile(Icons.lock_outline, 'Change Password', onTap: () {
                 context.go('/settings/change-password');
               }),
               const Divider(),
-              _buildListTile(FontAwesomeIcons.palette, 'Theme Settings', onTap: () {
+              _buildListTile(Icons.palette_outlined, 'Theme Settings', onTap: () {
                 _showThemeDialog(context);
               }),
               const Divider(),
               ListTile(
-                leading: const FaIcon(FontAwesomeIcons.powerOff, color: Colors.grey, size: 20),
+                leading: const Icon(Icons.logout_rounded, color: Colors.grey, size: 24),
                 title: Text('Sign out'.tr(), style: const TextStyle(color: Colors.red)),
                 onTap: () {
                   context.read<AuthBloc>().add(const AuthLogoutRequested());
@@ -109,9 +109,9 @@ class SettingsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildListTile(dynamic icon, String title, {VoidCallback? onTap}) {
+  Widget _buildListTile(IconData icon, String title, {VoidCallback? onTap}) {
     return ListTile(
-      leading: FaIcon(icon, color: Colors.grey[700], size: 20),
+      leading: Icon(icon, color: Colors.grey[700], size: 24),
       title: Text(title.tr()),
       onTap: onTap ?? () {},
     );
@@ -232,7 +232,7 @@ class _FingerprintToggleTileState extends State<_FingerprintToggleTile> {
   @override
   Widget build(BuildContext context) {
     return SwitchListTile(
-      secondary: FaIcon(FontAwesomeIcons.fingerprint, color: Colors.grey[700], size: 20),
+      secondary: Icon(Icons.fingerprint_outlined, color: Colors.grey[700], size: 24),
       title: Text('Enable Biometric Login'.tr()),
       value: _isEnabled,
       onChanged: _toggleFingerprint,
@@ -275,7 +275,7 @@ class _SecurityAlertToggleTileState extends State<_SecurityAlertToggleTile> {
   @override
   Widget build(BuildContext context) {
     return SwitchListTile(
-      secondary: FaIcon(FontAwesomeIcons.shieldHalved, color: Colors.grey[700], size: 20),
+      secondary: Icon(Icons.security_outlined, color: Colors.grey[700], size: 24),
       title: Text('Enable Security Alert'.tr()),
       value: _isEnabled,
       onChanged: _toggleSecurityAlert,
@@ -333,11 +333,10 @@ class _NotificationToggleTileState extends State<_NotificationToggleTile> {
   @override
   Widget build(BuildContext context) {
     return SwitchListTile(
-      secondary: FaIcon(FontAwesomeIcons.bell, color: Colors.grey[700], size: 20),
+      secondary: Icon(Icons.notifications_outlined, color: Colors.grey[700], size: 24),
       title: Text('Enable Notifications'.tr()),
       value: _isEnabled,
       onChanged: _toggleNotifications,
     );
   }
 }
-

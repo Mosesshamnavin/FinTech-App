@@ -68,35 +68,35 @@ class HomeShellPage extends StatelessWidget {
                       BottomNavigationBarItem(
                         icon: const Padding(
                           padding: EdgeInsets.only(bottom: 4.0),
-                          child: FaIcon(FontAwesomeIcons.moneyBill1Wave, size: 20),
+                          child: Icon(Icons.payments_outlined, size: 24),
                         ),
                         label: 'Collection'.tr(),
                       ),
                       BottomNavigationBarItem(
                         icon: const Padding(
                           padding: EdgeInsets.only(bottom: 4.0),
-                          child: FaIcon(FontAwesomeIcons.solidCreditCard, size: 20),
+                          child: Icon(Icons.credit_card_outlined, size: 24),
                         ),
                         label: 'Expense'.tr(),
                       ),
                       BottomNavigationBarItem(
                         icon: const Padding(
                           padding: EdgeInsets.only(bottom: 4.0),
-                          child: FaIcon(FontAwesomeIcons.users, size: 20),
+                          child: Icon(Icons.people_outline, size: 24),
                         ),
                         label: 'Customer'.tr(),
                       ),
                       BottomNavigationBarItem(
                         icon: const Padding(
                           padding: EdgeInsets.only(bottom: 4.0),
-                          child: FaIcon(FontAwesomeIcons.chartSimple, size: 20),
+                          child: Icon(Icons.bar_chart_outlined, size: 24),
                         ),
                         label: 'Reports'.tr(),
                       ),
                       BottomNavigationBarItem(
                         icon: const Padding(
                           padding: EdgeInsets.only(bottom: 4.0),
-                          child: FaIcon(FontAwesomeIcons.gear, size: 20),
+                          child: Icon(Icons.settings_outlined, size: 24),
                         ),
                         label: 'Settings'.tr(),
                       ),

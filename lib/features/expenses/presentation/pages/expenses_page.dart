@@ -22,10 +22,12 @@ class ExpensesPage extends StatefulWidget {
 class _ExpensesPageState extends State<ExpensesPage> with SingleTickerProviderStateMixin {
   final TextEditingController _fromDateController = TextEditingController(text: '01/06/2026');
   final TextEditingController _toDateController = TextEditingController(text: '16/06/2026');
+  final TextEditingController _searchController = TextEditingController();
   String _selectedLine = 'All';
   bool _isOnlineChecked = false;
   late TabController _tabController;
   bool _wasVisible = false;
+  String _searchQuery = '';
 
   @override
   void initState() {
@@ -33,6 +35,12 @@ class _ExpensesPageState extends State<ExpensesPage> with SingleTickerProviderSt
     _tabController = TabController(length: 2, vsync: this);
     _tabController.addListener(() {
       if (!_tabController.indexIsChanging) {
+        if (_searchQuery.isNotEmpty) {
+          setState(() {
+            _searchQuery = '';
+            _searchController.clear();
+          });
+        }
         _loadData();
       }
     });
@@ -81,6 +89,7 @@ class _ExpensesPageState extends State<ExpensesPage> with SingleTickerProviderSt
     _tabController.dispose();
     _fromDateController.dispose();
     _toDateController.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
@@ -140,7 +149,7 @@ class _ExpensesPageState extends State<ExpensesPage> with SingleTickerProviderSt
             actions: [
               Builder(
                 builder: (ctx) => IconButton(
-                  icon: const FaIcon(FontAwesomeIcons.plus, size: 20),
+                  icon: const Icon(Icons.add_circle_outline, size: 24),
                   onPressed: () => _showAddModal(ctx),
                 ),
               ),
@@ -165,11 +174,17 @@ class _ExpensesPageState extends State<ExpensesPage> with SingleTickerProviderSt
           Padding(
             padding: const EdgeInsets.all(12.0),
             child: TextField(
+              controller: _searchController,
               textAlignVertical: TextAlignVertical.center,
+              onChanged: (val) {
+                setState(() {
+                  _searchQuery = val.toLowerCase();
+                });
+              },
               decoration: InputDecoration(
                 prefixIcon: const Padding(
                   padding: EdgeInsets.only(left: 16.0, right: 12.0),
-                  child: FaIcon(FontAwesomeIcons.magnifyingGlass, size: 18, color: Colors.grey),
+                  child: Icon(Icons.search, size: 20, color: Colors.grey),
                 ),
                 prefixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),
                 hintText: 'Search'.tr(),
@@ -214,7 +229,7 @@ class _ExpensesPageState extends State<ExpensesPage> with SingleTickerProviderSt
                           floatingLabelBehavior: FloatingLabelBehavior.always,
                           suffixIcon: Padding(
                             padding: const EdgeInsets.only(top: 14.0, bottom: 14.0),
-                            child: FaIcon(FontAwesomeIcons.calendarDay, color: context.accent, size: 20),
+                            child: Icon(Icons.calendar_month_outlined, color: context.accent, size: 24),
                           ),
                           suffixIconConstraints: const BoxConstraints(minWidth: 40, minHeight: 0),
                           border: const UnderlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
@@ -231,7 +246,7 @@ class _ExpensesPageState extends State<ExpensesPage> with SingleTickerProviderSt
                           floatingLabelBehavior: FloatingLabelBehavior.always,
                           suffixIcon: Padding(
                             padding: const EdgeInsets.only(top: 14.0, bottom: 14.0),
-                            child: FaIcon(FontAwesomeIcons.calendarDay, color: context.accent, size: 20),
+                            child: Icon(Icons.calendar_month_outlined, color: context.accent, size: 24),
                           ),
                           suffixIconConstraints: const BoxConstraints(minWidth: 40, minHeight: 0),
                           border: const UnderlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
@@ -301,8 +316,29 @@ class _ExpensesPageState extends State<ExpensesPage> with SingleTickerProviderSt
               } else if (state is ExpensesError) {
                 return Center(child: Text(state.message, style: TextStyle(color: context.danger)));
               } else if (state is ExpensesLoaded) {
-                // Filter by online/cash switch
-                final filtered = state.expenses.where((e) => _isOnlineChecked ? e.isOnline : true).toList();
+                final settingsState = context.read<SettingsBloc>().state;
+                // Filter by online/cash switch and search query
+                final filtered = state.expenses.where((e) {
+                  if (_isOnlineChecked && !e.isOnline) return false;
+                  
+                  if (_searchQuery.isNotEmpty) {
+                    String categoryName = e.category;
+                    if (settingsState is SettingsLoaded) {
+                      if (e.isInvestment) {
+                        final match = settingsState.investmentTypes.where((type) => type.id == e.category).toList();
+                        if (match.isNotEmpty) categoryName = match.first.name;
+                      } else {
+                        final match = settingsState.expenseTypes.where((type) => type.id == e.category).toList();
+                        if (match.isNotEmpty) categoryName = match.first.name;
+                      }
+                    }
+                    
+                    final matchesCategory = categoryName.toLowerCase().contains(_searchQuery);
+                    final matchesDesc = e.description.toLowerCase().contains(_searchQuery);
+                    if (!matchesCategory && !matchesDesc) return false;
+                  }
+                  return true;
+                }).toList();
                 
                 final totalCash = filtered.where((e) => !e.isOnline).fold(0.0, (sum, e) => sum + e.amount);
                 final totalOnline = filtered.where((e) => e.isOnline).fold(0.0, (sum, e) => sum + e.amount);
@@ -345,7 +381,7 @@ class _ExpensesPageState extends State<ExpensesPage> with SingleTickerProviderSt
                           leading: CircleAvatar(
                             backgroundColor: expense.isOnline ? context.primaryContainer : context.successLight,
                             child: Icon(
-                              expense.isOnline ? Icons.account_balance : Icons.money,
+                              expense.isOnline ? Icons.account_balance_outlined : Icons.payments_outlined,
                               color: expense.isOnline ? context.primary : context.success,
                             ),
                           ),

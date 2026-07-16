@@ -64,7 +64,7 @@ class _CustomersViewState extends State<_CustomersView> {
             title: Text('Customers'.tr()),
             actions: [
               IconButton(
-                icon: const FaIcon(FontAwesomeIcons.userPlus, size: 20),
+                icon: const Icon(Icons.person_add_outlined, size: 24),
                 onPressed: () async {
                   // Wait for the AddCustomerPage to pop, and if true, reload customers
                   final shouldReload = await context.push('/customers/add');
@@ -185,7 +185,7 @@ class _CustomersViewState extends State<_CustomersView> {
                                 child: Icon(Icons.person, color: context.primary),
                               ),
                               title: Text(
-                                customer.name,
+                                customer.name.split(' ').map((str) => str.isNotEmpty ? '${str[0].toUpperCase()}${str.substring(1)}' : '').join(' '),
                                 style: const TextStyle(fontWeight: FontWeight.bold),
                               ),
                               subtitle: Column(

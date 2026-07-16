@@ -32,7 +32,7 @@ class AppTheme {
           background: const Color(0xFF121212),
           surface: const Color(0xFF1E1E1E),
         ),
-        textTheme: GoogleFonts.outfitTextTheme(ThemeData.dark().textTheme),
+        textTheme: _buildInterTextTheme(ThemeData.dark().textTheme),
         appBarTheme: const AppBarTheme(
           backgroundColor: Color(0xFF1E1E1E),
           foregroundColor: Colors.white,
@@ -88,7 +88,7 @@ class AppTheme {
         background: Colors.white,
         surface: Colors.white,
       ),
-      textTheme: GoogleFonts.outfitTextTheme(ThemeData.light().textTheme),
+      textTheme: _buildInterTextTheme(ThemeData.light().textTheme),
       appBarTheme: const AppBarTheme(
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
@@ -131,6 +131,20 @@ class AppTheme {
           borderSide: BorderSide(color: seedColor),
         ),
       ),
+    );
+  }
+
+  static TextTheme _buildInterTextTheme(TextTheme base) {
+    return GoogleFonts.interTextTheme(base).copyWith(
+      displayLarge: GoogleFonts.inter(fontSize: 32, fontWeight: FontWeight.bold),
+      headlineLarge: GoogleFonts.inter(fontSize: 28, fontWeight: FontWeight.bold),
+      headlineMedium: GoogleFonts.inter(fontSize: 24, fontWeight: FontWeight.w600),
+      titleLarge: GoogleFonts.inter(fontSize: 22, fontWeight: FontWeight.w600),
+      titleMedium: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w600),
+      bodyLarge: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.normal),
+      bodyMedium: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.normal),
+      labelSmall: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w500),
+      labelLarge: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600), // Button Text
     );
   }
 }
